@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research · WhoIsJaneTurner</title>
+<meta name="description" content="Long-form research articles and reference architectures from WhoIsJaneTurner, LLC.">
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#fbfaf7;--paper:#ffffff;--ink:#1f1e1c;--muted:#5f5e5a;--faint:#8a8984;--line:#e4e2da;
+  --accent:#3C3489;--accent-2:#534AB7;--accent-bg:#EEEDFE;--teal:#0F6E56;--teal-bg:#E1F5EE;--coral:#993C1D;--coral-bg:#FAECE7;
+  --serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15141a;--paper:#1d1c24;--ink:#ece9e2;--muted:#b4b1a9;--faint:#85827b;--line:#2f2d38;
+    --accent:#AFA9EC;--accent-2:#C7C2F4;--accent-bg:#2a2650;--teal:#7fd3b8;--teal-bg:#173a30;--coral:#f0a585;--coral-bg:#3d241a}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--serif)}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+@media(max-width:600px){.wrap{padding:0 16px}}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:12px;background:var(--paper);padding:6px 10px;z-index:10}
+
+/* masthead */
+.mast{border-bottom:1px solid var(--line)}
+.mast .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+.brand{font:600 15px/1 var(--sans);letter-spacing:.02em;text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand .mark{width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--bg);display:grid;place-items:center;font:700 13px/1 var(--serif)}
+.brand small{font-weight:400;color:var(--muted)}
+nav a{font:14px var(--sans);color:var(--muted);text-decoration:none;margin-left:20px}
+nav a:hover,nav a[aria-current]{color:var(--ink)}
+
+/* intro */
+.intro{padding:64px 0 36px;max-width:720px}
+.kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font-weight:500;font-size:clamp(34px,5.2vw,52px);line-height:1.08;letter-spacing:-.015em;margin:14px 0 18px}
+.lede{font-size:20px;line-height:1.55;color:var(--muted);margin:0}
+
+/* featured */
+.feature{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:8px 0 72px}
+@media(max-width:860px){.feature{grid-template-columns:1fr}}
+.feature .body{padding:36px 36px 32px}
+@media(max-width:600px){.feature .body{padding:24px 20px}}
+.feature .art{background:var(--accent-bg);display:flex;align-items:center;justify-content:center;padding:28px;min-height:260px}
+.feature .art svg{width:100%;max-width:420px;height:auto}
+.feature h2{font-weight:500;font-size:clamp(26px,3.4vw,34px);line-height:1.15;margin:12px 0 12px;letter-spacing:-.01em}
+.feature h2 a{text-decoration:none}.feature h2 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.feature p.dek{margin:0 0 18px;color:var(--muted)}
+.meta{font:13px/1.5 var(--sans);color:var(--faint);display:flex;flex-wrap:wrap;gap:4px 14px}
+.meta b{font-weight:500;color:var(--muted)}
+.toc{margin:22px 0 26px;padding:16px 0 0;border-top:1px solid var(--line)}
+.toc .label{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.toc ol{columns:2;column-gap:24px;margin:0;padding-left:20px;font:14px/1.5 var(--sans);color:var(--muted)}
+.toc li{break-inside:avoid;margin:2px 0}
+@media(max-width:480px){.toc ol{columns:1}}
+.btn{display:inline-flex;align-items:center;gap:8px;font:600 14px/1 var(--sans);background:var(--accent);color:var(--bg);text-decoration:none;padding:12px 18px;border-radius:8px}
+.btn:hover{filter:brightness(1.1)}
+
+/* section headers */
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-bottom:1px solid var(--ink);padding-bottom:10px;margin-bottom:6px}
+.sh h2{font-weight:500;font-size:26px;margin:0}
+.sh .count{font:13px var(--sans);color:var(--faint)}
+
+/* filters */
+.tools{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:14px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:13px/1 var(--sans);border:1px solid var(--line);background:transparent;color:var(--muted);padding:7px 12px;border-radius:999px;cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--faint)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{font:14px var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 12px;width:240px;max-width:100%}
+.search:focus,.chip:focus-visible,.btn:focus-visible,a:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+
+/* list */
+.list{list-style:none;margin:0;padding:0}
+.item{display:grid;grid-template-columns:130px minmax(0,1fr) 150px;gap:8px 28px;padding:24px 0;border-bottom:1px solid var(--line)}
+@media(max-width:760px){.item{grid-template-columns:1fr}.item .side{text-align:left!important}}
+.item time{font:13px/1.7 var(--sans);color:var(--faint)}
+.item h3{font-weight:500;font-size:22px;line-height:1.25;margin:0 0 6px}
+.item h3 a{text-decoration:none}.item h3 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.item p{margin:0 0 10px;color:var(--muted);font-size:16px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font:12px/1 var(--sans);padding:4px 8px;border-radius:999px;background:var(--accent-bg);color:var(--accent)}
+.tag.t1{background:var(--teal-bg);color:var(--teal)}.tag.t2{background:var(--coral-bg);color:var(--coral)}
+.item .side{font:13px/1.7 var(--sans);color:var(--faint);text-align:right}
+.empty{padding:28px 0;color:var(--muted);font-style:italic}
+
+/* about */
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;margin:80px 0 0;padding:40px 0;border-top:1px solid var(--line)}
+@media(max-width:760px){.about{grid-template-columns:1fr;gap:20px}}
+.about h2{font-weight:500;font-size:26px;margin:8px 0 0}
+.about p{margin:0 0 14px;color:var(--muted)}
+.about dl{margin:0;font:14px/1.5 var(--sans)}
+.about dt{font-weight:600;color:var(--ink);margin-top:12px}
+.about dd{margin:2px 0 0;color:var(--muted)}
+
+footer{border-top:1px solid var(--line);margin-top:40px;padding:24px 0 48px;font:13px/1.6 var(--sans);color:var(--faint)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+</style>
+</head>
+<body>
+<a class="skip" href="#articles">Skip to articles</a>
+
+<header class="mast">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">J</span>WhoIsJaneTurner <small>Research</small></a>
+    <nav aria-label="Primary"><a href="#articles" aria-current="page">Articles</a><a href="#about">About</a></nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <section class="intro">
+    <div class="kicker">Research</div>
+    <h1>Reference architectures and field notes for machine learning systems</h1>
+    <p class="lede">Long-form technical articles from WhoIsJaneTurner, LLC. Each piece is generalized from working systems, interactive where it helps, and versioned as the thinking evolves.</p>
+  </section>
+
+  <article class="feature" id="featured" aria-labelledby="featTitle"></article>
+
+  <section id="articles" aria-labelledby="allTitle">
+    <div class="sh"><h2 id="allTitle">All articles</h2><span class="count" id="count"></span></div>
+    <div class="tools">
+      <div class="chips" id="chips" role="group" aria-label="Filter by topic"></div>
+      <input class="search" id="q" type="search" placeholder="Search articles" aria-label="Search articles">
+    </div>
+    <ul class="list" id="list">
+      <!-- Fallback when JavaScript is off -->
+      <li class="item"><time>Oct 4, 2026</time><div><h3><a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a></h3></div><div class="side">v1.2</div></li>
+    </ul>
+  </section>
+
+  <section class="about" id="about">
+    <div>
+      <div class="kicker">About</div>
+      <h2>WhoIsJaneTurner, LLC</h2>
+    </div>
+    <div>
+      <p>We publish the designs behind the systems we build: architectures, operating models and the decisions that shape them. Articles are written to be used, not just read, with diagrams you can explore and references to the standards they align with.</p>
+      <dl>
+        <dt>Versioned</dt><dd>Every article carries a version and date. Substantive revisions bump the version.</dd>
+        <dt>Generalized</dt><dd>Examples are drawn from real platforms; clients, names and numbers are changed or made up.</dd>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; 2026 WhoIsJaneTurner, LLC. All rights reserved.</span>
+    <a href="#top">Back to top &uarr;</a>
+  </div>
+</footer>
+
+<script>
+/* ---------------------------------------------------------------
+   ARTICLES — add one entry per article to publish it on this page.
+   Newest first is not required; the list sorts by date.
+   featured: true puts an article in the lead slot (else the newest).
+   --------------------------------------------------------------- */
+const ARTICLES = [
+  {
+    href: "mlops_architecture.html",
+    title: "MLOps reference architecture with an LLM interface",
+    dek: "How the layers of a small team's data science platform link together, from environments and model promotion to lineage, agent evaluation and an LLM interface with guardrails. Includes a step-through simulation of one request, end to end.",
+    date: "2026-10-04",
+    version: "1.2",
+    type: "Reference architecture",
+    topics: ["MLOps", "LLM systems", "Governance"],
+    minutes: 25,
+    featured: true,
+    sections: ["Overview","Simulation","Environments","Model lifecycle","Stores and lineage","LLM interface","Agent evaluation","Orchestration","Built as code","Standards","Decisions"]
+  }
+];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
+const sorted = [...ARTICLES].sort((a, b) => b.date.localeCompare(a.date));
+const allTopics = [...new Set(sorted.flatMap(a => a.topics))];
+const tagClass = t => ["", "t1", "t2"][allTopics.indexOf(t) % 3];
+const tags = a => a.topics.map(t => `<span class="tag ${tagClass(t)}">${esc(t)}</span>`).join("");
+
+/* Featured */
+const f = sorted.find(a => a.featured) || sorted[0];
+if (f) {
+  $("#featured").innerHTML = `
+    <div class="body">
+      <div class="kicker">Featured &middot; ${esc(f.type)}</div>
+      <h2 id="featTitle"><a href="${esc(f.href)}">${esc(f.title)}</a></h2>
+      <p class="dek">${esc(f.dek)}</p>
+      <div class="meta"><span><b>${fmt(f.date)}</b></span><span>Version ${esc(f.version)}</span><span>~${f.minutes} min read</span></div>
+      ${f.sections ? `<div class="toc"><div class="label">In this article</div><ol>${f.sections.map(s => `<li>${esc(s)}</li>`).join("")}</ol></div>` : ""}
+      <a class="btn" href="${esc(f.href)}">Read the article <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="art" aria-hidden="true">${layersArt()}</div>`;
+}
+
+/* Abstract layered diagram for the featured slot */
+function layersArt(){
+  const rows = [["Interface","var(--accent)"],["Orchestration","var(--accent-2)"],["Models & registry","var(--teal)"],["Stores & lineage","var(--coral)"]];
+  let g = "";
+  rows.forEach(([label, c], i) => {
+    const y = 20 + i * 62, x = 30 + i * 14, w = 320 - i * 28;
+    g += `<rect x="${x}" y="${y}" width="${w}" height="44" rx="8" fill="var(--paper)" stroke="${c}" stroke-width="1.5"/>
+          <rect x="${x}" y="${y}" width="6" height="44" rx="3" fill="${c}"/>
+          <text x="${x + 20}" y="${y + 27}" font-family="-apple-system,Segoe UI,sans-serif" font-size="14" fill="var(--ink)">${label}</text>`;
+    if (i < rows.length - 1) g += `<line x1="200" y1="${y + 44}" x2="200" y2="${y + 62}" stroke="var(--faint)" stroke-dasharray="3 3"/>`;
+  });
+  return `<svg viewBox="0 0 380 280" role="img">${g}</svg>`;
+}
+
+/* List with topic filter + search */
+let topic = "All";
+function renderChips(){
+  $("#chips").innerHTML = ["All", ...allTopics].map(t =>
+    `<button class="chip" type="button" aria-pressed="${t === topic}" data-t="${esc(t)}">${esc(t)}</button>`).join("");
+}
+function renderList(){
+  const q = $("#q").value.trim().toLowerCase();
+  const rows = sorted.filter(a =>
+    (topic === "All" || a.topics.includes(topic)) &&
+    (!q || [a.title, a.dek, a.type, ...a.topics].join(" ").toLowerCase().includes(q)));
+  $("#count").textContent = `${rows.length} of ${sorted.length} article${sorted.length === 1 ? "" : "s"}`;
+  $("#list").innerHTML = rows.length ? rows.map(a => `
+    <li class="item">
+      <time datetime="${a.date}">${fmt(a.date)}</time>
+      <div>
+        <h3><a href="${esc(a.href)}">${esc(a.title)}</a></h3>
+        <p>${esc(a.dek)}</p>
+        <div class="tags">${tags(a)}</div>
+      </div>
+      <div class="side">${esc(a.type)}<br>v${esc(a.version)} &middot; ~${a.minutes} min</div>
+    </li>`).join("") : `<li class="empty">No articles match that filter.</li>`;
+}
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  topic = b.dataset.t; renderChips(); renderList();
+});
+$("#q").addEventListener("input", renderList);
+renderChips(); renderList();
+</script>
+</body>
+</html>
