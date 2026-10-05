@@ -11,6 +11,9 @@
 <meta property="og:title" content="Research · WhoIsJaneTurner">
 <meta property="og:description" content="Long-form research articles and reference architectures from WhoIsJaneTurner, LLC.">
 <meta property="og:url" content="https://whoisjaneturner.ai/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme:light dark;
@@ -104,6 +107,34 @@ h1{font-weight:500;font-size:clamp(34px,5.2vw,52px);line-height:1.08;letter-spac
 .about dt{font-weight:600;color:var(--ink);margin-top:12px}
 .about dd{margin:2px 0 0;color:var(--muted)}
 
+/* hero banner (always dark) */
+.hero{position:relative;overflow:hidden;min-height:clamp(440px,62vh,600px);color:#fff;display:flex;flex-direction:column;
+  background:
+    radial-gradient(ellipse 55% 75% at 82% 38%,rgba(150,165,230,.55),transparent 70%),
+    radial-gradient(ellipse 40% 50% at 42% 46%,rgba(40,70,160,.45),transparent 70%),
+    linear-gradient(100deg,#03040c 0%,#0a0f2b 32%,#222c66 64%,#5d6cb4 100%)}
+.hero canvas,.hero svg.swoosh{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:120px;background:linear-gradient(to bottom,transparent,rgba(3,4,12,.35));pointer-events:none}
+.cube{position:absolute;width:var(--s);height:var(--s);border-radius:3px;transform:rotate(var(--r));
+  background:linear-gradient(135deg,#ff5a8a,#c8124a);box-shadow:0 0 24px rgba(255,45,111,.45);opacity:var(--o,.9);pointer-events:none}
+.cube.soft{filter:blur(3px)}
+.hero-bar{position:relative;z-index:2;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:22px 24px 0;max-width:1180px;margin:0 auto;width:100%}
+.wordmark{grid-column:2;font:600 15px/1 Montserrat,var(--sans);letter-spacing:.24em;text-transform:uppercase;color:#fff;text-decoration:none;white-space:nowrap}
+.hero nav{justify-self:end}
+.hero nav a{color:rgba(255,255,255,.75);font:14px var(--sans);margin-left:20px;text-decoration:none}
+.hero nav a:hover{color:#fff}
+.hero-copy{position:relative;z-index:2;margin:auto;text-align:center;padding:40px 24px 110px;max-width:900px}
+.hero-kicker{font:600 12px/1 Montserrat,var(--sans);letter-spacing:.3em;text-transform:uppercase;color:#7fe9da}
+.hero h1{font-family:"Playfair Display",var(--serif);font-weight:400;font-size:clamp(42px,7vw,80px);line-height:1.05;margin:18px 0 18px;letter-spacing:0;text-shadow:0 2px 30px rgba(5,8,30,.6)}
+.hero-copy p{margin:0 auto;max-width:560px;font-size:19px;line-height:1.55;color:rgba(255,255,255,.82);text-shadow:0 1px 16px rgba(5,8,30,.7)}
+@media(max-width:640px){
+  .hero-bar{grid-template-columns:1fr;justify-items:center;gap:12px;padding:18px 16px 0}
+  .wordmark{grid-column:1;font-size:12px;letter-spacing:.18em}
+  .hero nav{justify-self:center}.hero nav a{margin:0 10px}
+  .hero-copy{padding:28px 16px 90px}.hero-copy p{font-size:17px}}
+main>.feature:first-child{position:relative;z-index:3;margin-top:-72px}
+@media(max-width:640px){main>.feature:first-child{margin-top:-48px}}
+
 footer{border-top:1px solid var(--line);margin-top:40px;padding:24px 0 48px;font:13px/1.6 var(--sans);color:var(--faint)}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
 </style>
@@ -111,19 +142,26 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
 <body>
 <a class="skip" href="#articles">Skip to articles</a>
 
-<header class="mast">
-  <div class="wrap">
-    <a class="brand" href="https://whoisjaneturner.ai/"><span class="mark" aria-hidden="true">J</span>WhoIsJaneTurner <small>Research</small></a>
-    <nav aria-label="Primary"><a href="#articles" aria-current="page">Articles</a><a href="#about">About</a></nav>
+<header class="hero" id="top">
+  <canvas id="net" aria-hidden="true"></canvas>
+  <svg class="swoosh" id="swoosh" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+  <span class="cube" style="--s:30px;--r:24deg;left:11%;top:47%"></span>
+  <span class="cube soft" style="--s:56px;--r:-14deg;left:20%;top:-14px;--o:.75"></span>
+  <span class="cube soft" style="--s:46px;--r:18deg;right:16%;top:-10px;--o:.45"></span>
+  <span class="cube" style="--s:12px;--r:40deg;left:46%;top:16%;--o:.7"></span>
+  <span class="cube soft" style="--s:20px;--r:-30deg;right:7%;top:70%;--o:.5"></span>
+  <div class="hero-bar">
+    <a class="wordmark" href="https://whoisjaneturner.ai/">WhoIsJaneTurner, LLC</a>
+    <nav aria-label="Primary"><a href="#articles">Articles</a><a href="#about">About</a></nav>
+  </div>
+  <div class="hero-copy">
+    <div class="hero-kicker">Research</div>
+    <h1>Empowering AI Solutions</h1>
+    <p>Reference architectures and field notes for machine learning systems, generalized from working platforms and versioned as the thinking evolves.</p>
   </div>
 </header>
 
-<main class="wrap" id="top">
-  <section class="intro">
-    <div class="kicker">Research</div>
-    <h1>Reference architectures and field notes for machine learning systems</h1>
-    <p class="lede">Long-form technical articles from WhoIsJaneTurner, LLC. Each piece is generalized from working systems, interactive where it helps, and versioned as the thinking evolves.</p>
-  </section>
+<main class="wrap">
 
   <article class="feature" id="featured" aria-labelledby="featTitle"></article>
 
@@ -248,6 +286,56 @@ $("#chips").addEventListener("click", e => {
 });
 $("#q").addEventListener("input", renderList);
 renderChips(); renderList();
+
+/* ---- Hero: dotted swooshes + drifting neural network ---- */
+(function(){
+  const ns="http://www.w3.org/2000/svg", sw=document.getElementById("swoosh");
+  const add=(tag,attrs)=>{const e=document.createElementNS(ns,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);sw.appendChild(e);return e;};
+  for(let i=0;i<9;i++){
+    add("path",{d:`M -60 ${560-i*14} C 160 ${430-i*22}, 260 ${150+i*6}, 560 ${70+i*9} S 980 ${10+i*6}, 1250 ${-30+i*10}`,
+      fill:"none",stroke:i%3?"#5fd8ff":"#7fe9da","stroke-width":2,"stroke-linecap":"round","stroke-dasharray":"0.1 9",opacity:(0.65-i*0.05).toFixed(2)});
+  }
+  add("ellipse",{cx:760,cy:330,rx:470,ry:300,transform:"rotate(-18 760 330)",fill:"none",stroke:"#ff2d6f","stroke-width":2,
+    "stroke-dasharray":"1250 3000","stroke-dashoffset":"-200",opacity:.75});
+  for(let i=0;i<5;i++){
+    add("path",{d:`M 1120 ${600-i*8} C 1260 ${470-i*14}, 1420 ${420-i*10}, 1660 ${300-i*12}`,fill:"none",stroke:"#ff2d6f","stroke-width":2.4,
+      "stroke-linecap":"round","stroke-dasharray":"0.1 7",opacity:(0.55-i*0.08).toFixed(2)});
+  }
+
+  const c=document.getElementById("net"), ctx=c.getContext("2d");
+  const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W,H,pts=[],raf;
+  function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  function setup(){
+    const d=Math.min(devicePixelRatio||1,2), r=c.getBoundingClientRect();
+    W=r.width;H=r.height;c.width=W*d;c.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+    const cx=W*(W<640?0.5:0.42), cy=H*0.46, rx=Math.min(W*0.2,300), ry=Math.min(H*0.26,170);
+    const n=W<640?70:150; pts=[];
+    for(let i=0;i<n;i++){
+      const x=cx+gauss()*rx*0.55, y=cy+gauss()*ry*0.55;
+      pts.push({x,y,ox:x,oy:y,a:Math.random()*6.28,s:0.2+Math.random()*0.5,r:Math.random()<0.12?2.2:1.1});
+    }
+  }
+  function frame(t){
+    ctx.clearRect(0,0,W,H);
+    const k=t*0.0004;
+    for(const p of pts){p.x=p.ox+Math.cos(p.a+k*p.s*3)*6;p.y=p.oy+Math.sin(p.a+k*p.s*2)*6;}
+    ctx.lineWidth=0.6;
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j],dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy;
+      if(d2<4200){ctx.strokeStyle=`rgba(127,233,218,${(1-d2/4200)*0.45})`;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    }
+    for(const p of pts){
+      ctx.fillStyle=p.r>2?"rgba(220,255,250,.95)":"rgba(127,233,218,.85)";
+      ctx.shadowColor="#7fe9da";ctx.shadowBlur=p.r>2?10:4;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.283);ctx.fill();
+    }
+    ctx.shadowBlur=0;
+    if(!still)raf=requestAnimationFrame(frame);
+  }
+  setup();frame(0);
+  let to;addEventListener("resize",()=>{clearTimeout(to);to=setTimeout(()=>{cancelAnimationFrame(raf);setup();frame(performance.now());},150);});
+})();
 </script>
 </body>
 </html>
