@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MLOps reference architecture with an LLM interface</title>
+<style>
+:root{color-scheme:light;--bg:#fbfaf7;--card:#fff;--ink:#1f1e1c;--muted:#5f5e5a;--faint:#8a8984;--line:#e4e2da;
+--purple:#534AB7;--purple-bg:#EEEDFE;--teal:#0F6E56;--teal-bg:#E1F5EE;--coral:#993C1D;--coral-bg:#FAECE7;--gray:#5F5E5A;--gray-bg:#F1EFE8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+body{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto 1fr}
+header{grid-column:1/-1;padding:26px 32px 14px;border-bottom:1px solid rgba(255,255,255,.15)}
+h1{font-size:24px;font-weight:600;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px}
+.tabs{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;z-index:5;border-right:1px solid var(--line)}
+.tabs div{padding:18px 12px 24px 20px;display:flex;flex-direction:column;gap:2px}
+.tabs button{font:inherit;font-size:14px;text-align:left;background:none;border:none;border-left:3px solid transparent;border-radius:0 8px 8px 0;padding:8px 12px;color:var(--muted);cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-left-color:var(--purple);font-weight:600}
+main{width:100%;max-width:1180px;padding:18px 32px 60px}
+@media(max-width:760px){body{display:block}
+ .tabs{position:static;height:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,.15)}
+ .tabs div{flex-direction:row;flex-wrap:wrap;padding:6px 20px}
+ .tabs button{border-left:none;border-radius:8px}}
+.panel{display:none}.panel.active{display:block}
+h2{font-size:19px;font-weight:600;margin:0 0 6px}
+h3{font-size:15px;font-weight:600;margin:22px 0 8px}
+p.lead{color:var(--muted);margin:0 0 14px;max-width:880px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.tcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr.flash td{background:#fff7d6;transition:background .3s}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;white-space:nowrap}
+.g-llm{background:var(--purple-bg);color:var(--purple)}.g-lib{background:var(--teal-bg);color:var(--teal)}
+.g-plat{background:var(--coral-bg);color:var(--coral)}.g-prod{background:var(--gray-bg);color:var(--gray)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:860px){.grid3,.grid2{grid-template-columns:1fr}}
+.k{font-weight:600;margin-bottom:4px}
+.muted{color:var(--muted)}
+ul{margin:6px 0 0;padding-left:20px}li{margin:4px 0}
+#flowwrap{display:grid;grid-template-columns:1fr 280px;gap:14px}
+@media(max-width:980px){#flowwrap{grid-template-columns:1fr}}
+#flow{width:100%;height:auto;display:block}
+#flow .node rect{stroke-width:1}
+#flow .node{cursor:pointer}
+#flow .node text{font-size:15px;pointer-events:none}
+#flow .node .t1{font-weight:600}
+#flow .node .t2{font-size:12.5px}
+#flow .link{fill:none;opacity:.38;transition:opacity .15s}
+#flow.focus .link{opacity:.06}#flow.focus .link.on{opacity:.9}
+#flow.focus .node{opacity:.35}#flow.focus .node.on{opacity:1}
+#panel h4{margin:0 0 6px;font-size:15px}
+#panel .dir{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;margin-top:10px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend span i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+details{margin-top:14px}
+summary{cursor:pointer;font-weight:600;font-size:15px;margin-bottom:8px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 12px;font-size:13px}
+.chain b{font-weight:500;background:var(--gray-bg);border:1px solid var(--line);padding:4px 10px;border-radius:8px}
+.chain span{color:var(--faint)}
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media(max-width:980px){.steps{grid-template-columns:repeat(2,1fr)}}
+.step{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--purple);border-radius:0 0 10px 10px;padding:10px 12px;font-size:13px}
+.step .n{font-size:11px;color:var(--purple);font-weight:600}
+.stage{border-top-color:var(--teal)}.stage .n{color:var(--teal)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--gray-bg);padding:1px 5px;border-radius:4px}
+footer{color:var(--faint);font-size:12px;margin-top:40px}
+
+/* violet theme: page on blue, content stays on white cards */
+:root{--bg:#3C3489;--on-bg:#FFFFFF;--on-bg-muted:#D9D6F7;--on-bg-faint:#AFA9EC}
+header h1{color:var(--on-bg)}header .sub{color:var(--on-bg-muted)}
+.tabs{background:rgba(60,52,137,.97);border-right-color:rgba(255,255,255,.15)}
+.tabs button{color:var(--on-bg-muted)}.tabs button:hover{color:var(--on-bg);background:rgba(255,255,255,.06)}
+.tabs button[aria-selected="true"]{color:var(--on-bg);border-left-color:#FFFFFF;background:rgba(255,255,255,.12)}
+.panel>h2,.panel>h3,details>summary{color:var(--on-bg)}
+.panel>p.lead,.panel>p.muted{color:var(--on-bg-muted)}
+footer{color:var(--on-bg-muted)}
+.card,.tcard{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.chain b{background:#fff;border-color:transparent}.chain span{color:var(--on-bg-muted)}
+.panel a{color:#3C3489}
+.simctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.simctl button{font:inherit;font-size:14px;background:#fff;color:#3C3489;border:none;border-radius:8px;padding:6px 14px;cursor:pointer}
+.simctl button:hover{background:#EEEDFE}
+#simCount{color:var(--on-bg-muted);font-size:14px;margin-left:6px}
+#simBar{flex:1;min-width:160px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
+#simBar div{height:100%;width:0;background:#fff;transition:width .3s}
+.simgrid{display:grid;grid-template-columns:1fr 420px;gap:14px}
+.simgrid3{display:grid;grid-template-columns:1fr 1.4fr;gap:14px;margin-top:14px}
+@media(max-width:1000px){.simgrid,.simgrid3{grid-template-columns:1fr}}
+.simh{font-weight:600;font-size:14px;padding:8px 10px 4px}
+#simDiagram svg{width:100%;height:auto;display:block}
+#simDiagram .node text{font-size:15px}#simDiagram .node .t1{font-weight:600}#simDiagram .node .t2{font-size:12.5px}
+#simDiagram .link{fill:none;opacity:.08;transition:opacity .3s}
+#simDiagram .link.on{opacity:.95}
+#simDiagram .node{opacity:.3;transition:opacity .3s}
+#simDiagram .node.on{opacity:1}
+#simDiagram .node.on rect{stroke-width:2.5}
+#simStep .n{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em}
+#simStep h4{margin:2px 0 8px;font-size:17px}
+.bub{border-radius:12px;padding:8px 12px;margin:8px 0;font-size:14px;max-width:92%}
+.bub .who{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+.bub.analyst{background:#F1EFE8;margin-left:auto}.bub.analyst .who{color:#5F5E5A}
+.bub.agent{background:#EEEDFE}.bub.agent .who{color:#534AB7}
+.bub table{font-size:13px;margin-top:6px;background:#fff;border-radius:6px}
+.bub td,.bub th{padding:4px 8px}
+.narr{font-size:14px;color:var(--ink);margin:6px 0}
+.gate{font-size:13px;border-left:3px solid #534AB7;background:#EEEDFE;color:#3C3489;padding:6px 10px;margin-top:10px}
+.st{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;font-weight:500}
+.st-production,.st-COMPLETED{background:#E1F5EE;color:#0F6E56}
+.st-candidate,.st-PENDING,.st-RUNNING{background:#FAEEDA;color:#854F0B}
+.st-previous{background:#F1EFE8;color:#5F5E5A}
+tr.new td{background:#fff7d6}
+.fb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.fb span{font-size:12px;background:#fff;border:1px solid #D6D3F5;color:#534AB7;border-radius:6px;padding:1px 8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>MLOps reference architecture with an LLM interface</h1>
+  <div class="sub">Generalized from a working Data Science platform &middot; version 1.2 &middot; October 4, 2026</div>
+</header>
+<nav class="tabs" role="tablist" aria-orientation="vertical"><div>
+  <button role="tab" data-tab="overview">Overview</button>
+  <button role="tab" data-tab="sim">Simulation</button>
+  <button role="tab" data-tab="envs">Environments</button>
+  <button role="tab" data-tab="lifecycle">Model lifecycle</button>
+  <button role="tab" data-tab="stores">Stores and lineage</button>
+  <button role="tab" data-tab="llm">LLM interface</button>
+  <button role="tab" data-tab="eval">Agent evaluation</button>
+  <button role="tab" data-tab="orch">Orchestration</button>
+  <button role="tab" data-tab="built">Built as code</button>
+  <button role="tab" data-tab="standards">Standards</button>
+  <button role="tab" data-tab="decisions">Decisions</button>
+</div></nav>
+<main>
+
+<!-- OVERVIEW -->
+<section class="panel" id="tab-overview">
+  <h2>How the layers link</h2>
+  <p class="lead">Arrows show what calls or feeds what. Solid lines are calls; dashed lines return state or results. Hover a layer to trace its links; click it to jump to its definition below.</p>
+  <div id="flowwrap">
+    <div class="card"><svg id="flow" role="img" aria-label="Flow diagram of the twelve architecture layers and their links"></svg>
+      <div class="legend">
+        <span><i style="background:var(--purple)"></i>LLM interface</span>
+        <span><i style="background:var(--teal)"></i>Shared libraries</span>
+        <span><i style="background:var(--coral)"></i>Platform</span>
+        <span><i style="background:var(--gray)"></i>Product lines</span>
+        <span>&mdash; call &nbsp; - - - returns state or results</span>
+      </div>
+    </div>
+    <div class="card" id="panel"><h4>Hover a layer</h4><div class="muted" style="font-size:14px">Its incoming and outgoing links appear here.</div></div>
+  </div>
+  <h3>Layers</h3>
+  <div class="tcard"><table id="layertable"><thead><tr><th style="width:170px">Layer</th><th>What it gives the template</th><th style="width:120px">Group</th><th style="width:220px">Across environments</th></tr></thead><tbody></tbody></table></div>
+  <details><summary>All links</summary>
+    <div class="tcard"><table id="linktable"><thead><tr><th>From</th><th>To</th><th>Relationship</th></tr></thead><tbody></tbody></table></div>
+  </details>
+</section>
+
+<!-- SIMULATION -->
+<section class="panel" id="tab-sim">
+  <h2>Simulation: an external model request, end to end</h2>
+  <p class="lead">A simulated walkthrough of one request through every layer: plan, correct, build, compare, approve, score, and revert. The client, names and numbers are made up. Step through it, or press play.</p>
+  <div class="simctl">
+    <button id="simBack">&larr; Back</button><button id="simPlay">&#9654; Play</button><button id="simNext">Next &rarr;</button><button id="simReset">Reset</button>
+    <span id="simCount"></span>
+    <div id="simBar"><div></div></div>
+  </div>
+  <div class="simgrid">
+    <div class="card" style="padding:12px"><div id="simDiagram"></div></div>
+    <div class="card" id="simStep"></div>
+  </div>
+  <div class="simgrid3">
+    <div class="tcard"><div class="simh">Model registry &middot; <code>acme_lookalike</code></div><table><thead><tr><th>Version</th><th>Stage</th></tr></thead><tbody id="simReg"></tbody></table></div>
+    <div class="tcard"><div class="simh">Job store</div><table><thead><tr><th>Job</th><th>Type</th><th>Env</th><th>Status</th></tr></thead><tbody id="simJobs"></tbody></table></div>
+  </div>
+  <div class="tcard" style="margin-top:14px"><div class="simh">Action log</div><table><thead><tr><th style="width:50px">Step</th><th style="width:190px">Who</th><th>Action</th><th style="width:100px">Env</th><th>Result</th></tr></thead><tbody id="simLog"></tbody></table></div>
+</section>
+
+<!-- ENVIRONMENTS -->
+<section class="panel" id="tab-envs">
+  <h2>Environments for a small team</h2>
+  <p class="lead">Dev, staging and prod are needed, but not every layer needs three copies. Each layer is one of four kinds, and each kind handles environments differently. Environments are about where platform code runs; they are not model stages.</p>
+  <div class="grid2">
+    <div class="card"><div class="k">Built once, versioned</div><div class="muted">Agent framework, ML framework, platform client, LLM knowledge, agent playbooks. Published or reviewed once; each environment pins the version it uses.</div></div>
+    <div class="card"><div class="k">Deployed per environment</div><div class="muted">Orchestration (the managed workflow engine and its compute), model monitoring, and the job store. Same infrastructure definition, different config.</div></div>
+    <div class="card"><div class="k">Shared across environments</div><div class="muted">LLM interface, model registry (model, metadata and feature stores), tool registry, action log, eval store. One instance; every call and record names its environment.</div></div>
+    <div class="card"><div class="k">Product lines</div><div class="muted">Their code is versioned like any library. Their models are not deployed per environment; they move through registry stages.</div></div>
+  </div>
+  <h3>Which stores are shared</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:200px">Store</th><th style="width:160px">Scope</th><th>Why</th></tr></thead><tbody>
+    <tr><td><b>Model store</b></td><td>Shared</td><td>A model version is one object everywhere; stages are aliases on it.</td></tr>
+    <tr><td><b>Metadata store</b></td><td>Shared</td><td>Travels with the model version, so every environment's read path sees the same results.</td></tr>
+    <tr><td><b>Feature catalog</b></td><td>Shared</td><td>Feature metadata is attached to model versions.</td></tr>
+    <tr><td><b>Tool registry</b></td><td>Shared</td><td>Tool definitions are shared; access rules are set per environment.</td></tr>
+    <tr><td><b>Action log</b></td><td>Shared</td><td>One record of agent and operator actions; each entry names its environment.</td></tr>
+    <tr><td><b>Eval store</b></td><td>Shared</td><td>Eval runs and feedback attach to an agent version, which is the same object in every environment; each feedback entry names its environment.</td></tr>
+    <tr><td><b>Job store</b></td><td>Per environment</td><td>Runs belong to the environment that executed them.</td></tr>
+  </tbody></table></div>
+  <h3>Rules</h3>
+  <div class="card"><ul>
+    <li><b>Two cheap environments, one real.</b> Dev can be mostly local; staging is prod at a smaller scale; only prod needs full capacity.</li>
+    <li><b>Environment comes from config, never from code.</b> One setting selects every per-environment resource.</li>
+    <li><b>Where models are trained.</b> Model training registers directly into the shared registry, from whichever environment ran it, so a model is uploaded once and never copied between registries. Dev is for changing the platform itself, not for holding models.</li>
+    <li><b>Data rule.</b> Dev and staging read prod input data (or a sample) and never write to prod data or prod outputs. Registering models and eval evidence is the one write they share, by design.</li>
+    <li><b>Agent evals run before prod.</b> The pre-release harness runs in dev or staging against fixture data; in-chat feedback is collected in every environment.</li>
+    <li><b>One LLM interface across environments.</b> Each tool call targets an explicit environment, and access controls and trigger levels are set per environment, so the same agent can freely read dev results and still ask before starting a prod job.</li>
+  </ul></div>
+</section>
+
+<!-- LIFECYCLE -->
+<section class="panel" id="tab-lifecycle">
+  <h2>Model lifecycle</h2>
+  <p class="lead">Promotion lives in the model registry. The registry owns one thing: which version of each model holds each stage. Promotion is the only way a model changes stage, any retained version can be promoted, and reverting is promoting a previous version. A human is always in the loop.</p>
+  <h3>Stages</h3>
+  <div class="steps" style="grid-template-columns:repeat(4,1fr)">
+    <div class="step stage"><div class="n">Before training</div><div class="k">Input checks</div><div class="muted">Schema, row counts and distributions checked against expectations. Failures stop the run and are recorded on the job.</div></div>
+    <div class="step stage"><div class="n">Stage</div><div class="k">Candidate</div><div class="muted">Registered, with eval evidence attached and gates evaluated. Waiting for the analyst.</div></div>
+    <div class="step stage"><div class="n">Stage</div><div class="k">Production</div><div class="muted">An analyst approved the metrics. Scoring resolves this alias.</div></div>
+    <div class="step stage"><div class="n">Stage</div><div class="k">Previous</div><div class="muted">Retained with its artifacts and evidence; can be promoted again.</div></div>
+  </div>
+  <h3>Who does what</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:280px">Part of promotion</th><th>Where it lives</th></tr></thead><tbody>
+    <tr><td><b>State</b> &mdash; which version holds each stage</td><td>Model registry (platform services)</td></tr>
+    <tr><td><b>Policy</b> &mdash; the gates a model must pass</td><td>Each product line, versioned with its models</td></tr>
+    <tr><td><b>Evidence</b> &mdash; eval runs against those gates</td><td>Run by orchestration; stored on the model version</td></tr>
+    <tr><td><b>Gate check</b> &mdash; evidence vs. policy</td><td>The registry, at stage-change time; it refuses a change without passing evidence on that exact version</td></tr>
+    <tr><td><b>Decision</b> &mdash; the approval</td><td>An analyst, after reviewing gains, lift, deciles, holdout performance and the audit</td></tr>
+    <tr><td><b>Consumption</b> &mdash; scoring uses "production"</td><td>Orchestration resolves the alias through the registry; the read path reports on it</td></tr>
+  </tbody></table></div>
+  <h3>Approval path</h3>
+  <div class="grid2">
+    <div class="card"><div class="k">Approval the agent can't fake</div><div class="muted">The agent assembles the metrics and requests promotion. The approval itself is a signed-in action under the analyst's identity, sent from the operator UI or an approve control in the LLM interface, straight to the registry. It's never a message the agent relays. The registry records who approved, when and why.</div></div>
+    <div class="card"><div class="k">Rules</div><ul>
+      <li>Promotion moves an alias. Nothing is retrained or re-uploaded.</li>
+      <li>Re-promoting a previous version still takes an analyst's sign-off, but its evidence already exists, so it can be approved immediately in an incident.</li>
+      <li>Promotion doesn't change outputs already delivered; re-scoring affected batches is a separate orchestration step, found through the job store's model links.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- STORES -->
+<section class="panel" id="tab-stores">
+  <h2>Stores and lineage</h2>
+  <p class="lead">Lineage is carried as metadata across the stores. Read in order, they form a chain from input data to delivered output.</p>
+  <div class="chain"><b>Input data + config</b><span>&rarr;</span><b>Input checks</b><span>&rarr;</span><b>Model version</b><span>&rarr;</span><b>Features</b><span>&rarr;</span><b>Evaluation + summary</b><span>&rarr;</span><b>Approval</b><span>&rarr;</span><b>Runs</b><span>&rarr;</span><b>Outputs</b></div>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:170px">Store</th><th>What it tracks</th><th style="width:220px">Main readers</th></tr></thead><tbody>
+    <tr><td><b>Model store</b><div class="muted" style="font-size:12px">registry record + artifact</div></td><td>Identity, version, stage and stage history. Test metrics and holdout evaluation. Training data references. The full pipeline config. The audit, including the analyst's approval (who, when, why). Pointer to the artifact, which holds the complete pipeline result.</td><td>Promotion, orchestration, scoring</td></tr>
+    <tr><td><b>Metadata store</b><div class="muted" style="font-size:12px">key:value components</div></td><td>The model summary stored as key:value components, each under a stable dotted key path (e.g. <code>model_summary.roc_curve</code>), plus an index listing every key with its type and size. Components include feature importances, coefficients, thresholds, ROC and gains curves, rank concentration and stability, coverage, business metrics, decile and ranking reports. The same key means the same thing in every version.</td><td>Read path, LLM interface, reporting, monitoring</td></tr>
+    <tr><td><b>Feature catalog</b></td><td>Feature metadata, not feature values: each feature's name, type, importance and tags, plus a feature group tying the set to its model.</td><td>Product lines, monitoring</td></tr>
+    <tr><td><b>Job store</b></td><td>Each run, in platform terms: workflow, input source, input-check results, expected count, model version, completeness check, delivery, and the engine's run ID. Status (pending through completed or failed) is copied from the workflow engine's state-change events; the engine owns run state, and the job store records it.</td><td>Operator UI, LLM, alerts</td></tr>
+    <tr><td><b>Tool registry</b></td><td>Tool definitions with version, parameter and return schemas, and execution strategy (function, module or API); plus access rules and trigger levels per environment.</td><td>LLM interface, agent framework</td></tr>
+    <tr><td><b>Action log</b></td><td>Every agent and operator action: who asked, on whose behalf, which tool, with what parameters, against which environment, the result, and links to any job or model it touched.</td><td>Analysts, audits, the LLM (its own history)</td></tr>
+    <tr><td><b>Eval store</b></td><td>Whether the agent did it well. Golden-set versions; eval runs per agent version with per-case scores, traces and the release verdict; and in-chat feedback (rating, flag, correction) linked to the action-log entries behind each answer.</td><td>Agent release gate, eval reviewers, monitoring</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- LLM -->
+<section class="panel" id="tab-llm">
+  <h2>LLM interface</h2>
+  <p class="lead">One LLM interface serves every environment. It reads experiment results from the metadata store, starts jobs and checks their status, all through tools in the tool registry. The approach is guardrails, not handcuffs: the LLM gets real access, and the guardrails shape how it uses it.</p>
+  <h3>Capabilities and guardrails</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:180px">Capability</th><th>What the LLM does</th><th style="width:360px">Guardrail</th></tr></thead><tbody>
+    <tr><td><b>Read results</b></td><td>Lists experiments and versions, loads summary components, compares and plots them</td><td>Runs freely; every answer cites model ID, version and environment</td></tr>
+    <tr><td><b>Check job status</b></td><td>Reads run state from the job store, and step-level status, failure reasons and logs from the workflow engine</td><td>Runs freely</td></tr>
+    <tr><td><b>Start jobs</b></td><td>Launches builds and scoring runs through the tool registry, which hands them to orchestration</td><td>Same workflows and checks as the operator UI; explicit target environment; trigger level per environment (e.g. confirm before launching in prod)</td></tr>
+    <tr><td><b>Propose promotion</b></td><td>Assembles gains, lift, deciles, holdout results and the audit, and requests a stage change</td><td>Only an analyst's signed-in approval changes the stage</td></tr>
+    <tr><td colspan="3" class="muted">Every action is written to the action log. Access rules and trigger levels live in the tool registry and are enforced when a tool is executed. Every answer carries feedback controls, and every agent version passes the eval harness before release (see Agent evaluation).</td></tr>
+  </tbody></table></div>
+  <h3>Reading results from experiments</h3>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div class="k">Question</div><div class="muted">"Compare the top features across the last three versions."</div></div>
+    <div class="step"><div class="n">2</div><div class="k">Skill loads</div><div class="muted">Maps the request to read-path actions and the call shape.</div></div>
+    <div class="step"><div class="n">3</div><div class="k">Tool registry</div><div class="muted">Agent calls <code>execute_tool</code>; the registry checks access and routes to the read path.</div></div>
+    <div class="step"><div class="n">4</div><div class="k">Read path</div><div class="muted">Reads the metadata index, then only the requested keys.</div></div>
+    <div class="step"><div class="n">5</div><div class="k">Interpreter</div><div class="muted">Builds the comparison table or plot in the agent's workspace.</div></div>
+    <div class="step"><div class="n">6</div><div class="k">Answer</div><div class="muted">Results with figures inline, citing model ID, version and environment.</div></div>
+  </div>
+  <div class="grid2" style="margin-top:14px">
+    <div class="tcard"><table>
+      <thead><tr><th>Read-path action</th><th>Used for</th></tr></thead><tbody>
+      <tr><td><code>get_details</code></td><td>Discover the action catalog instead of guessing</td></tr>
+      <tr><td><code>list_models</code> / <code>search_models</code></td><td>Find experiments by name (fuzzy)</td></tr>
+      <tr><td><code>list_model_versions</code></td><td>Enumerate the runs of one experiment</td></tr>
+      <tr><td><code>get_model_summary</code></td><td>Compact first look: version, sizes, top features</td></tr>
+      <tr><td><code>list_available_components</code></td><td>Discover which keys a version has</td></tr>
+      <tr><td><code>load_specific_components</code></td><td>Fetch only what's needed: ROC, gains, deciles, coefficients</td></tr>
+      <tr><td><code>load_model_metadata</code></td><td>Everything; last resort</td></tr>
+    </tbody></table></div>
+    <div class="card">
+      <div class="k">Design principles</div>
+      <ul>
+        <li><b>Each tool does one job.</b> Reporting tools read; job tools start and check runs; stage changes go through promotion.</li>
+        <li><b>Keyed component reads.</b> The agent reads the index to discover what exists, then fetches only the keys it needs, keeping context small and answers fast.</li>
+        <li><b>Skills hold the contract.</b> Each skill maps common requests to actions and documents the call and response shape.</li>
+        <li><b>The registry holds the schema.</b> Tool definitions carry parameter and return schemas and a version, so skills and tools can be checked against each other.</li>
+        <li><b>Two status levels.</b> The registry reports whether routing worked; the tool reports whether the action worked.</li>
+        <li><b>Compare across versions.</b> Because a key means the same thing in every version, a comparison is: list versions, read the same key from each, tabulate or plot.</li>
+        <li><b>Monitoring as a tool.</b> Drift results reach the agent through the tool registry, the same way metadata does.</li><li><b>Taxonomy on demand.</b> The agent reads the taxonomy as markdown, searches it through a hierarchical vector index, or queries it as an MCP server, so field meanings are looked up rather than guessed.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EVALUATION -->
+<section class="panel" id="tab-eval">
+  <h2>Agent evaluation</h2>
+  <p class="lead">The action log records what the agent did. Evaluation records whether it did it well. There are two loops, and they share one golden set and one eval store. A pre-release harness gates every change to the agent, and feedback controls in chat catch what the harness missed.</p>
+  <div class="grid2">
+    <div class="card"><div class="k">Before release: eval harness</div><div class="muted">Replays a versioned golden set of tasks and retrieval queries against a candidate agent version in dev or staging, scores each case, and compares the scores with the current release. Any change to the agent triggers it: the LLM model, prompts, skills, playbooks, tool schemas, hooks, routing rules, the taxonomy, or a rebuilt vector index.</div></div>
+    <div class="card"><div class="k">In use: feedback in chat</div><div class="muted">Every agent answer has controls to rate it, flag it or correct it. Each signal is linked to the trace behind the answer: its action-log entries, skill, agent version and environment. A bad answer can then be replayed, diagnosed and turned into a test case.</div></div>
+  </div>
+  <h3>What gets evaluated</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:170px">Area</th><th>What's measured</th><th style="width:320px">How it's scored</th></tr></thead><tbody>
+    <tr><td><b>Retrieval</b></td><td>Taxonomy lookups and skill selection return the right fields and skills. Measured as recall@k and the rank of the first correct result on labeled queries, including whether near-target fields are flagged.</td><td>Deterministic, against labeled relevant sets</td></tr>
+    <tr><td><b>Tool use and trajectory</b></td><td>The right tool, parameters and environment at each step, and the right sequence overall: no skipped verification steps and no redundant calls. Confirmation is asked wherever the trigger level requires it. A fluent answer that skipped a check counts as a worse failure than a visible error.</td><td>Deterministic, against expected call traces; required steps must appear, in order</td></tr>
+    <tr><td><b>Grounding</b></td><td>No hallucinated numbers, fields or versions: every number in an answer matches a component the agent read, and every answer cites model ID, version and environment.</td><td>Numbers checked deterministically against tool results; an LLM judge checks for unsupported claims</td></tr>
+    <tr><td><b>Response quality</b></td><td>The answer is clear, complete and useful for the question asked. It states its assumptions, and it asks rather than guesses when a request is ambiguous.</td><td>LLM judge against a rubric, calibrated on analyst ratings</td></tr>
+    <tr><td><b>Task completion</b></td><td>Playbook tasks reach the expected end state: plan drafted, gates respected, the right job started.</td><td>State assertions in a dev sandbox, plus a rubric</td></tr>
+    <tr><td><b>Guardrails</b></td><td>The agent ignores instructions planted in content it reads. It never approves its own promotion, and it never launches in prod without confirmation.</td><td>Every case must pass; one failure blocks release</td></tr>
+    <tr><td><b>Cost and latency</b></td><td>Tokens, tool calls and time per task.</td><td>Compared with the current release; regressions are flagged but don't block by default</td></tr>
+  </tbody></table></div>
+  <h3>Before release: an agent version is promoted like a model</h3>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div class="k">Change</div><div class="muted">A pull request changes a prompt, skill, playbook, tool schema, hook, routing rule, the LLM model, or the vector index.</div></div>
+    <div class="step"><div class="n">2</div><div class="k">Pin the version</div><div class="muted">Agent version = LLM model + prompts + skills + tool schemas + hooks + routing rules + index version.</div></div>
+    <div class="step"><div class="n">3</div><div class="k">Retrieval first</div><div class="muted">Retrieval cases run before the full suite, so a retrieval regression is caught where it starts.</div></div>
+    <div class="step"><div class="n">4</div><div class="k">Full suite</div><div class="muted">CI runs the harness on the pull request, replaying the golden set in dev or staging against fixture data. It never writes to prod.</div></div>
+    <div class="step"><div class="n">5</div><div class="k">Gate check</div><div class="muted">Scores are checked against thresholds and against the current release. Every guardrail case must pass.</div></div>
+    <div class="step"><div class="n">6</div><div class="k">Sign-off</div><div class="muted">A reviewer approves the release under their own identity. The previous version stays pinned and ready to revert to.</div></div>
+  </div>
+  <p class="muted" style="margin-top:12px">Responsibilities split the same way as in model promotion: policy (the thresholds) is versioned in code, evidence (the eval run) is stored on the version, and a person decides.</p>
+  <h3>In use: feedback in chat</h3>
+  <div class="grid2">
+    <div class="card"><div class="k">Controls on every answer</div>
+      <div class="bub agent"><div class="who">LLM agent</div>Top-decile lift is 3.1 for <code>v2026-09-30</code> against 2.7 for production <code>v2026-08-01</code> (<code>acme_lookalike</code>, shared registry).
+        <div class="fb"><span>&#128077; Helpful</span><span>&#128078; Not helpful</span><span>&#9873; Flag</span><span>&#9998; Correct</span></div></div>
+      <div class="muted" style="font-size:13px;margin-top:8px">Feedback is a signed-in action under the analyst's identity, like an approval. The agent never sends or edits it.</div>
+    </div>
+    <div class="tcard"><table>
+      <thead><tr><th style="width:150px">Signal</th><th>Captured as</th></tr></thead><tbody>
+      <tr><td><b>Helpful / not helpful</b></td><td>One click on any answer</td></tr>
+      <tr><td><b>Flag</b></td><td>A reason: wrong number, wrong field, wrong tool, should have asked, unsafe action</td></tr>
+      <tr><td><b>Correct</b></td><td>The right value or field, in the analyst's words</td></tr>
+      <tr><td><b>Implicit</b></td><td>Plan rejected, confirmation cancelled, question asked again</td></tr>
+      <tr><td colspan="2" class="muted">Each signal is stored in the eval store with the trace ID, agent version, skill and environment.</td></tr>
+    </tbody></table></div>
+  </div>
+  <h3>Closing the loop</h3>
+  <div class="chain"><b>Answer</b><span>&rarr;</span><b>Feedback</b><span>&rarr;</span><b>Triage</b><span>&rarr;</span><b>Reviewed case</b><span>&rarr;</span><b>Golden set</b><span>&rarr;</span><b>Next pre-release run</b></div>
+  <div class="grid3">
+    <div class="card"><div class="k">Triage</div><div class="muted">Flags and corrections go to a review queue, grouped by skill. A reviewer confirms the expected answer, labels the failure area (retrieval, tool use, grounding, response quality or guardrail), and adds the case to the golden set. Feedback never enters the golden set without review.</div></div>
+    <div class="card"><div class="k">Root cause: fix the harness first</div><div class="muted">Failures are also grouped by cause: a missing tool, a vague rule or skill, a missing guardrail or hook, or noisy context. Most agent failures are configuration failures, so the fix starts with the skill, tool, hook or context, and the LLM model is changed only when those don't help. Each fix is then checked against the full golden set, so it can't break something else.</div></div>
+    <div class="card"><div class="k">Online monitoring</div><div class="muted">Each week, a sample of production traces is scored by the same judges used before release. Helpful rate, flag rate and judge scores per skill appear on the monitoring dashboard next to model drift, and a drop raises an alert.</div></div>
+  </div>
+  <h3>Rules</h3>
+  <div class="card"><ul>
+    <li><b>Golden sets are code.</b> They are versioned, reviewed, and owned per skill or playbook, and every case is labeled with its area.</li>
+    <li><b>Deterministic checks first, judges second.</b> Anything that can be checked exactly, such as numbers, tool calls or retrieved fields, is checked exactly. LLM judges handle only what can't be.</li>
+    <li><b>Judges are checked against people.</b> Each LLM judge is calibrated on human-labeled cases, and re-checked whenever its model or rubric changes.</li>
+    <li><b>Scores belong to an exact version.</b> Changing any part of the agent version makes its scores stale until the suite runs again.</li>
+    <li><b>Eval data follows the LLM data rules.</b> Fixtures and captured traces carry no raw personal data.</li>
+  </ul></div>
+</section>
+
+<!-- ORCHESTRATION -->
+<section class="panel" id="tab-orch">
+  <h2>Orchestration patterns</h2>
+  <p class="lead">Orchestration receives job requests from the tool registry, the operator UI or arriving data, and runs them on a managed workflow engine and managed compute. The platform writes the workflow definitions and adds two checks specific to its data: input checks at the start and a completeness check at the end. Everything else (scheduling, provisioning, retries, cleanup, run state and events) belongs to the managed services.</p>
+  <div class="grid2">
+    <div class="card"><div class="k">Workflows as definitions</div><div class="muted">Each pipeline is a DAG or state machine in version control, with its trigger: arriving data, a tool call, a schedule or an operator. Adding a pipeline means adding one definition.</div></div>
+    <div class="card"><div class="k">Input checks first</div><div class="muted">Every build and scoring workflow runs the input checks as its first step. A failure stops the run, and the results are stored on the job.</div></div>
+    <div class="card"><div class="k">Managed compute</div><div class="muted">Steps run as containers or Spark jobs on a managed service, which provisions capacity, retries failed tasks, enforces timeouts and scales back down. Images are built and tested in CI, so a bad image fails in CI, not in a run.</div></div>
+    <div class="card"><div class="k">Completeness check last</div><div class="muted">The final step compares outputs to sources. A run succeeds only if every expected output exists, because the compute service knows a task exited, not that its outputs are complete.</div></div>
+    <div class="card"><div class="k">Run state from the engine</div><div class="muted">The engine owns run state. Its state-change events update the job store, which holds the platform's view of each run (model version, input checks, expected counts, delivery), so the LLM and the operator UI don't depend on any one engine.</div></div>
+    <div class="card"><div class="k">Alerts from engine events</div><div class="muted">State changes, failures and timeouts from the engine and the compute service are routed to notifications, with no alerting code in the steps.</div></div>
+    <div class="card"><div class="k">Runs tagged by run ID</div><div class="muted">The engine's run ID is passed to every step and applied as a tag on the compute it uses, so a run's resources, logs and costs can always be found.</div></div>
+    <div class="card"><div class="k">Scoring resolves "production"</div><div class="muted">Scoring workflows ask the registry for the production version at dispatch and record that version on the job.</div></div>
+  </div>
+  <h3>Engine and compute options</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:220px">Option</th><th>Role</th><th style="width:300px">Good fit when</th></tr></thead><tbody>
+    <tr><td><b>Airflow</b><div class="muted" style="font-size:12px">Amazon MWAA</div></td><td>Workflow engine: DAGs, schedules, data-aware triggers, retries, run history</td><td>The team knows Airflow, or workflows span systems beyond AWS</td></tr>
+    <tr><td><b>AWS Step Functions</b></td><td>Workflow engine: state machines with native Batch, EMR and SageMaker integrations</td><td>AWS-native, event-driven workflows with little to operate</td></tr>
+    <tr><td><b>AWS Batch</b></td><td>Compute: job queues, array jobs, retries, timeouts, state-change events</td><td>Container-based training and scoring tasks</td></tr>
+    <tr><td><b>Amazon EMR</b><div class="muted" style="font-size:12px">or EMR Serverless</div></td><td>Compute: managed Spark</td><td>Large, Spark-shaped data processing</td></tr>
+    <tr><td colspan="3" class="muted">Any engine plus any compute option gives the same system. Choose by the team's skills and the shape of the workloads.</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- BUILT AS CODE -->
+<section class="panel" id="tab-built">
+  <h2>Built as code</h2>
+  <p class="lead">The whole system is version controlled, not just the models. Infrastructure is defined in code (for example with the AWS CDK), so every service, store, queue, role and trigger has a reviewed, versioned definition, and an environment is that definition deployed with its own config.</p>
+  <div class="grid3">
+    <div class="card"><div class="k">Infrastructure as code</div><div class="muted">Services, stores, queues, schedules, alert streams and access roles are all declared in code. Nothing is created by hand, so any environment can be rebuilt from the repository.</div></div>
+    <div class="card"><div class="k">One definition, many environments</div><div class="muted">Dev, staging and prod are deployments of the same stacks. Only config differs, which is what makes "environment comes from config" true in practice.</div></div>
+    <div class="card"><div class="k">One owner per resource</div><div class="muted">Each table, bucket and queue is owned by exactly one stack, which also owns its schema. Other layers use it through the platform client, never by creating it.</div></div>
+    <div class="card"><div class="k">Packages released by tag</div><div class="muted">Shared libraries publish to a private package index when a version tag is pushed, and only if the tag matches the package version.</div></div>
+    <div class="card"><div class="k">No stored deploy keys</div><div class="muted">Build pipelines authenticate with short-lived, federated identity (e.g. OIDC) scoped to publishing or deploying.</div></div>
+    <div class="card"><div class="k">Changes are reviewed and reversible</div><div class="muted">Infrastructure changes go through the same review as code, show a diff before they deploy, and can be rolled back by deploying the previous version.</div></div>
+  </div>
+  <h3>What lives in version control</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:240px">Artifact</th><th>Defines</th><th style="width:230px">Released as</th></tr></thead><tbody>
+    <tr><td><b>Infrastructure stacks</b></td><td>Platform services, orchestration, read path, monitoring, LLM interface hosting, roles and triggers</td><td>Deployed per environment, or once for shared resources</td></tr>
+    <tr><td><b>Shared libraries</b></td><td>Agent framework, ML framework, platform client, LLM knowledge</td><td>Tagged package versions</td></tr>
+    <tr><td><b>Workflow definitions</b></td><td>DAGs or state machines, their triggers, retry and timeout policies, and compute settings</td><td>Deployed per environment with orchestration</td></tr>
+    <tr><td><b>Tool definitions and access rules</b></td><td>Tool schemas, execution strategy, and trigger levels per environment</td><td>Deployed to the tool registry</td></tr>
+    <tr><td><b>Product-line code and gates</b></td><td>Model configurations and promotion gates</td><td>Versioned with the product line</td></tr>
+    <tr><td><b>Agent playbooks and skills</b></td><td>Staged workflows, approval gates, skill contracts</td><td>Reviewed and merged; one copy</td></tr>
+    <tr><td><b>Golden sets and eval thresholds</b></td><td>Golden tasks, labeled retrieval queries, judge rubrics, and release thresholds for the agent</td><td>Versioned with the playbooks and skills they test; run in CI on every change to the agent</td></tr>
+  </tbody></table></div>
+  <p class="muted" style="margin-top:12px">Models are the one thing deliberately not deployed from version control: they are data, versioned in the registry and moved by promotion. Their configs, gates and evidence are still traceable to versioned code.</p>
+</section>
+
+<!-- STANDARDS -->
+<section class="panel" id="tab-standards">
+  <h2>Standards alignment</h2>
+  <p class="lead">There is no single MLOps standard, and no formal standard yet for LLMs inside MLOps. There are widely used maturity models, governance frameworks, an emerging agent-standards effort, and de facto tooling. This tab maps the architecture to each.</p>
+  <h3>Maturity models and governance frameworks</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:230px">Framework</th><th>How this architecture aligns</th></tr></thead><tbody>
+    <tr><td><b>Google MLOps levels</b><div class="muted" style="font-size:12px">0 manual &middot; 1 pipeline automation &middot; 2 CI/CD automation</div></td><td>Level 1&ndash;2. Pipelines are configuration on the ML framework and run by orchestration; packages and infrastructure are released through CI/CD (see Built as code).</td></tr>
+    <tr><td><b>Microsoft MLOps maturity</b><div class="muted" style="font-size:12px">levels 0&ndash;4</div></td><td>Level 3: automated training, registry, lineage and deployment. Level 4's fully automatic promotion is deliberately not adopted: an analyst approves every promotion.</td></tr>
+    <tr><td><b>AWS MLOps phases</b><div class="muted" style="font-size:12px">initial &middot; repeatable &middot; reliable &middot; scalable</div></td><td>Repeatable and reliable: infrastructure as code, separate environments from one definition, a shared registry, gated promotion and managed orchestration.</td></tr>
+    <tr><td><b>NIST AI RMF</b><div class="muted" style="font-size:12px">Govern &middot; Map &middot; Measure &middot; Manage</div></td><td><b>Govern:</b> access rules, trigger levels and approval policy, all in version control. <b>Map:</b> product lines with their own gates and audiences. <b>Measure:</b> input checks, eval evidence, drift monitoring, and agent evaluation before release and in use. <b>Manage:</b> promotion, re-promoting a previous version, and re-scoring.</td></tr>
+    <tr><td><b>ISO/IEC 42001</b><div class="muted" style="font-size:12px">AI management system</div></td><td>Defined roles (the analyst approves), retained records (approvals on the model version, the action log), and a review loop (monitoring informs retraining decisions).</td></tr>
+    <tr><td><b>NIST AI Agent Standards Initiative</b><div class="muted" style="font-size:12px">launched February 2026</div></td><td>Its first focus, agent identity, authorization and auditing, maps to three parts of the design: approvals made under the analyst's own identity, access rules enforced in the tool registry, and the action log. Treating read content as data, never instructions, addresses its prompt-injection concern.</td></tr>
+    <tr><td><b>Vibe coding to agentic engineering</b><div class="muted" style="font-size:12px">Google, The New SDLC With Vibe Coding, 2026</div></td><td>The agentic-engineering end of the spectrum. Tests cover the deterministic parts (input checks, gates); evals cover trajectory, tool use and response quality. The harness (skills, tools, hooks, routing, context) is versioned, reviewed and evaluated in CI, and people own the architecture and the approvals.</td></tr>
+    <tr><td><b>Human oversight</b><div class="muted" style="font-size:12px">in-the-loop &middot; on-the-loop</div></td><td>Human-in-the-loop for promotion: nothing changes stage without an analyst. Human-on-the-loop for runs: confirmation before prod launches, alerts and monitoring.</td></tr>
+  </tbody></table></div>
+  <h3>Tooling and protocol interoperability</h3>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:230px">Layer or store</th><th>Maps to</th></tr></thead><tbody>
+    <tr><td><b>Model registry</b></td><td>MLflow Model Registry (versions, aliases such as "production", tags) or SageMaker Model Registry (model package versions with approval status such as pending manual approval / approved). The analyst approval maps directly to SageMaker's manual approval.</td></tr>
+    <tr><td><b>Metadata store</b></td><td>MLflow run metrics, parameters and artifacts; SageMaker model metadata and model cards. Keyed components map to logged artifacts addressed by path.</td></tr>
+    <tr><td><b>Orchestration</b></td><td>Workflow engine: Airflow (Amazon MWAA), AWS Step Functions or SageMaker Pipelines. Compute: AWS Batch, Amazon EMR (or EMR Serverless) for Spark, or SageMaker training and processing jobs. State-change events through EventBridge or Airflow callbacks.</td></tr>
+    <tr><td><b>Job store</b></td><td>MLflow runs or SageMaker Pipelines executions can hold the same record; either way, it carries the engine's run ID.</td></tr>
+    <tr><td><b>Tool registry</b></td><td>Model Context Protocol. Tool definitions are published in MCP schema format, and the registry exposes an MCP-compatible JSON-RPC 2.0 endpoint for listing and calling tools, so any MCP client can use the platform's tools.</td></tr>
+    <tr><td><b>Read path</b></td><td>The same role as MLflow's MCP server, which exposes the registry and experiment history to agents; either can sit behind the tool registry.</td></tr>
+    <tr><td><b>Agent framework and LLM knowledge</b></td><td>MCP client support for external tool servers; skills as markdown with front matter; the taxonomy served as markdown, a vector index or an MCP server.</td></tr>
+    <tr><td><b>Agent evaluation</b></td><td>MLflow GenAI evaluation and tracing, or Amazon Bedrock evaluations (including RAG evaluation); Ragas-style metrics for retrieval and grounding; OpenTelemetry GenAI semantic conventions for traces, so feedback and scores join on the same trace ID.</td></tr>
+    <tr><td><b>Built as code</b></td><td>AWS CDK (CloudFormation underneath); the same principles apply with Terraform or Pulumi.</td></tr>
+  </tbody></table></div>
+  <h3>Where the design goes further</h3>
+  <div class="card"><div class="muted">Most published patterns connect agents to a model registry read-only. Here the LLM reads results, starts jobs and proposes promotions, with guardrails sized to each action: free reads, confirmed launches, and analyst-approved stage changes, all recorded in the action log. The agent is also held to the same standard as the models: each agent version is evaluated and signed off before release, and scored by its users once it is in use.</div></div>
+  <h3>References</h3>
+  <div class="card" style="font-size:14px"><ul>
+    <li><a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/mlops-maturity-model">Microsoft: MLOps maturity model</a></li>
+    <li><a href="https://www.sciencedirect.com/science/article/pii/S0950584925000643">An empirical guide to MLOps adoption (Google, Microsoft and AWS models compared)</a></li>
+    <li><a href="https://www.vanta.com/collection/iso-42001/nist-ai-rmf-and-iso-42001">NIST AI RMF and ISO/IEC 42001</a></li>
+    <li><a href="https://www.ansi.org/standards-news/all-news/2-18-26-nist-launches-ai-agent-standards-initiative">NIST launches AI Agent Standards Initiative</a></li>
+    <li><a href="https://labs.cloudsecurityalliance.org/research/governance-nist-ai-agent-standards-agentic-governance-v1-csa/">CSA: Agentic AI governance and NIST standards</a></li>
+    <li><a href="https://aws.amazon.com/blogs/machine-learning/enhance-ai-agents-using-predictive-ml-models-with-amazon-sagemaker-ai-and-model-context-protocol-mcp/">AWS: AI agents with SageMaker AI and MCP</a></li>
+    <li><a href="https://aws.amazon.com/blogs/machine-learning/build-strands-agents-with-sagemaker-ai-models-and-mlflow/">AWS: Agents with SageMaker AI models and MLflow</a></li>
+    <li><a href="https://www.kaggle.com/whitepaper-the-new-SDLC-with-vibe-coding">Osmani, Saboo and Kartakis: The New SDLC With Vibe Coding (Google, May 2026)</a></li>
+  </ul></div>
+</section>
+
+<!-- DECISIONS -->
+<section class="panel" id="tab-decisions">
+  <h2>Decisions to make</h2>
+  <p class="lead">Choices the design leaves to the implementer. Each has a reasonable default.</p>
+  <div class="tcard"><table>
+    <thead><tr><th style="width:250px">Decision</th><th>Options and default</th></tr></thead><tbody>
+    <tr><td><b>Gates per product line</b></td><td>Which metrics and thresholds a candidate must pass before the analyst sees it. Default: start from the metrics analysts already review (gains, lift, deciles, holdout gap) and the audit flags.</td></tr>
+    <tr><td><b>LLM access controls and trigger levels</b></td><td>Which actions run directly, which ask for confirmation and which need approval, per environment. Default: reads and status checks run directly; starting jobs asks for confirmation in prod; promotion needs analyst approval.</td></tr>
+    <tr><td><b>LLM data and safety rules</b></td><td>What data may be sent to the LLM provider, and how content read from files and metadata is treated. Default: no raw personal data in prompts; content the agent reads is treated as data, never as instructions.</td></tr>
+    <tr><td><b>Agent release thresholds</b></td><td>What an agent version must score before release. Default: guardrail cases must all pass; retrieval, trajectory, grounding and response-quality scores may not fall below the current release by more than a set margin; cost and latency regressions are flagged but don't block.</td></tr>
+    <tr><td><b>Golden set ownership</b></td><td>Who writes and maintains the eval cases. Default: each skill or playbook owner owns its cases; a starting set is seeded from the analysts' most common requests and from known failures.</td></tr>
+    <tr><td><b>Feedback triage</b></td><td>Who reviews flags and corrections, and how quickly. Default: weekly review by the skill owner; guardrail flags are reviewed the same day.</td></tr>
+    <tr><td><b>LLM judges</b></td><td>Where a judge is used, and which model it runs on. Default: only for checks that can't be done exactly; a different model from the agent's; calibrated on human labels before use.</td></tr>
+    <tr><td><b>Input checks</b></td><td>What is checked before training and scoring. Default: schema against the data dictionary, row counts against expectations, and null rates and distributions against a reference.</td></tr>
+    <tr><td><b>Retraining trigger</b></td><td>What prompts a new candidate. Default: an analyst decides from the drift dashboard; the agent can propose.</td></tr>
+    <tr><td><b>Outcome feedback</b></td><td>How real outcomes, when they arrive, flow back. Default: recorded against the model version in the metadata store and shown in monitoring.</td></tr>
+    <tr><td><b>Output delivery</b></td><td>Who owns getting outputs to consumers. Default: orchestration delivers and records the delivery on the job.</td></tr>
+    <tr><td><b>Deploy automation</b></td><td>Whether infrastructure deploys run by hand from reviewed code or automatically on merge. Default: automatic to dev and staging; prod deploys after review of the infrastructure diff.</td></tr>
+    <tr><td><b>Retention and backup</b></td><td>How long versions are kept, and how the shared registry is protected. Default: keep every version that was ever in production; back up the registry and its artifacts.</td></tr>
+    <tr><td><b>Cost limits</b></td><td>Caps on compute and LLM use. Default: a maximum capacity per compute environment or queue, a per-run concurrency limit, and a per-session LLM budget, with alerts.</td></tr>
+    <tr><td><b>Model routing</b></td><td>Which LLM model each step uses. Default: the most capable model for planning and analysis; smaller, cheaper models for routine steps such as taxonomy lookups, summarizing tool output and simple status questions; judges on a different model from the agent's. Routing rules are part of the agent version, so changing them re-runs the eval.</td></tr>
+    <tr><td><b>Workflow engine and compute</b></td><td>Which managed services run orchestration. Any of them gives the same system: Airflow (MWAA) or Step Functions as the engine, and AWS Batch, EMR or SageMaker jobs as compute. Default: choose by team skills and workload shape, such as Airflow where the team already runs it, Step Functions for AWS-native event-driven work, Batch for container tasks, and EMR for Spark. Whatever is chosen, keep the input checks, the completeness check and the job store, so the LLM tools stay the same.</td></tr>
+    <tr><td><b>Online serving</b></td><td>Batch only, or an optional real-time serving layer. Default: batch only until a product line needs real-time scoring.</td></tr>
+  </tbody></table></div>
+</section>
+
+<footer>&copy; 2026 WhoIsJaneTurner, LLC. All rights reserved.<br>Version 1.2. Layer and link data live in the script at the bottom of this page; edit the arrays to evolve the design.</footer>
+</main>
+
+<script>
+const COLORS={llm:["#534AB7","#EEEDFE"],lib:["#0F6E56","#E1F5EE"],plat:["#993C1D","#FAECE7"],prod:["#5F5E5A","#F1EFE8"]};
+const GROUPNAME={llm:"LLM interface",lib:"Shared library",plat:"Platform",prod:"Product lines"};
+const NODES=[
+ {id:"playbooks",name:"Agent playbooks",sub:"Staged work + gates",g:"llm",col:0,
+  desc:"A staged request workflow with human approval gates, written as files the agent works through; it also defines how model builds are configured.",env:"Versioned with review; one copy"},
+ {id:"products",name:"Product lines",sub:"Internal + external",g:"prod",col:0,
+  desc:"Separate internal and external modeling products built on the same platform.",env:"Code versioned; models move by registry stage"},
+ {id:"llm",name:"LLM interface",sub:"Chat + operator UI",g:"llm",col:1,
+  desc:"A chat assistant with skills, plus an operator UI for launching and watching runs and for analyst approvals.",env:"One instance; each tool call targets an environment"},
+ {id:"mlfw",name:"ML framework",sub:"Pipeline + input checks",g:"lib",col:1,
+  desc:"A component pipeline where new models are configuration, not new code; includes the input checks.",env:"Package version"},
+ {id:"agentfw",name:"Agent framework",sub:"Agents, tools, skills",g:"lib",col:2,
+  desc:"Reusable agents, tool providers, skills and MCP client support, shipped as a package.",env:"Package version"},
+ {id:"client",name:"Platform client",sub:"One client for all",g:"lib",col:2,
+  desc:"One client library for every platform service, shared by all consumers.",env:"Package version"},
+ {id:"knowledge",name:"LLM knowledge",sub:"Taxonomy metadata",g:"llm",col:3,
+  desc:"A taxonomy metadata package that gives the LLM a shared vocabulary for fields, attributes and their meanings. Delivered as markdown, a hierarchical vector index the agent searches, or an MCP server.",env:"Package version; one copy"},
+ {id:"services",name:"Platform services",sub:"Stores, tools, action log",g:"plat",col:3,
+  desc:"Model registry, metadata store, feature catalog, job store, tool registry with access rules, the action log, and the eval store.",env:"Registry, tool registry, action log and eval store shared; job store per environment"},
+ {id:"read",name:"Read path",sub:"Metadata as a tool",g:"plat",col:4,
+  desc:"Read-only access to model metadata, exposed to the LLM as a tool.",env:"Reads the shared metadata store"},
+ {id:"orch",name:"Orchestration",sub:"Managed workflows",g:"plat",col:4,
+  desc:"A managed workflow engine on managed compute, such as Airflow or Step Functions with AWS Batch or EMR. Workflows run input checks first and a completeness check last; run state is copied to the job store.",env:"Deployed per environment"},
+ {id:"monitor",name:"Model monitoring",sub:"Drift dashboard",g:"plat",col:4,
+  desc:"A drift dashboard comparing data and models over time; its results reach analysts and the agent through the tool registry.",env:"Deployed per environment"},
+ {id:"eval",name:"Agent evaluation",sub:"Eval harness + feedback",g:"llm",col:4,
+  desc:"Scores whether the agent did the work well, not just what it did. A pre-release harness replays golden tasks and retrieval queries against each agent version, and in-chat feedback flags bad answers in use.",env:"Golden sets versioned; harness runs in dev and staging; feedback from every environment"}
+];
+// [from, to, label, backward?, route("top"|"bottom"), style("solid"|"dash")]
+const LINKS=[
+ ["playbooks","llm","Guides the agent's work"],
+ ["playbooks","mlfw","Defines how model builds are configured"],
+ ["products","mlfw","Product models are built on the framework"],
+ ["products","client","Register candidate models"],
+ ["llm","agentfw","Runs its agents on the framework"],
+ ["llm","client","Analyst approvals, operator actions and chat feedback, under the user's identity"],
+ ["mlfw","client","Registers models, features and summaries"],
+ ["agentfw","client","Tool calls: read results, start jobs, check status, propose promotion"],
+ ["client","services","API for the stores, tool registry and action log"],
+ ["agentfw","knowledge","Reads or searches the taxonomy: markdown, hierarchical vector index or MCP server"],
+ ["services","read","Model metadata"],
+ ["services","orch","Job requests from tools and the operator UI"],
+ ["services","monitor","Models, metrics and outputs over time"],
+ ["agentfw","eval","Agent runs and tool-call traces, scored against golden tasks"],
+ ["knowledge","eval","Retrieval eval: labeled queries scored against the taxonomy index"],
+ ["services","eval","Chat feedback and action-log traces for triage"],
+ ["read","agentfw","Results returned to the agent as a tool",true,"top","dash"],
+ ["orch","services","Run state from engine events; resolves the production model",true,"bottom","dash"],
+ ["monitor","services","Drift results, available through the tool registry",true,"bottom","dash"],
+ ["orch","products","Runs scoring workers for product models",true,"bottom","solid"],
+ ["eval","services","Eval runs, scores and release verdicts on the agent version",true,"bottom","dash"]
+];
+const byId=Object.fromEntries(NODES.map(n=>[n.id,n]));
+const NS="http://www.w3.org/2000/svg",svg=document.getElementById("flow");
+const W=1000,NW=166,NH=60,TOP=48,AREA=340,COLS=5,colX=c=>20+c*((W-40-NW)/(COLS-1));
+const cols={};NODES.forEach(n=>(cols[n.col]=cols[n.col]||[]).push(n));
+Object.values(cols).forEach(list=>{const gap=(AREA-list.length*NH)/(list.length+1);
+ list.forEach((n,i)=>{n.x=colX(n.col);n.y=TOP+gap+(i*(NH+gap));});});
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const outs={},ins={};NODES.forEach(n=>{outs[n.id]=[];ins[n.id]=[];});
+LINKS.forEach((l,i)=>{if(!l[3]){outs[l[0]].push(i);ins[l[1]].push(i);}});
+const port={};
+NODES.forEach(n=>{
+ outs[n.id].sort((a,b)=>byId[LINKS[a][1]].y-byId[LINKS[b][1]].y).forEach((li,k,arr)=>{(port[li]=port[li]||{}).sy=n.y+NH*(k+1)/(arr.length+1);});
+ ins[n.id].sort((a,b)=>byId[LINKS[a][0]].y-byId[LINKS[b][0]].y).forEach((li,k,arr)=>{(port[li]=port[li]||{}).ty=n.y+NH*(k+1)/(arr.length+1);});
+});
+const linkG=el("g",{}),nodeG=el("g",{});svg.appendChild(linkG);svg.appendChild(nodeG);
+const linkEls=[];let bottomN=0;const base=TOP+AREA+26;
+function add(e,i){e.dataset.i=i;linkG.appendChild(e);linkEls.push(e);}
+LINKS.forEach((l,i)=>{const s=byId[l[0]],t=byId[l[1]],c=COLORS[s.g][0];
+ const dash=l[5]==="dash"?{"stroke-dasharray":"7 5"}:{};let d,ah;
+ if(!l[3]){const x1=s.x+NW,x2=t.x,y1=port[i].sy,y2=port[i].ty,m=(x1+x2)/2;
+  d=`M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`;
+  ah=`M${x2-8},${y2-5} L${x2-1},${y2} L${x2-8},${y2+5}`;
+ } else if(l[4]==="top"){const x1=s.x+NW/2,x2=t.x+NW/2,y1=s.y,y2=t.y;
+  d=`M${x1},${y1} C${x1},6 ${x2},6 ${x2},${y2-8}`;
+  ah=`M${x2-6},${y2-16} L${x2},${y2-6} L${x2+6},${y2-16}`;
+ } else {const k=bottomN++,xr=W+8+k*14,low=base+k*30,x1=s.x+NW,y1=s.y+NH/2+(k%2?8:-8),x2=t.x+NW/2,y2=t.y+NH;
+  d=`M${x1},${y1} L${xr-12},${y1} Q${xr},${y1} ${xr},${y1+12} L${xr},${low-12} Q${xr},${low} ${xr-12},${low} L${x2+14},${low} Q${x2},${low} ${x2},${low-14} L${x2},${y2+8}`;
+  ah=`M${x2-6},${y2+16} L${x2},${y2+6} L${x2+6},${y2+16}`;}
+ const p=el("path",Object.assign({d,class:"link",stroke:c,"stroke-width":l[3]?3:5},dash));
+ const tt=el("title",{});tt.textContent=`${s.name} → ${t.name}: ${l[2]}`;p.appendChild(tt);add(p,i);
+ add(el("path",{d:ah,class:"link",stroke:c,"stroke-width":2,fill:"none"}),i);
+});
+svg.setAttribute("viewBox",`0 0 ${W+8+bottomN*14+6} ${base+bottomN*30+6}`);
+const panel=document.getElementById("panel");
+function show(n){svg.classList.add("focus");const rel=new Set([n.id]);
+ linkEls.forEach(e=>{const l=LINKS[e.dataset.i];const on=l[0]===n.id||l[1]===n.id;e.classList.toggle("on",on);if(on){rel.add(l[0]);rel.add(l[1]);}});
+ nodeG.querySelectorAll(".node").forEach(g=>g.classList.toggle("on",rel.has(g.dataset.id)));
+ const o=LINKS.filter(l=>l[0]===n.id),inc=LINKS.filter(l=>l[1]===n.id);
+ const li=(arr,k)=>arr.length?"<ul>"+arr.map(l=>`<li><b>${byId[l[k]].name}</b> &mdash; ${l[2]}</li>`).join("")+"</ul>":'<div class="muted">None</div>';
+ panel.innerHTML=`<h4>${n.name}</h4><span class="pill g-${n.g}">${GROUPNAME[n.g]}</span><div style="margin-top:8px;font-size:14px">${n.desc}</div><div class="dir">Feeds or calls</div>${li(o,1)}<div class="dir">Fed or called by</div>${li(inc,0)}`;}
+NODES.forEach(n=>{const [stroke,fill]=COLORS[n.g];const g=el("g",{class:"node"});g.dataset.id=n.id;
+ g.appendChild(el("rect",{x:n.x,y:n.y,width:NW,height:NH,rx:8,fill,stroke}));
+ const t1=el("text",{x:n.x+NW/2,y:n.y+26,"text-anchor":"middle",class:"t1",fill:stroke});t1.textContent=n.name;
+ const t2=el("text",{x:n.x+NW/2,y:n.y+46,"text-anchor":"middle",class:"t2",fill:stroke,opacity:.8});t2.textContent=n.sub;
+ g.appendChild(t1);g.appendChild(t2);
+ g.addEventListener("mouseenter",()=>show(n));g.addEventListener("mouseleave",()=>svg.classList.remove("focus"));
+ g.addEventListener("click",()=>{const r=document.getElementById("row-"+n.id);r.scrollIntoView({behavior:"smooth",block:"center"});r.classList.add("flash");setTimeout(()=>r.classList.remove("flash"),1600);});
+ nodeG.appendChild(g);});
+document.querySelector("#linktable tbody").innerHTML=LINKS.map(l=>`<tr><td><span class="pill g-${byId[l[0]].g}">${byId[l[0]].name}</span></td><td><span class="pill g-${byId[l[1]].g}">${byId[l[1]].name}</span></td><td>${l[2]}</td></tr>`).join("");
+const order=["llm","playbooks","knowledge","agentfw","eval","mlfw","client","services","orch","read","monitor","products"];
+document.querySelector("#layertable tbody").innerHTML=order.map(id=>{const n=byId[id];return `<tr id="row-${id}"><td><b>${n.name}</b></td><td>${n.desc}</td><td><span class="pill g-${n.g}">${GROUPNAME[n.g]}</span></td><td class="muted">${n.env}</td></tr>`;}).join("");
+const tabs=[...document.querySelectorAll(".tabs button")];
+function openTab(id){tabs.forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===id));
+ document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id==="tab-"+id));
+ try{history.replaceState(null,"","#"+id);}catch(e){}window.scrollTo({top:0});}
+tabs.forEach(b=>b.addEventListener("click",()=>openTab(b.dataset.tab)));
+const h=(location.hash||"").slice(1);openTab(tabs.some(b=>b.dataset.tab===h)?h:"overview");
+</script>
+<script>
+(function(){
+const V1="v2026-08-01",V2="v2026-09-30";
+const STEPS=[
+ {t:"Request arrives",nodes:["llm","playbooks"],links:[["playbooks","llm"]],
+  chat:[["analyst","New request from Acme Retail: a lookalike model on their customer file. Plan it."],
+        ["agent","Loaded the request playbook. Draft plan: ingest the customer and proxy files, run discovery, build with the standard pipeline, and hold out 10% as independent test data. Expected rows: 6,492 customers and 102,254 proxy records. Confirm the plan before I start?"]],
+  log:[["Agent","Read request playbook","&mdash;","Plan drafted"]]},
+ {t:"Plan confirmed",nodes:["llm","playbooks"],links:[],
+  chat:[["analyst","Confirmed."]],gate:"Playbook gate: nothing runs without a confirmed plan.",
+  log:[["j.rivera (analyst)","Confirm plan","&mdash;","Approved"]]},
+ {t:"Look up field meanings",nodes:["agentfw","knowledge"],links:[["agentfw","knowledge"]],
+  chat:[["agent","Checked the taxonomy: 14 donor fields are near-target for this client, so I'll exclude them from the features."]],
+  log:[["Agent","Search taxonomy","&mdash;","14 fields flagged"]]},
+ {t:"Analyst corrects a lookup",nodes:["llm","client","services","eval"],links:[["llm","client"],["client","services"],["services","eval"]],
+  chat:[["analyst","<code>donor_recency_12m</code> isn't near-target for Acme; their campaigns don't use it. Keep it in."],
+        ["agent","Keeping it, so 13 fields are excluded. Your correction is recorded against that taxonomy lookup."]],
+  gate:"The correction is linked to the trace and queued for review. If accepted, it becomes a retrieval case in the golden set.",
+  log:[["j.rivera (analyst)","Feedback: correct taxonomy lookup","shared","Queued for eval review"]]},
+ {t:"Start the build",nodes:["agentfw","client","services","orch"],links:[["agentfw","client"],["client","services"],["services","orch"]],
+  chat:[["agent","Starting the build in staging. At this trigger level, staging builds run without confirmation."]],
+  jobs:{add:{id:"job-0142",type:"Build",env:"staging",status:"PENDING"}},
+  log:[["Agent","start_job: build","staging","job-0142 created"]]},
+ {t:"Input checks, then compute",nodes:["orch","mlfw","services"],links:[["orch","services"]],
+  narr:"Orchestration runs the input checks: row counts match (6,492 and 102,254), the schema matches the data dictionary, and null rates are within the reference range. The workflow engine then submits the training tasks to managed compute, which provisions capacity, retries failed tasks and scales back down when they finish.",
+  jobs:{set:["job-0142","RUNNING"]},
+  log:[["Workflow engine","Input checks","staging","Passed"],["Workflow engine","Submit training tasks","staging","4 tasks queued"]]},
+ {t:"Candidate registered",nodes:["mlfw","client","services","orch","products"],links:[["products","mlfw"],["mlfw","client"],["client","services"],["orch","services"]],
+  narr:"The pipeline registers the new version with its metrics, training data references, config and audit. The summary is written as keyed components and the features go to the catalog. The final workflow step, the completeness check, confirms every expected output exists, and only then does the run succeed.",
+  reg:{add:V2},jobs:{set:["job-0142","COMPLETED"]},
+  log:[["ML framework","Register model","shared",V2+" as candidate"],["Workflow engine","Completeness check","staging","job-0142 completed"]]},
+ {t:"Compare to production",nodes:["llm","agentfw","read","services"],links:[["llm","agentfw"],["services","read"],["read","agentfw"]],
+  chat:[["analyst","How does it compare to what's in production?"],
+        ["agent","I read <code>model_summary.gains_chart</code> and <code>model_summary.decile_report</code> for both versions:<table><tr><th></th><th>"+V1+"<br><span class='muted'>production</span></th><th>"+V2+"<br><span class='muted'>candidate</span></th></tr><tr><td>Top-decile lift</td><td>2.7</td><td>3.1</td></tr><tr><td>Holdout ROC</td><td>0.74</td><td>0.78</td></tr><tr><td>Test vs. holdout gap</td><td>0.03</td><td>0.02</td></tr></table>Gains chart attached."]],
+  log:[["Agent","Read path: load_specific_components","shared",V1+", "+V2],["Agent","Plot gains chart","&mdash;","gains_compare.png"]]},
+ {t:"Gates checked, promotion proposed",nodes:["agentfw","client","services"],links:[["agentfw","client"],["client","services"]],
+  chat:[["agent","All gates pass on "+V2+": lift, holdout gap, and no audit flags. I've requested promotion; it needs your approval."]],
+  gate:"The agent can request a stage change but can't make it.",
+  log:[["Registry","Gate check","shared","Passed"],["Agent","Propose promotion","shared","Awaiting analyst"]]},
+ {t:"Analyst approves",nodes:["llm","client","services"],links:[["llm","client"],["client","services"]],
+  narr:"The analyst reviews the gains, lift and deciles in the operator UI and approves under their own identity. The registry records who, when and why, then moves the production alias.",
+  reg:{promote:V2},gate:"Human in the loop: the approval is a signed-in action, not a chat reply.",
+  log:[["j.rivera (analyst)","Approve promotion","shared",V2+" &rarr; production"]]},
+ {t:"Score a new file in prod",nodes:["llm","agentfw","client","services","orch"],links:[["llm","agentfw"],["agentfw","client"],["client","services"],["services","orch"]],
+  chat:[["analyst","Score Acme's October file."],["agent","That's a prod launch, so I need your confirmation. It will use the production version, "+V2+", on 1.2M rows."],["analyst","Go."]],
+  jobs:{add:{id:"job-0143",type:"Scoring",env:"prod",status:"RUNNING"}},
+  log:[["Agent","start_job: scoring","prod","Confirmed by j.rivera"],["Orchestration","Resolve production","prod",V2+" recorded on job"]]},
+ {t:"Scoring completes",nodes:["orch","products","services"],links:[["orch","products"],["orch","services"]],
+  narr:"Managed compute scores the file. The completeness check compares outputs to sources, the run succeeds, and orchestration records the delivery on the job.",
+  jobs:{set:["job-0143","COMPLETED"]},
+  log:[["Workflow engine","Completeness check","prod","job-0143 completed"],["Orchestration","Deliver output","prod","Delivery recorded"]]},
+ {t:"Drift flagged: revert by promotion",nodes:["monitor","services","read","agentfw","llm","orch"],links:[["services","monitor"],["monitor","services"],["read","agentfw"],["services","orch"]],
+  chat:[["agent","The drift dashboard flags an income distribution shift (PSI 0.18) in "+V2+"'s scores; "+V1+" is stable on the same data. Its evidence and earlier approval are on record. Promote it back? One batch, job-0143, was scored with the current version."],
+        ["analyst","Yes. Revert and re-score job-0143."]],
+  reg:{promote:V1},jobs:{add:{id:"job-0144",type:"Re-score of job-0143",env:"prod",status:"PENDING"}},
+  gate:"Reverting is promoting a previous version. Nothing is retrained or re-uploaded.",
+  log:[["Model monitoring","Drift alert","prod","PSI 0.18"],["j.rivera (analyst)","Approve promotion","shared",V1+" &rarr; production"],["Agent","start_job: re-score","prod","job-0144 created"]]}
+];
+const src=document.getElementById("flow"),holder=document.getElementById("simDiagram");
+const svg=src.cloneNode(true);svg.removeAttribute("id");svg.classList.remove("focus");holder.appendChild(svg);
+svg.querySelectorAll("title").forEach(t=>t.remove());
+const linkIdx=(a,b)=>LINKS.findIndex(l=>l[0]===a&&l[1]===b);
+let i=0,timer=null;
+function state(upto){const reg=[{v:V1,stage:"production"}],jobs=[],log=[];
+ for(let k=0;k<=upto;k++){const s=STEPS[k];
+  if(s.reg&&s.reg.add)reg.unshift({v:s.reg.add,stage:"candidate"});
+  if(s.reg&&s.reg.promote)reg.forEach(r=>{if(r.stage==="production")r.stage="previous";if(r.v===s.reg.promote)r.stage="production";});
+  if(s.jobs&&s.jobs.add)jobs.push(Object.assign({},s.jobs.add,{step:k}));
+  if(s.jobs&&s.jobs.set)jobs.forEach(j=>{if(j.id===s.jobs.set[0])j.status=s.jobs.set[1];});
+  (s.log||[]).forEach(e=>log.push({step:k,e}));}
+ return {reg,jobs,log};}
+function render(){const s=STEPS[i],st=state(i);
+ const on=new Set(s.links.map(([a,b])=>String(linkIdx(a,b))));
+ svg.querySelectorAll(".link").forEach(e=>e.classList.toggle("on",on.has(e.dataset.i)));
+ svg.querySelectorAll(".node").forEach(g=>g.classList.toggle("on",s.nodes.includes(g.dataset.id)));
+ let h=`<div class="n">Step ${i+1} of ${STEPS.length}</div><h4>${s.t}</h4>`;
+ if(s.narr)h+=`<div class="narr">${s.narr}</div>`;
+ (s.chat||[]).forEach(([w,t])=>{h+=`<div class="bub ${w}"><div class="who">${w==="agent"?"LLM agent":"Analyst"}</div>${t}</div>`;});
+ if(s.gate)h+=`<div class="gate">${s.gate}</div>`;
+ document.getElementById("simStep").innerHTML=h;
+ document.getElementById("simReg").innerHTML=st.reg.map(r=>`<tr><td><code>${r.v}</code></td><td><span class="st st-${r.stage}">${r.stage}</span></td></tr>`).join("");
+ document.getElementById("simJobs").innerHTML=st.jobs.length?st.jobs.map(j=>`<tr class="${j.step===i?"new":""}"><td>${j.id}</td><td>${j.type}</td><td>${j.env}</td><td><span class="st st-${j.status}">${j.status.toLowerCase()}</span></td></tr>`).join(""):'<tr><td colspan="4" class="muted">No jobs yet</td></tr>';
+ document.getElementById("simLog").innerHTML=st.log.slice().reverse().map(({step,e})=>`<tr class="${step===i?"new":""}"><td>${step+1}</td><td>${e[0]}</td><td>${e[1]}</td><td>${e[2]}</td><td>${e[3]}</td></tr>`).join("");
+ document.getElementById("simCount").textContent=`Step ${i+1} / ${STEPS.length}`;
+ document.querySelector("#simBar div").style.width=((i+1)/STEPS.length*100)+"%";}
+function stop(){clearInterval(timer);timer=null;document.getElementById("simPlay").innerHTML="&#9654; Play";}
+document.getElementById("simNext").onclick=()=>{if(i<STEPS.length-1){i++;render();}else stop();};
+document.getElementById("simBack").onclick=()=>{stop();if(i>0){i--;render();}};
+document.getElementById("simReset").onclick=()=>{stop();i=0;render();};
+document.getElementById("simPlay").onclick=()=>{if(timer){stop();return;}
+ if(i>=STEPS.length-1){i=0;render();}
+ document.getElementById("simPlay").innerHTML="&#10073;&#10073; Pause";
+ timer=setInterval(()=>{if(i<STEPS.length-1){i++;render();}else stop();},5500);};
+render();
+})();
+</script>
+
+</body>
+</html>
