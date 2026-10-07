@@ -172,6 +172,8 @@ footer{border-top:1px solid var(--line);padding:28px 0 48px;font:13px/1.6 var(--
   <p>Every prompt asked for the same program: <em>identify companies within thematic communities that are likely to be successful, innovative and disruptive</em>. The task content was therefore constant, and any systematic difference in the code could be attributed to the persona.</p>
   <p>Two questions were then asked of the resulting code. <b>Attribution:</b> can the persona that wrote a function be recovered from style alone? <b>Provenance injection:</b> if a block of functions from the opposite persona is spliced into a file, can a detector built from that file&rsquo;s own functions flag it, without flagging other files by the same persona?</p>
 
+  <p><b>Background.</b> The framing of prompts as belief systems was set out in an earlier essay, <a href="https://medium.com/@camirabzadeh/prompt-engineering-as-belief-engineering-how-identity-constraints-guide-ai-outputs-129351233802" target="_blank" rel="noopener">Prompt Engineering as Belief Engineering: How Identity Constraints Guide AI Outputs</a> (Medium, May 2025), which argues that role and identity prompts narrow the range of outputs a model is likely to produce. The experiment below tests one consequence of that idea on code.</p>
+
   <div class="stats">
     <div class="stat"><div class="v">0.963</div><div class="l">Function-level balanced accuracy on this corpus, logistic regression, leave-one-file-out</div></div>
     <div class="stat"><div class="v">8 / 8</div><div class="l">Files assigned to the correct persona</div></div>
@@ -291,6 +293,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 48px;font:13px/1.6 var(--
 
 <footer>
   <div style="margin-bottom:8px">Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible.</div>
+  <div style="margin-bottom:8px">Related reading: <a href="https://medium.com/@camirabzadeh/prompt-engineering-as-belief-engineering-how-identity-constraints-guide-ai-outputs-129351233802" target="_blank" rel="noopener">Prompt Engineering as Belief Engineering</a> (Medium).</div>
   <div>All figures were produced by <code>calibration_rig.py</code> (Python <code>ast</code>, NumPy, scikit-learn) on the eight-file corpus, random seed 20260721, 200 probe blocks per size. Re-running on a clean copy reproduced the logistic-regression and injection figures exactly.</div>
 </footer>
 </main>
