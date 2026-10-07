@@ -17,8 +17,8 @@
 @media (prefers-color-scheme:dark){:root{--bg:#15141a;--card:#1d1c24;--ink:#ece9e2;--muted:#b4b1a9;--faint:#85827b;--line:#2f2d38;--purple:#AFA9EC;--purple-bg:#2a2650;--teal:#7fd3b8;--teal-bg:#173a30;--coral:#f0a585;--coral-bg:#3d241a;--gray:#b4b1a9;--gray-bg:#26252e;--amber:#e8c07a;--amber-bg:#3a2d14;--flash:#3a3418;--line-p:#3d3870;--on-accent:#15141a}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
-body{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto auto 1fr}
-header{grid-column:1/-1;padding:26px 32px 14px;border-bottom:1px solid var(--line)}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr);max-width:1080px;margin:0 auto}
+header{padding:26px max(24px,calc((100% - 1080px)/2 + 24px)) 14px;border-bottom:1px solid var(--line)}
 h1{font-size:24px;font-weight:600;margin:0 0 4px}
 .sub{color:var(--muted);font-size:14px}
 .tabs{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;z-index:5;border-right:1px solid var(--line)}
@@ -26,8 +26,8 @@ h1{font-size:24px;font-weight:600;margin:0 0 4px}
 .tabs button{font:inherit;font-size:14px;text-align:left;background:none;border:none;border-left:3px solid transparent;border-radius:0 8px 8px 0;padding:8px 12px;color:var(--muted);cursor:pointer}
 .tabs button:hover{color:var(--ink)}
 .tabs button[aria-selected="true"]{color:var(--ink);border-left-color:var(--purple);font-weight:600}
-main{width:100%;max-width:1180px;padding:18px 32px 60px}
-@media(max-width:760px){body{display:block}
+main{width:100%;padding:18px 24px 60px}
+@media(max-width:760px){.shell{display:block}
  .tabs{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}
  .tabs div{flex-direction:row;flex-wrap:wrap;padding:6px 20px}
  .tabs button{border-left:none;border-radius:8px}}
@@ -51,7 +51,7 @@ tr.flash td{background:var(--flash);transition:background .3s}
 .k{font-weight:600;margin-bottom:4px}
 .muted{color:var(--muted)}
 ul{margin:6px 0 0;padding-left:20px}li{margin:4px 0}
-#flowwrap{display:grid;grid-template-columns:1fr 280px;gap:14px}
+#flowwrap{display:grid;grid-template-columns:1fr;gap:14px}
 @media(max-width:980px){#flowwrap{grid-template-columns:1fr}}
 #flow{width:100%;height:auto;display:block}
 #flow .node rect{stroke-width:1}
@@ -98,7 +98,7 @@ footer{color:var(--on-bg-muted)}
 #simCount{color:var(--on-bg-muted);font-size:14px;margin-left:6px}
 #simBar{flex:1;min-width:160px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
 #simBar div{height:100%;width:0;background:var(--accent);transition:width .3s}
-.simgrid{display:grid;grid-template-columns:1fr 420px;gap:14px}
+.simgrid{display:grid;grid-template-columns:1fr;gap:14px}
 .simgrid3{display:grid;grid-template-columns:1fr 1.4fr;gap:14px;margin-top:14px}
 @media(max-width:1000px){.simgrid,.simgrid3{grid-template-columns:1fr}}
 .simh{font-weight:600;font-size:14px;padding:8px 10px 4px}
@@ -126,12 +126,12 @@ footer{color:var(--on-bg-muted)}
 tr.new td{background:var(--flash)}
 .fb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .fb span{font-size:12px;background:var(--card);border:1px solid var(--line-p);color:var(--purple);border-radius:6px;padding:1px 8px}
-.mast{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 max(24px,calc((100% - 1080px)/2 + 24px));background:transparent;border-bottom:1px solid var(--line)}
+.mast{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 max(24px,calc((100% - 1080px)/2 + 24px));background:transparent;border-bottom:1px solid var(--line)}
 .brand{font:600 15px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;letter-spacing:.02em;text-decoration:none;color:var(--on-bg);display:flex;align-items:center;gap:10px}
 .brand .mark{width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--bg);display:grid;place-items:center;font:700 13px/1 Georgia,serif}
 .brand small{font-weight:400;color:var(--on-bg-muted)}
 .mast a.back{font-size:14px;color:var(--on-bg-muted);text-decoration:none}.mast a.back:hover{color:var(--on-bg)}
-@media(max-width:600px){.mast{padding:0 16px}}
+@media(max-width:600px){.mast{padding:0 16px}header{padding-left:16px;padding-right:16px}main{padding-left:16px;padding-right:16px}}
 </style>
 </head>
 <body>
@@ -143,6 +143,7 @@ tr.new td{background:var(--flash)}
   <h1>MLOps reference architecture with an LLM interface</h1>
   <div class="sub">Generalized from a working Data Science platform &middot; version 1.2 &middot; October 4, 2026</div>
 </header>
+<div class="shell">
 <nav class="tabs" role="tablist" aria-orientation="vertical"><div>
   <button role="tab" data-tab="overview">Overview</button>
   <button role="tab" data-tab="sim">Simulation</button>
@@ -515,6 +516,7 @@ tr.new td{background:var(--flash)}
 
 <footer><p style="margin:0 0 12px;font-size:14px">Next: <a href="responsible_agent_framework.html" style="color:var(--accent)">Responsible agent deployment and evaluation</a>, a draft framework for governing customer-facing agents.</p>&copy; 2026 WhoIsJaneTurner, LLC. All rights reserved.<br>Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible.<br>Version 1.2. Layer and link data live in the script at the bottom of this page; edit the arrays to evolve the design.</footer>
 </main>
+</div>
 
 <script>
 const COLORS={llm:["var(--purple)","var(--purple-bg)"],lib:["var(--teal)","var(--teal-bg)"],plat:["var(--coral)","var(--coral-bg)"],prod:["var(--gray)","var(--gray-bg)"]};
