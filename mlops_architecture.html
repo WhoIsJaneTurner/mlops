@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
 body{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto auto 1fr}
-header{grid-column:1/-1;padding:26px 32px 14px;border-bottom:1px solid rgba(255,255,255,.15)}
+header{grid-column:1/-1;padding:26px 32px 14px;border-bottom:1px solid var(--line)}
 h1{font-size:24px;font-weight:600;margin:0 0 4px}
 .sub{color:var(--muted);font-size:14px}
 .tabs{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;z-index:5;border-right:1px solid var(--line)}
@@ -20,7 +20,7 @@ h1{font-size:24px;font-weight:600;margin:0 0 4px}
 .tabs button[aria-selected="true"]{color:var(--ink);border-left-color:var(--purple);font-weight:600}
 main{width:100%;max-width:1180px;padding:18px 32px 60px}
 @media(max-width:760px){body{display:block}
- .tabs{position:static;height:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,.15)}
+ .tabs{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}
  .tabs div{flex-direction:row;flex-wrap:wrap;padding:6px 20px}
  .tabs button{border-left:none;border-radius:8px}}
 .panel{display:none}.panel.active{display:block}
@@ -72,23 +72,23 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--
 footer{color:var(--faint);font-size:12px;margin-top:40px}
 
 /* violet theme: page on blue, content stays on white cards */
-:root{--bg:#3C3489;--on-bg:#FFFFFF;--on-bg-muted:#D9D6F7;--on-bg-faint:#AFA9EC}
+:root{--accent:#3C3489;--accent-bg:#EEEDFE;--on-bg:#1f1e1c;--on-bg-muted:#5f5e5a;--on-bg-faint:#8a8984}
 header h1{color:var(--on-bg)}header .sub{color:var(--on-bg-muted)}
-.tabs{background:rgba(60,52,137,.97);border-right-color:rgba(255,255,255,.15)}
-.tabs button{color:var(--on-bg-muted)}.tabs button:hover{color:var(--on-bg);background:rgba(255,255,255,.06)}
-.tabs button[aria-selected="true"]{color:var(--on-bg);border-left-color:#FFFFFF;background:rgba(255,255,255,.12)}
+.tabs{background:transparent;border-right-color:var(--line)}
+.tabs button{color:var(--on-bg-muted)}.tabs button:hover{color:var(--on-bg);background:var(--gray-bg)}
+.tabs button[aria-selected="true"]{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg)}
 .panel>h2,.panel>h3,details>summary{color:var(--on-bg)}
 .panel>p.lead,.panel>p.muted{color:var(--on-bg-muted)}
 footer{color:var(--on-bg-muted)}
-.card,.tcard{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.chain b{background:#fff;border-color:transparent}.chain span{color:var(--on-bg-muted)}
+.card,.tcard{border-color:var(--line)}
+.chain b{background:var(--gray-bg);border-color:var(--line)}.chain span{color:var(--on-bg-muted)}
 .panel a{color:#3C3489}
 .simctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.simctl button{font:inherit;font-size:14px;background:#fff;color:#3C3489;border:none;border-radius:8px;padding:6px 14px;cursor:pointer}
-.simctl button:hover{background:#EEEDFE}
+.simctl button{font:inherit;font-size:14px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer}
+.simctl button:hover{background:#534AB7}
 #simCount{color:var(--on-bg-muted);font-size:14px;margin-left:6px}
-#simBar{flex:1;min-width:160px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
-#simBar div{height:100%;width:0;background:#fff;transition:width .3s}
+#simBar{flex:1;min-width:160px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+#simBar div{height:100%;width:0;background:var(--accent);transition:width .3s}
 .simgrid{display:grid;grid-template-columns:1fr 420px;gap:14px}
 .simgrid3{display:grid;grid-template-columns:1fr 1.4fr;gap:14px;margin-top:14px}
 @media(max-width:1000px){.simgrid,.simgrid3{grid-template-columns:1fr}}
@@ -117,9 +117,9 @@ footer{color:var(--on-bg-muted)}
 tr.new td{background:#fff7d6}
 .fb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .fb span{font-size:12px;background:#fff;border:1px solid #D6D3F5;color:#534AB7;border-radius:6px;padding:1px 8px}
-.mast{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 32px;background:rgba(0,0,0,.18);border-bottom:1px solid rgba(255,255,255,.15)}
+.mast{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 32px;background:transparent;border-bottom:1px solid var(--line)}
 .brand{font:600 15px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;letter-spacing:.02em;text-decoration:none;color:var(--on-bg);display:flex;align-items:center;gap:10px}
-.brand .mark{width:26px;height:26px;border-radius:6px;background:#fff;color:#3C3489;display:grid;place-items:center;font:700 13px/1 Georgia,serif}
+.brand .mark{width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--bg);display:grid;place-items:center;font:700 13px/1 Georgia,serif}
 .brand small{font-weight:400;color:var(--on-bg-muted)}
 .mast a.back{font-size:14px;color:var(--on-bg-muted);text-decoration:none}.mast a.back:hover{color:var(--on-bg)}
 @media(max-width:600px){.mast{padding:0 16px}}
@@ -504,7 +504,7 @@ tr.new td{background:#fff7d6}
   </tbody></table></div>
 </section>
 
-<footer><p style="margin:0 0 12px;font-size:14px">Next: <a href="responsible_agent_framework.html" style="color:#fff">Responsible agent deployment and evaluation</a>, a draft framework for governing customer-facing agents.</p>&copy; 2026 WhoIsJaneTurner, LLC. All rights reserved.<br>Version 1.2. Layer and link data live in the script at the bottom of this page; edit the arrays to evolve the design.</footer>
+<footer><p style="margin:0 0 12px;font-size:14px">Next: <a href="responsible_agent_framework.html" style="color:var(--accent)">Responsible agent deployment and evaluation</a>, a draft framework for governing customer-facing agents.</p>&copy; 2026 WhoIsJaneTurner, LLC. All rights reserved.<br>Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible.<br>Version 1.2. Layer and link data live in the script at the bottom of this page; edit the arrays to evolve the design.</footer>
 </main>
 
 <script>
