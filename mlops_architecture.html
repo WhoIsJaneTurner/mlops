@@ -141,7 +141,7 @@ tr.new td{background:var(--flash)}
 </div>
 <header>
   <h1>MLOps reference architecture with an LLM interface</h1>
-  <div class="sub">Generalized from a working Data Science platform &middot; version 1.2 &middot; October 4, 2026</div>
+  <div class="sub">Version 1.2 &middot; October 4, 2026</div>
 </header>
 <div class="shell">
 <nav class="tabs" role="tablist" aria-orientation="vertical"><div>
@@ -184,7 +184,7 @@ tr.new td{background:var(--flash)}
 
 <!-- SIMULATION -->
 <section class="panel" id="tab-sim">
-  <h2>Simulation: an external model request, end to end</h2>
+  <h2>Simulation: a model request, end to end</h2>
   <p class="lead">A simulated walkthrough of one request through every layer: plan, correct, build, compare, approve, score, and revert. The client, names and numbers are made up. Step through it, or press play.</p>
   <div class="simctl">
     <button id="simBack">&larr; Back</button><button id="simPlay">&#9654; Play</button><button id="simNext">Next &rarr;</button><button id="simReset">Reset</button>
@@ -196,7 +196,7 @@ tr.new td{background:var(--flash)}
     <div class="card" id="simStep"></div>
   </div>
   <div class="simgrid3">
-    <div class="tcard"><div class="simh">Model registry &middot; <code>acme_lookalike</code></div><table><thead><tr><th>Version</th><th>Stage</th></tr></thead><tbody id="simReg"></tbody></table></div>
+    <div class="tcard"><div class="simh">Model registry &middot; <code>acme_churn</code></div><table><thead><tr><th>Version</th><th>Stage</th></tr></thead><tbody id="simReg"></tbody></table></div>
     <div class="tcard"><div class="simh">Job store</div><table><thead><tr><th>Job</th><th>Type</th><th>Env</th><th>Status</th></tr></thead><tbody id="simJobs"></tbody></table></div>
   </div>
   <div class="tcard" style="margin-top:14px"><div class="simh">Action log</div><table><thead><tr><th style="width:50px">Step</th><th style="width:190px">Who</th><th>Action</th><th style="width:100px">Env</th><th>Result</th></tr></thead><tbody id="simLog"></tbody></table></div>
@@ -252,7 +252,7 @@ tr.new td{background:var(--flash)}
     <tr><td><b>Policy</b> &mdash; the gates a model must pass</td><td>Each product line, versioned with its models</td></tr>
     <tr><td><b>Evidence</b> &mdash; eval runs against those gates</td><td>Run by orchestration; stored on the model version</td></tr>
     <tr><td><b>Gate check</b> &mdash; evidence vs. policy</td><td>The registry, at stage-change time; it refuses a change without passing evidence on that exact version</td></tr>
-    <tr><td><b>Decision</b> &mdash; the approval</td><td>An analyst, after reviewing gains, lift, deciles, holdout performance and the audit</td></tr>
+    <tr><td><b>Decision</b> &mdash; the approval</td><td>An analyst, after reviewing precision-recall, calibration, holdout performance and the audit</td></tr>
     <tr><td><b>Consumption</b> &mdash; scoring uses "production"</td><td>Orchestration resolves the alias through the registry; the read path reports on it</td></tr>
   </tbody></table></div>
   <h3>Approval path</h3>
@@ -261,7 +261,7 @@ tr.new td{background:var(--flash)}
     <div class="card"><div class="k">Rules</div><ul>
       <li>Promotion moves an alias. Nothing is retrained or re-uploaded.</li>
       <li>Re-promoting a previous version still takes an analyst's sign-off, but its evidence already exists, so it can be approved immediately in an incident.</li>
-      <li>Promotion doesn't change outputs already delivered; re-scoring affected batches is a separate orchestration step, found through the job store's model links.</li>
+      <li>Promotion doesn't change outputs already handed off; re-scoring affected batches is a separate orchestration step, found through the job store's model links.</li>
     </ul></div>
   </div>
 </section>
@@ -269,14 +269,14 @@ tr.new td{background:var(--flash)}
 <!-- STORES -->
 <section class="panel" id="tab-stores">
   <h2>Stores and lineage</h2>
-  <p class="lead">Lineage is carried as metadata across the stores. Read in order, they form a chain from input data to delivered output.</p>
+  <p class="lead">Lineage is carried as metadata across the stores. Read in order, they form a chain from input data to final output.</p>
   <div class="chain"><b>Input data + config</b><span>&rarr;</span><b>Input checks</b><span>&rarr;</span><b>Model version</b><span>&rarr;</span><b>Features</b><span>&rarr;</span><b>Evaluation + summary</b><span>&rarr;</span><b>Approval</b><span>&rarr;</span><b>Runs</b><span>&rarr;</span><b>Outputs</b></div>
   <div class="tcard"><table>
     <thead><tr><th style="width:170px">Store</th><th>What it tracks</th><th style="width:220px">Main readers</th></tr></thead><tbody>
     <tr><td><b>Model store</b><div class="muted" style="font-size:12px">registry record + artifact</div></td><td>Identity, version, stage and stage history. Test metrics and holdout evaluation. Training data references. The full pipeline config. The audit, including the analyst's approval (who, when, why). Pointer to the artifact, which holds the complete pipeline result.</td><td>Promotion, orchestration, scoring</td></tr>
-    <tr><td><b>Metadata store</b><div class="muted" style="font-size:12px">key:value components</div></td><td>The model summary stored as key:value components, each under a stable dotted key path (e.g. <code>model_summary.roc_curve</code>), plus an index listing every key with its type and size. Components include feature importances, coefficients, thresholds, ROC and gains curves, rank concentration and stability, coverage, business metrics, decile and ranking reports. The same key means the same thing in every version.</td><td>Read path, LLM interface, reporting, monitoring</td></tr>
+    <tr><td><b>Metadata store</b><div class="muted" style="font-size:12px">key:value components</div></td><td>The model summary stored as key:value components, each under a stable dotted key path (e.g. <code>model_summary.roc_curve</code>), plus an index listing every key with its type and size. Components include feature importances, coefficients, thresholds, ROC and precision-recall curves, calibration, score stability, coverage, business metrics. The same key means the same thing in every version.</td><td>Read path, LLM interface, reporting, monitoring</td></tr>
     <tr><td><b>Feature catalog</b></td><td>Feature metadata, not feature values: each feature's name, type, importance and tags, plus a feature group tying the set to its model.</td><td>Product lines, monitoring</td></tr>
-    <tr><td><b>Job store</b></td><td>Each run, in platform terms: workflow, input source, input-check results, expected count, model version, completeness check, delivery, and the engine's run ID. Status (pending through completed or failed) is copied from the workflow engine's state-change events; the engine owns run state, and the job store records it.</td><td>Operator UI, LLM, alerts</td></tr>
+    <tr><td><b>Job store</b></td><td>Each run, in platform terms: workflow, input source, input-check results, expected count, model version, output validation, hand-off, and the engine's run ID. Status (pending through completed or failed) is copied from the workflow engine's state-change events; the engine owns run state, and the job store records it.</td><td>Operator UI, LLM, alerts</td></tr>
     <tr><td><b>Tool registry</b></td><td>Tool definitions with version, parameter and return schemas, and execution strategy (function, module or API); plus access rules and trigger levels per environment.</td><td>LLM interface, agent framework</td></tr>
     <tr><td><b>Action log</b></td><td>Every agent and operator action: who asked, on whose behalf, which tool, with what parameters, against which environment, the result, and links to any job or model it touched.</td><td>Analysts, audits, the LLM (its own history)</td></tr>
     <tr><td><b>Eval store</b></td><td>Whether the agent did it well. Golden-set versions; eval runs per agent version with per-case scores, traces and the release verdict; and in-chat feedback (rating, flag, correction) linked to the action-log entries behind each answer.</td><td>Agent release gate, eval reviewers, monitoring</td></tr>
@@ -293,7 +293,7 @@ tr.new td{background:var(--flash)}
     <tr><td><b>Read results</b></td><td>Lists experiments and versions, loads summary components, compares and plots them</td><td>Runs freely; every answer cites model ID, version and environment</td></tr>
     <tr><td><b>Check job status</b></td><td>Reads run state from the job store, and step-level status, failure reasons and logs from the workflow engine</td><td>Runs freely</td></tr>
     <tr><td><b>Start jobs</b></td><td>Launches builds and scoring runs through the tool registry, which hands them to orchestration</td><td>Same workflows and checks as the operator UI; explicit target environment; trigger level per environment (e.g. confirm before launching in prod)</td></tr>
-    <tr><td><b>Propose promotion</b></td><td>Assembles gains, lift, deciles, holdout results and the audit, and requests a stage change</td><td>Only an analyst's signed-in approval changes the stage</td></tr>
+    <tr><td><b>Propose promotion</b></td><td>Assembles precision-recall, calibration, holdout results and the audit, and requests a stage change</td><td>Only an analyst's signed-in approval changes the stage</td></tr>
     <tr><td colspan="3" class="muted">Every action is written to the action log. Access rules and trigger levels live in the tool registry and are enforced when a tool is executed. Every answer carries feedback controls, and every agent version passes the eval harness before release (see Agent evaluation).</td></tr>
   </tbody></table></div>
   <h3>Reading results from experiments</h3>
@@ -313,7 +313,7 @@ tr.new td{background:var(--flash)}
       <tr><td><code>list_model_versions</code></td><td>Enumerate the runs of one experiment</td></tr>
       <tr><td><code>get_model_summary</code></td><td>Compact first look: version, sizes, top features</td></tr>
       <tr><td><code>list_available_components</code></td><td>Discover which keys a version has</td></tr>
-      <tr><td><code>load_specific_components</code></td><td>Fetch only what's needed: ROC, gains, deciles, coefficients</td></tr>
+      <tr><td><code>load_specific_components</code></td><td>Fetch only what's needed: ROC, precision-recall, calibration, coefficients</td></tr>
       <tr><td><code>load_model_metadata</code></td><td>Everything; last resort</td></tr>
     </tbody></table></div>
     <div class="card">
@@ -325,7 +325,7 @@ tr.new td{background:var(--flash)}
         <li><b>The registry holds the schema.</b> Tool definitions carry parameter and return schemas and a version, so skills and tools can be checked against each other.</li>
         <li><b>Two status levels.</b> The registry reports whether routing worked; the tool reports whether the action worked.</li>
         <li><b>Compare across versions.</b> Because a key means the same thing in every version, a comparison is: list versions, read the same key from each, tabulate or plot.</li>
-        <li><b>Monitoring as a tool.</b> Drift results reach the agent through the tool registry, the same way metadata does.</li><li><b>Taxonomy on demand.</b> The agent reads the taxonomy as markdown, searches it through a hierarchical vector index, or queries it as an MCP server, so field meanings are looked up rather than guessed.</li>
+        <li><b>Monitoring as a tool.</b> Drift results reach the agent through the tool registry, the same way metadata does.</li><li><b>Data dictionary on demand.</b> The agent reads the data dictionary as markdown, searches it through a hierarchical vector index, or queries it as an MCP server, so field meanings are looked up rather than guessed.</li>
       </ul>
     </div>
   </div>
@@ -336,13 +336,13 @@ tr.new td{background:var(--flash)}
   <h2>Agent evaluation</h2>
   <p class="lead">The action log records what the agent did. Evaluation records whether it did it well. There are two loops, and they share one golden set and one eval store. A pre-release harness gates every change to the agent, and feedback controls in chat catch what the harness missed.</p>
   <div class="grid2">
-    <div class="card"><div class="k">Before release: eval harness</div><div class="muted">Replays a versioned golden set of tasks and retrieval queries against a candidate agent version in dev or staging, scores each case, and compares the scores with the current release. Any change to the agent triggers it: the LLM model, prompts, skills, playbooks, tool schemas, hooks, routing rules, the taxonomy, or a rebuilt vector index.</div></div>
+    <div class="card"><div class="k">Before release: eval harness</div><div class="muted">Replays a versioned golden set of tasks and retrieval queries against a candidate agent version in dev or staging, scores each case, and compares the scores with the current release. Any change to the agent triggers it: the LLM model, prompts, skills, playbooks, tool schemas, hooks, routing rules, the data dictionary, or a rebuilt vector index.</div></div>
     <div class="card"><div class="k">In use: feedback in chat</div><div class="muted">Every agent answer has controls to rate it, flag it or correct it. Each signal is linked to the trace behind the answer: its action-log entries, skill, agent version and environment. A bad answer can then be replayed, diagnosed and turned into a test case.</div></div>
   </div>
   <h3>What gets evaluated</h3>
   <div class="tcard"><table>
     <thead><tr><th style="width:170px">Area</th><th>What's measured</th><th style="width:320px">How it's scored</th></tr></thead><tbody>
-    <tr><td><b>Retrieval</b></td><td>Taxonomy lookups and skill selection return the right fields and skills. Measured as recall@k and the rank of the first correct result on labeled queries, including whether near-target fields are flagged.</td><td>Deterministic, against labeled relevant sets</td></tr>
+    <tr><td><b>Retrieval</b></td><td>Data dictionary lookups and skill selection return the right fields and skills. Measured as recall@k and the rank of the first correct result on labeled queries, including whether leakage-risk fields are flagged.</td><td>Deterministic, against labeled relevant sets</td></tr>
     <tr><td><b>Tool use and trajectory</b></td><td>The right tool, parameters and environment at each step, and the right sequence overall: no skipped verification steps and no redundant calls. Confirmation is asked wherever the trigger level requires it. A fluent answer that skipped a check counts as a worse failure than a visible error.</td><td>Deterministic, against expected call traces; required steps must appear, in order</td></tr>
     <tr><td><b>Grounding</b></td><td>No hallucinated numbers, fields or versions: every number in an answer matches a component the agent read, and every answer cites model ID, version and environment.</td><td>Numbers checked deterministically against tool results; an LLM judge checks for unsupported claims</td></tr>
     <tr><td><b>Response quality</b></td><td>The answer is clear, complete and useful for the question asked. It states its assumptions, and it asks rather than guesses when a request is ambiguous.</td><td>LLM judge against a rubric, calibrated on analyst ratings</td></tr>
@@ -363,7 +363,7 @@ tr.new td{background:var(--flash)}
   <h3>In use: feedback in chat</h3>
   <div class="grid2">
     <div class="card"><div class="k">Controls on every answer</div>
-      <div class="bub agent"><div class="who">LLM agent</div>Top-decile lift is 3.1 for <code>v2026-09-30</code> against 2.7 for production <code>v2026-08-01</code> (<code>acme_lookalike</code>, shared registry).
+      <div class="bub agent"><div class="who">LLM agent</div>Holdout PR-AUC is 0.46 for <code>v2026-09-30</code> against 0.41 for production <code>v2026-08-01</code> (<code>acme_churn</code>, shared registry).
         <div class="fb"><span>&#128077; Helpful</span><span>&#128078; Not helpful</span><span>&#9873; Flag</span><span>&#9998; Correct</span></div></div>
       <div class="muted" style="font-size:13px;margin-top:8px">Feedback is a signed-in action under the analyst's identity, like an approval. The agent never sends or edits it.</div>
     </div>
@@ -396,13 +396,13 @@ tr.new td{background:var(--flash)}
 <!-- ORCHESTRATION -->
 <section class="panel" id="tab-orch">
   <h2>Orchestration patterns</h2>
-  <p class="lead">Orchestration receives job requests from the tool registry, the operator UI or arriving data, and runs them on a managed workflow engine and managed compute. The platform writes the workflow definitions and adds two checks specific to its data: input checks at the start and a completeness check at the end. Everything else (scheduling, provisioning, retries, cleanup, run state and events) belongs to the managed services.</p>
+  <p class="lead">Orchestration receives job requests from the tool registry, the operator UI or arriving data, and runs them on a managed workflow engine and managed compute. The platform writes the workflow definitions and adds two checks specific to its data: input checks at the start and output validation at the end. Everything else (scheduling, provisioning, retries, cleanup, run state and events) belongs to the managed services.</p>
   <div class="grid2">
     <div class="card"><div class="k">Workflows as definitions</div><div class="muted">Each pipeline is a DAG or state machine in version control, with its trigger: arriving data, a tool call, a schedule or an operator. Adding a pipeline means adding one definition.</div></div>
     <div class="card"><div class="k">Input checks first</div><div class="muted">Every build and scoring workflow runs the input checks as its first step. A failure stops the run, and the results are stored on the job.</div></div>
     <div class="card"><div class="k">Managed compute</div><div class="muted">Steps run as containers or Spark jobs on a managed service, which provisions capacity, retries failed tasks, enforces timeouts and scales back down. Images are built and tested in CI, so a bad image fails in CI, not in a run.</div></div>
-    <div class="card"><div class="k">Completeness check last</div><div class="muted">The final step compares outputs to sources. A run succeeds only if every expected output exists, because the compute service knows a task exited, not that its outputs are complete.</div></div>
-    <div class="card"><div class="k">Run state from the engine</div><div class="muted">The engine owns run state. Its state-change events update the job store, which holds the platform's view of each run (model version, input checks, expected counts, delivery), so the LLM and the operator UI don't depend on any one engine.</div></div>
+    <div class="card"><div class="k">Output validation last</div><div class="muted">The final step compares outputs to sources. A run succeeds only if every expected output exists, because the compute service knows a task exited, not that its outputs are complete.</div></div>
+    <div class="card"><div class="k">Run state from the engine</div><div class="muted">The engine owns run state. Its state-change events update the job store, which holds the platform's view of each run (model version, input checks, expected counts, hand-off), so the LLM and the operator UI don't depend on any one engine.</div></div>
     <div class="card"><div class="k">Alerts from engine events</div><div class="muted">State changes, failures and timeouts from the engine and the compute service are routed to notifications, with no alerting code in the steps.</div></div>
     <div class="card"><div class="k">Runs tagged by run ID</div><div class="muted">The engine's run ID is passed to every step and applied as a tag on the compute it uses, so a run's resources, logs and costs can always be found.</div></div>
     <div class="card"><div class="k">Scoring resolves "production"</div><div class="muted">Scoring workflows ask the registry for the production version at dispatch and record that version on the job.</div></div>
@@ -454,7 +454,7 @@ tr.new td{background:var(--flash)}
     <tr><td><b>Google MLOps levels</b><div class="muted" style="font-size:12px">0 manual &middot; 1 pipeline automation &middot; 2 CI/CD automation</div></td><td>Level 1&ndash;2. Pipelines are configuration on the ML framework and run by orchestration; packages and infrastructure are released through CI/CD (see Built as code).</td></tr>
     <tr><td><b>Microsoft MLOps maturity</b><div class="muted" style="font-size:12px">levels 0&ndash;4</div></td><td>Level 3: automated training, registry, lineage and deployment. Level 4's fully automatic promotion is deliberately not adopted: an analyst approves every promotion.</td></tr>
     <tr><td><b>AWS MLOps phases</b><div class="muted" style="font-size:12px">initial &middot; repeatable &middot; reliable &middot; scalable</div></td><td>Repeatable and reliable: infrastructure as code, separate environments from one definition, a shared registry, gated promotion and managed orchestration.</td></tr>
-    <tr><td><b>NIST AI RMF</b><div class="muted" style="font-size:12px">Govern &middot; Map &middot; Measure &middot; Manage</div></td><td><b>Govern:</b> access rules, trigger levels and approval policy, all in version control. <b>Map:</b> product lines with their own gates and audiences. <b>Measure:</b> input checks, eval evidence, drift monitoring, and agent evaluation before release and in use. <b>Manage:</b> promotion, re-promoting a previous version, and re-scoring.</td></tr>
+    <tr><td><b>NIST AI RMF</b><div class="muted" style="font-size:12px">Govern &middot; Map &middot; Measure &middot; Manage</div></td><td><b>Govern:</b> access rules, trigger levels and approval policy, all in version control. <b>Map:</b> product lines with their own gates and intended uses. <b>Measure:</b> input checks, eval evidence, drift monitoring, and agent evaluation before release and in use. <b>Manage:</b> promotion, re-promoting a previous version, and re-scoring.</td></tr>
     <tr><td><b>ISO/IEC 42001</b><div class="muted" style="font-size:12px">AI management system</div></td><td>Defined roles (the analyst approves), retained records (approvals on the model version, the action log), and a review loop (monitoring informs retraining decisions).</td></tr>
     <tr><td><b>NIST AI Agent Standards Initiative</b><div class="muted" style="font-size:12px">launched February 2026</div></td><td>Its first focus, agent identity, authorization and auditing, maps to three parts of the design: approvals made under the analyst's own identity, access rules enforced in the tool registry, and the action log. Treating read content as data, never instructions, addresses its prompt-injection concern.</td></tr>
     <tr><td><b>Vibe coding to agentic engineering</b><div class="muted" style="font-size:12px">Google, The New SDLC With Vibe Coding, 2026</div></td><td>The agentic-engineering end of the spectrum. Tests cover the deterministic parts (input checks, gates); evals cover trajectory, tool use and response quality. The harness (skills, tools, hooks, routing, context) is versioned, reviewed and evaluated in CI, and people own the architecture and the approvals.</td></tr>
@@ -469,7 +469,7 @@ tr.new td{background:var(--flash)}
     <tr><td><b>Job store</b></td><td>MLflow runs or SageMaker Pipelines executions can hold the same record; either way, it carries the engine's run ID.</td></tr>
     <tr><td><b>Tool registry</b></td><td>Model Context Protocol. Tool definitions are published in MCP schema format, and the registry exposes an MCP-compatible JSON-RPC 2.0 endpoint for listing and calling tools, so any MCP client can use the platform's tools.</td></tr>
     <tr><td><b>Read path</b></td><td>The same role as MLflow's MCP server, which exposes the registry and experiment history to agents; either can sit behind the tool registry.</td></tr>
-    <tr><td><b>Agent framework and LLM knowledge</b></td><td>MCP client support for external tool servers; skills as markdown with front matter; the taxonomy served as markdown, a vector index or an MCP server.</td></tr>
+    <tr><td><b>Agent framework and LLM knowledge</b></td><td>MCP client support for external tool servers; skills as markdown with front matter; the data dictionary served as markdown, a vector index or an MCP server.</td></tr>
     <tr><td><b>Agent evaluation</b></td><td>MLflow GenAI evaluation and tracing, or Amazon Bedrock evaluations (including RAG evaluation); Ragas-style metrics for retrieval and grounding; OpenTelemetry GenAI semantic conventions for traces, so feedback and scores join on the same trace ID.</td></tr>
     <tr><td><b>Built as code</b></td><td>AWS CDK (CloudFormation underneath); the same principles apply with Terraform or Pulumi.</td></tr>
   </tbody></table></div>
@@ -494,7 +494,7 @@ tr.new td{background:var(--flash)}
   <p class="lead">Choices the design leaves to the implementer. Each has a reasonable default.</p>
   <div class="tcard"><table>
     <thead><tr><th style="width:250px">Decision</th><th>Options and default</th></tr></thead><tbody>
-    <tr><td><b>Gates per product line</b></td><td>Which metrics and thresholds a candidate must pass before the analyst sees it. Default: start from the metrics analysts already review (gains, lift, deciles, holdout gap) and the audit flags.</td></tr>
+    <tr><td><b>Gates per product line</b></td><td>Which metrics and thresholds a candidate must pass before the analyst sees it. Default: start from the metrics analysts already review (ROC AUC, precision-recall, calibration, holdout gap) and the audit flags.</td></tr>
     <tr><td><b>LLM access controls and trigger levels</b></td><td>Which actions run directly, which ask for confirmation and which need approval, per environment. Default: reads and status checks run directly; starting jobs asks for confirmation in prod; promotion needs analyst approval.</td></tr>
     <tr><td><b>LLM data and safety rules</b></td><td>What data may be sent to the LLM provider, and how content read from files and metadata is treated. Default: no raw personal data in prompts; content the agent reads is treated as data, never as instructions.</td></tr>
     <tr><td><b>Agent release thresholds</b></td><td>What an agent version must score before release. Default: guardrail cases must all pass; retrieval, trajectory, grounding and response-quality scores may not fall below the current release by more than a set margin; cost and latency regressions are flagged but don't block.</td></tr>
@@ -504,17 +504,17 @@ tr.new td{background:var(--flash)}
     <tr><td><b>Input checks</b></td><td>What is checked before training and scoring. Default: schema against the data dictionary, row counts against expectations, and null rates and distributions against a reference.</td></tr>
     <tr><td><b>Retraining trigger</b></td><td>What prompts a new candidate. Default: an analyst decides from the drift dashboard; the agent can propose.</td></tr>
     <tr><td><b>Outcome feedback</b></td><td>How real outcomes, when they arrive, flow back. Default: recorded against the model version in the metadata store and shown in monitoring.</td></tr>
-    <tr><td><b>Output delivery</b></td><td>Who owns getting outputs to consumers. Default: orchestration delivers and records the delivery on the job.</td></tr>
+    <tr><td><b>Output hand-off</b></td><td>Who owns getting outputs to consumers. Default: orchestration hands them off and records it on the job.</td></tr>
     <tr><td><b>Deploy automation</b></td><td>Whether infrastructure deploys run by hand from reviewed code or automatically on merge. Default: automatic to dev and staging; prod deploys after review of the infrastructure diff.</td></tr>
     <tr><td><b>Retention and backup</b></td><td>How long versions are kept, and how the shared registry is protected. Default: keep every version that was ever in production; back up the registry and its artifacts.</td></tr>
     <tr><td><b>Cost limits</b></td><td>Caps on compute and LLM use. Default: a maximum capacity per compute environment or queue, a per-run concurrency limit, and a per-session LLM budget, with alerts.</td></tr>
-    <tr><td><b>Model routing</b></td><td>Which LLM model each step uses. Default: the most capable model for planning and analysis; smaller, cheaper models for routine steps such as taxonomy lookups, summarizing tool output and simple status questions; judges on a different model from the agent's. Routing rules are part of the agent version, so changing them re-runs the eval.</td></tr>
-    <tr><td><b>Workflow engine and compute</b></td><td>Which managed services run orchestration. Any of them gives the same system: Airflow (MWAA) or Step Functions as the engine, and AWS Batch, EMR or SageMaker jobs as compute. Default: choose by team skills and workload shape, such as Airflow where the team already runs it, Step Functions for AWS-native event-driven work, Batch for container tasks, and EMR for Spark. Whatever is chosen, keep the input checks, the completeness check and the job store, so the LLM tools stay the same.</td></tr>
+    <tr><td><b>Model routing</b></td><td>Which LLM model each step uses. Default: the most capable model for planning and analysis; smaller, cheaper models for routine steps such as data dictionary lookups, summarizing tool output and simple status questions; judges on a different model from the agent's. Routing rules are part of the agent version, so changing them re-runs the eval.</td></tr>
+    <tr><td><b>Workflow engine and compute</b></td><td>Which managed services run orchestration. Any of them gives the same system: Airflow (MWAA) or Step Functions as the engine, and AWS Batch, EMR or SageMaker jobs as compute. Default: choose by team skills and workload shape, such as Airflow where the team already runs it, Step Functions for AWS-native event-driven work, Batch for container tasks, and EMR for Spark. Whatever is chosen, keep the input checks, the output validation and the job store, so the LLM tools stay the same.</td></tr>
     <tr><td><b>Online serving</b></td><td>Batch only, or an optional real-time serving layer. Default: batch only until a product line needs real-time scoring.</td></tr>
   </tbody></table></div>
 </section>
 
-<footer><p style="margin:0 0 12px;font-size:14px">Next: <a href="responsible_agent_framework.html" style="color:var(--accent)">Responsible agent deployment and evaluation</a>, a draft framework for governing customer-facing agents.</p>&copy; 2026 WhoIsJaneTurner, LLC. All rights reserved.<br>Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible.<br>Version 1.2. Layer and link data live in the script at the bottom of this page; edit the arrays to evolve the design.</footer>
+<footer><p style="margin:0 0 12px;font-size:14px">Next: <a href="responsible_agent_framework.html" style="color:var(--accent)">Responsible agent deployment and evaluation</a>, a draft framework for governing customer-facing agents.</p>Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible.<br>Version 1.2. Layer and link data live in the script at the bottom of this page; edit the arrays to evolve the design.</footer>
 </main>
 </div>
 
@@ -524,8 +524,8 @@ const GROUPNAME={llm:"LLM interface",lib:"Shared library",plat:"Platform",prod:"
 const NODES=[
  {id:"playbooks",name:"Agent playbooks",sub:"Staged work + gates",g:"llm",col:0,
   desc:"A staged request workflow with human approval gates, written as files the agent works through; it also defines how model builds are configured.",env:"Versioned with review; one copy"},
- {id:"products",name:"Product lines",sub:"Internal + external",g:"prod",col:0,
-  desc:"Separate internal and external modeling products built on the same platform.",env:"Code versioned; models move by registry stage"},
+ {id:"products",name:"Product lines",sub:"Per-product code",g:"prod",col:0,
+  desc:"Separate modeling products built on the same platform.",env:"Code versioned; models move by registry stage"},
  {id:"llm",name:"LLM interface",sub:"Chat + operator UI",g:"llm",col:1,
   desc:"A chat assistant with skills, plus an operator UI for launching and watching runs and for analyst approvals.",env:"One instance; each tool call targets an environment"},
  {id:"mlfw",name:"ML framework",sub:"Pipeline + input checks",g:"lib",col:1,
@@ -534,14 +534,14 @@ const NODES=[
   desc:"Reusable agents, tool providers, skills and MCP client support, shipped as a package.",env:"Package version"},
  {id:"client",name:"Platform client",sub:"One client for all",g:"lib",col:2,
   desc:"One client library for every platform service, shared by all consumers.",env:"Package version"},
- {id:"knowledge",name:"LLM knowledge",sub:"Taxonomy metadata",g:"llm",col:3,
-  desc:"A taxonomy metadata package that gives the LLM a shared vocabulary for fields, attributes and their meanings. Delivered as markdown, a hierarchical vector index the agent searches, or an MCP server.",env:"Package version; one copy"},
+ {id:"knowledge",name:"LLM knowledge",sub:"Data dictionary",g:"llm",col:3,
+  desc:"A data dictionary package that gives the LLM a shared vocabulary for fields and their meanings. Delivered as markdown, a hierarchical vector index the agent searches, or an MCP server.",env:"Package version; one copy"},
  {id:"services",name:"Platform services",sub:"Stores, tools, action log",g:"plat",col:3,
   desc:"Model registry, metadata store, feature catalog, job store, tool registry with access rules, the action log, and the eval store.",env:"Registry, tool registry, action log and eval store shared; job store per environment"},
  {id:"read",name:"Read path",sub:"Metadata as a tool",g:"plat",col:4,
   desc:"Read-only access to model metadata, exposed to the LLM as a tool.",env:"Reads the shared metadata store"},
  {id:"orch",name:"Orchestration",sub:"Managed workflows",g:"plat",col:4,
-  desc:"A managed workflow engine on managed compute, such as Airflow or Step Functions with AWS Batch or EMR. Workflows run input checks first and a completeness check last; run state is copied to the job store.",env:"Deployed per environment"},
+  desc:"A managed workflow engine on managed compute, such as Airflow or Step Functions with AWS Batch or EMR. Workflows run input checks first and output validation last; run state is copied to the job store.",env:"Deployed per environment"},
  {id:"monitor",name:"Model monitoring",sub:"Drift dashboard",g:"plat",col:4,
   desc:"A drift dashboard comparing data and models over time; its results reach analysts and the agent through the tool registry.",env:"Deployed per environment"},
  {id:"eval",name:"Agent evaluation",sub:"Eval harness + feedback",g:"llm",col:4,
@@ -558,12 +558,12 @@ const LINKS=[
  ["mlfw","client","Registers models, features and summaries"],
  ["agentfw","client","Tool calls: read results, start jobs, check status, propose promotion"],
  ["client","services","API for the stores, tool registry and action log"],
- ["agentfw","knowledge","Reads or searches the taxonomy: markdown, hierarchical vector index or MCP server"],
+ ["agentfw","knowledge","Reads or searches the data dictionary: markdown, hierarchical vector index or MCP server"],
  ["services","read","Model metadata"],
  ["services","orch","Job requests from tools and the operator UI"],
  ["services","monitor","Models, metrics and outputs over time"],
  ["agentfw","eval","Agent runs and tool-call traces, scored against golden tasks"],
- ["knowledge","eval","Retrieval eval: labeled queries scored against the taxonomy index"],
+ ["knowledge","eval","Retrieval eval: labeled queries scored against the data dictionary index"],
  ["services","eval","Chat feedback and action-log traces for triage"],
  ["read","agentfw","Results returned to the agent as a tool",true,"top","dash"],
  ["orch","services","Run state from engine events; resolves the production model",true,"bottom","dash"],
@@ -634,20 +634,20 @@ const h=(location.hash||"").slice(1);openTab(tabs.some(b=>b.dataset.tab===h)?h:"
 const V1="v2026-08-01",V2="v2026-09-30";
 const STEPS=[
  {t:"Request arrives",nodes:["llm","playbooks"],links:[["playbooks","llm"]],
-  chat:[["analyst","New request from Acme Retail: a lookalike model on their customer file. Plan it."],
-        ["agent","Loaded the request playbook. Draft plan: ingest the customer and proxy files, run discovery, build with the standard pipeline, and hold out 10% as independent test data. Expected rows: 6,492 customers and 102,254 proxy records. Confirm the plan before I start?"]],
+  chat:[["analyst","New request from Acme Retail: a churn model on their customer table. Plan it."],
+        ["agent","Loaded the request playbook. Draft plan: ingest the customer table and event logs, run discovery, build with the standard pipeline, and hold out 10% as independent test data. Expected rows: 6,492 customers and 102,254 event records. Confirm the plan before I start?"]],
   log:[["Agent","Read request playbook","&mdash;","Plan drafted"]]},
  {t:"Plan confirmed",nodes:["llm","playbooks"],links:[],
   chat:[["analyst","Confirmed."]],gate:"Playbook gate: nothing runs without a confirmed plan.",
   log:[["j.rivera (analyst)","Confirm plan","&mdash;","Approved"]]},
  {t:"Look up field meanings",nodes:["agentfw","knowledge"],links:[["agentfw","knowledge"]],
-  chat:[["agent","Checked the taxonomy: 14 donor fields are near-target for this client, so I'll exclude them from the features."]],
-  log:[["Agent","Search taxonomy","&mdash;","14 fields flagged"]]},
+  chat:[["agent","Checked the data dictionary: 14 fields are derived from the outcome (leakage risk) for this client, so I'll exclude them from the features."]],
+  log:[["Agent","Search data dictionary","&mdash;","14 fields flagged"]]},
  {t:"Analyst corrects a lookup",nodes:["llm","client","services","eval"],links:[["llm","client"],["client","services"],["services","eval"]],
-  chat:[["analyst","<code>donor_recency_12m</code> isn't near-target for Acme; their campaigns don't use it. Keep it in."],
-        ["agent","Keeping it, so 13 fields are excluded. Your correction is recorded against that taxonomy lookup."]],
+  chat:[["analyst","<code>days_since_last_login</code> isn't a leakage risk for Acme; it's computed before the prediction date. Keep it in."],
+        ["agent","Keeping it, so 13 fields are excluded. Your correction is recorded against that data dictionary lookup."]],
   gate:"The correction is linked to the trace and queued for review. If accepted, it becomes a retrieval case in the golden set.",
-  log:[["j.rivera (analyst)","Feedback: correct taxonomy lookup","shared","Queued for eval review"]]},
+  log:[["j.rivera (analyst)","Feedback: correct data dictionary lookup","shared","Queued for eval review"]]},
  {t:"Start the build",nodes:["agentfw","client","services","orch"],links:[["agentfw","client"],["client","services"],["services","orch"]],
   chat:[["agent","Starting the build in staging. At this trigger level, staging builds run without confirmation."]],
   jobs:{add:{id:"job-0142",type:"Build",env:"staging",status:"PENDING"}},
@@ -657,29 +657,29 @@ const STEPS=[
   jobs:{set:["job-0142","RUNNING"]},
   log:[["Workflow engine","Input checks","staging","Passed"],["Workflow engine","Submit training tasks","staging","4 tasks queued"]]},
  {t:"Candidate registered",nodes:["mlfw","client","services","orch","products"],links:[["products","mlfw"],["mlfw","client"],["client","services"],["orch","services"]],
-  narr:"The pipeline registers the new version with its metrics, training data references, config and audit. The summary is written as keyed components and the features go to the catalog. The final workflow step, the completeness check, confirms every expected output exists, and only then does the run succeed.",
+  narr:"The pipeline registers the new version with its metrics, training data references, config and audit. The summary is written as keyed components and the features go to the catalog. The final workflow step, output validation, confirms every expected output exists, and only then does the run succeed.",
   reg:{add:V2},jobs:{set:["job-0142","COMPLETED"]},
-  log:[["ML framework","Register model","shared",V2+" as candidate"],["Workflow engine","Completeness check","staging","job-0142 completed"]]},
+  log:[["ML framework","Register model","shared",V2+" as candidate"],["Workflow engine","Output validation","staging","job-0142 completed"]]},
  {t:"Compare to production",nodes:["llm","agentfw","read","services"],links:[["llm","agentfw"],["services","read"],["read","agentfw"]],
   chat:[["analyst","How does it compare to what's in production?"],
-        ["agent","I read <code>model_summary.gains_chart</code> and <code>model_summary.decile_report</code> for both versions:<table><tr><th></th><th>"+V1+"<br><span class='muted'>production</span></th><th>"+V2+"<br><span class='muted'>candidate</span></th></tr><tr><td>Top-decile lift</td><td>2.7</td><td>3.1</td></tr><tr><td>Holdout ROC</td><td>0.74</td><td>0.78</td></tr><tr><td>Test vs. holdout gap</td><td>0.03</td><td>0.02</td></tr></table>Gains chart attached."]],
-  log:[["Agent","Read path: load_specific_components","shared",V1+", "+V2],["Agent","Plot gains chart","&mdash;","gains_compare.png"]]},
+        ["agent","I read <code>model_summary.pr_curve</code> and <code>model_summary.calibration_report</code> for both versions:<table><tr><th></th><th>"+V1+"<br><span class='muted'>production</span></th><th>"+V2+"<br><span class='muted'>candidate</span></th></tr><tr><td>Holdout PR-AUC</td><td>0.41</td><td>0.46</td></tr><tr><td>Holdout ROC AUC</td><td>0.74</td><td>0.78</td></tr><tr><td>Test vs. holdout gap</td><td>0.03</td><td>0.02</td></tr></table>Precision-recall curve attached."]],
+  log:[["Agent","Read path: load_specific_components","shared",V1+", "+V2],["Agent","Plot PR curve","&mdash;","pr_compare.png"]]},
  {t:"Gates checked, promotion proposed",nodes:["agentfw","client","services"],links:[["agentfw","client"],["client","services"]],
-  chat:[["agent","All gates pass on "+V2+": lift, holdout gap, and no audit flags. I've requested promotion; it needs your approval."]],
+  chat:[["agent","All gates pass on "+V2+": PR-AUC, holdout gap, and no audit flags. I've requested promotion; it needs your approval."]],
   gate:"The agent can request a stage change but can't make it.",
   log:[["Registry","Gate check","shared","Passed"],["Agent","Propose promotion","shared","Awaiting analyst"]]},
  {t:"Analyst approves",nodes:["llm","client","services"],links:[["llm","client"],["client","services"]],
-  narr:"The analyst reviews the gains, lift and deciles in the operator UI and approves under their own identity. The registry records who, when and why, then moves the production alias.",
+  narr:"The analyst reviews the precision-recall curve, calibration and holdout results in the operator UI and approves under their own identity. The registry records who, when and why, then moves the production alias.",
   reg:{promote:V2},gate:"Human in the loop: the approval is a signed-in action, not a chat reply.",
   log:[["j.rivera (analyst)","Approve promotion","shared",V2+" &rarr; production"]]},
- {t:"Score a new file in prod",nodes:["llm","agentfw","client","services","orch"],links:[["llm","agentfw"],["agentfw","client"],["client","services"],["services","orch"]],
-  chat:[["analyst","Score Acme's October file."],["agent","That's a prod launch, so I need your confirmation. It will use the production version, "+V2+", on 1.2M rows."],["analyst","Go."]],
+ {t:"Score a new table in prod",nodes:["llm","agentfw","client","services","orch"],links:[["llm","agentfw"],["agentfw","client"],["client","services"],["services","orch"]],
+  chat:[["analyst","Score Acme's October customer table."],["agent","That's a prod launch, so I need your confirmation. It will use the production version, "+V2+", on 1.2M rows."],["analyst","Go."]],
   jobs:{add:{id:"job-0143",type:"Scoring",env:"prod",status:"RUNNING"}},
   log:[["Agent","start_job: scoring","prod","Confirmed by j.rivera"],["Orchestration","Resolve production","prod",V2+" recorded on job"]]},
  {t:"Scoring completes",nodes:["orch","products","services"],links:[["orch","products"],["orch","services"]],
-  narr:"Managed compute scores the file. The completeness check compares outputs to sources, the run succeeds, and orchestration records the delivery on the job.",
+  narr:"Managed compute scores the table. Output validation compares outputs to sources, the run succeeds, and orchestration records the hand-off on the job.",
   jobs:{set:["job-0143","COMPLETED"]},
-  log:[["Workflow engine","Completeness check","prod","job-0143 completed"],["Orchestration","Deliver output","prod","Delivery recorded"]]},
+  log:[["Workflow engine","Output validation","prod","job-0143 completed"],["Orchestration","Hand off output","prod","Hand-off recorded"]]},
  {t:"Drift flagged: revert by promotion",nodes:["monitor","services","read","agentfw","llm","orch"],links:[["services","monitor"],["monitor","services"],["read","agentfw"],["services","orch"]],
   chat:[["agent","The drift dashboard flags an income distribution shift (PSI 0.18) in "+V2+"'s scores; "+V1+" is stable on the same data. Its evidence and earlier approval are on record. Promote it back? One batch, job-0143, was scored with the current version."],
         ["analyst","Yes. Revert and re-score job-0143."]],
