@@ -9,7 +9,7 @@
 --purple:#534AB7;--purple-bg:#EEEDFE;--teal:#0F6E56;--teal-bg:#E1F5EE;--coral:#993C1D;--coral-bg:#FAECE7;--gray:#5F5E5A;--gray-bg:#F1EFE8}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
-body{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto 1fr}
+body{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto auto 1fr}
 header{grid-column:1/-1;padding:26px 32px 14px;border-bottom:1px solid rgba(255,255,255,.15)}
 h1{font-size:24px;font-weight:600;margin:0 0 4px}
 .sub{color:var(--muted);font-size:14px}
@@ -28,7 +28,7 @@ h2{font-size:19px;font-weight:600;margin:0 0 6px}
 h3{font-size:15px;font-weight:600;margin:22px 0 8px}
 p.lead{color:var(--muted);margin:0 0 14px;max-width:880px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
-.tcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 8px}
+.tcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th{text-align:left;font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em;padding:8px 10px;border-bottom:1px solid var(--line)}
 td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -63,9 +63,9 @@ summary{cursor:pointer;font-weight:600;font-size:15px;margin-bottom:8px}
 .chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 12px;font-size:13px}
 .chain b{font-weight:500;background:var(--gray-bg);border:1px solid var(--line);padding:4px 10px;border-radius:8px}
 .chain span{color:var(--faint)}
-.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
-@media(max-width:980px){.steps{grid-template-columns:repeat(2,1fr)}}
-.step{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--purple);border-radius:0 0 10px 10px;padding:10px 12px;font-size:13px}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media(max-width:980px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.step{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--purple);border-radius:0 0 10px 10px;padding:10px 12px;font-size:13px;overflow-wrap:anywhere}
 .step .n{font-size:11px;color:var(--purple);font-weight:600}
 .stage{border-top-color:var(--teal)}.stage .n{color:var(--teal)}
 code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--gray-bg);padding:1px 5px;border-radius:4px}
@@ -117,12 +117,20 @@ footer{color:var(--on-bg-muted)}
 tr.new td{background:#fff7d6}
 .fb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .fb span{font-size:12px;background:#fff;border:1px solid #D6D3F5;color:#534AB7;border-radius:6px;padding:1px 8px}
-.backlink{display:inline-block;margin-bottom:10px;font-size:13px;color:var(--on-bg-muted);text-decoration:none}.backlink:hover{color:var(--on-bg);text-decoration:underline}
+.mast{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 32px;background:rgba(0,0,0,.18);border-bottom:1px solid rgba(255,255,255,.15)}
+.brand{font:600 15px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;letter-spacing:.02em;text-decoration:none;color:var(--on-bg);display:flex;align-items:center;gap:10px}
+.brand .mark{width:26px;height:26px;border-radius:6px;background:#fff;color:#3C3489;display:grid;place-items:center;font:700 13px/1 Georgia,serif}
+.brand small{font-weight:400;color:var(--on-bg-muted)}
+.mast a.back{font-size:14px;color:var(--on-bg-muted);text-decoration:none}.mast a.back:hover{color:var(--on-bg)}
+@media(max-width:600px){.mast{padding:0 16px}}
 </style>
 </head>
 <body>
+<div class="mast">
+  <a class="brand" href="index.html"><span class="mark">J</span>WhoIsJaneTurner <small>Research</small></a>
+  <a class="back" href="index.html">&larr; All articles</a>
+</div>
 <header>
-<a class="backlink" href="index.html">&larr; WhoIsJaneTurner Research</a><br>
   <h1>MLOps reference architecture with an LLM interface</h1>
   <div class="sub">Generalized from a working Data Science platform &middot; version 1.2 &middot; October 4, 2026</div>
 </header>

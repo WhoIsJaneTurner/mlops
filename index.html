@@ -173,6 +173,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
     </div>
     <ul class="list" id="list">
       <!-- Fallback when JavaScript is off -->
+      <li class="item"><time>Oct 6, 2026</time><div><h3><a href="belief_engineering_provenance.html">Belief engineering and code provenance (preliminary)</a></h3></div><div class="side">v0.1</div></li>
       <li class="item"><time>Oct 6, 2026</time><div><h3><a href="agent_harness_comparison.html">Agent harness comparison</a></h3></div><div class="side">v1.4</div></li>
       <li class="item"><time>Oct 4, 2026</time><div><h3><a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a></h3></div><div class="side">v1.2</div></li>
     </ul>
@@ -207,6 +208,18 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
    featured: true puts an article in the lead slot (else the newest).
    --------------------------------------------------------------- */
 const ARTICLES = [
+  {
+    href: "belief_engineering_provenance.html",
+    title: "Belief engineering and code provenance",
+    dek: "Preliminary results, small corpus. Can system prompts that install a worldview act like distinct code authors? Four personas, eight generated programs and a stylometry harness were used to explore how reliably authorship can be attributed from style, and how large a foreign block of code must be before it is detected. Includes an explorable ROC-AUC chart, a step-through of the pipeline and every prompt verbatim.",
+    date: "2026-10-06",
+    version: "0.1 (preliminary)",
+    type: "Preliminary experiment",
+    topics: ["LLM systems", "Provenance", "Code analysis"],
+    minutes: 12,
+    featured: false,
+    sections: ["Overview","Method","Personas","Attribution","Detection","Observations"]
+  },
   {
     href: "agent_harness_comparison.html",
     title: "Agent harness comparison",
