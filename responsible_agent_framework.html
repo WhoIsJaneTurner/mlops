@@ -245,6 +245,7 @@ details p,details ul{font:14.5px/1.55 var(--sans);color:var(--muted)}
     <button data-t="3" aria-pressed="false"><b>Tier 3: Transactional</b><span>Actions with financial, contractual or material consequences. Handles sensitive PII. Example: refunds, plan changes, discount approval.</span></button>
   </div>
   <div class="small" id="tierNote" style="margin:6px 0 14px"></div>
+  <p class="small">Tag key. <span class="ev e-s">Sourced</span> backed by a published source checked for this draft. <span class="ev e-p">Practice</span> consistent with published practice, not itself measured. <span class="ev e-a">Added</span> introduced after the first draft.</p>
   <div class="prog"><div id="progBar"></div></div>
   <div class="small" id="progTxt"></div>
   <div id="chkHost"></div>
@@ -331,7 +332,7 @@ details p,details ul{font:14.5px/1.55 var(--sans);color:var(--muted)}
   <ul class="plain">
     <li><b>One call per dimension.</b> <span class="ev e-s">Sourced</span> Published agent-evaluation guidance recommends separate judges for separate dimensions, to stop the model conflating them (&ldquo;it was helpful, so it is probably faithful&rdquo;). The cost is three calls per trace, mitigated by sampling.</li>
     <li><b>Allow &ldquo;insufficient evidence&rdquo;.</b> <span class="ev e-s">Sourced</span> <span class="ev e-a">Added</span> The same guidance recommends giving the judge an explicit way out. A null score is routed to human review instead of being forced into 0 to 4.</li>
-    <li><b>Different model family, locked version.</b> <span class="ev e-s">Sourced</span> Self-preference is documented (see bias table), so the judge should come from a different family than the agent where possible. A judge upgrade counts as a change that requires recalibration.</li>
+    <li><b>Different model family, locked version.</b> <span class="ev e-s">Sourced</span> Self-preference is documented (see bias table), so the judge should come from a different family than the agent where possible. A judge upgrade counts as a change that requires recalibration. <span class="ev e-a">Added</span> The same reasoning is applied here to rubric drafting and to test-case or gold-set drafting by the judge&rsquo;s own model family. That extension is an inference: the cited studies measured judging, not drafting.</li>
     <li><b>Judge capability.</b> <span class="ev e-p">Practice</span> The judge should be at least as capable as the agent under test.</li>
     <li><b>Excerpt selection is a bias source.</b> <span class="ev e-a">Added</span> The prompt includes &ldquo;relevant excerpts&rdquo; of the system prompt. Whoever or whatever selects them shapes the score, so selection is rule-based and versioned, or the full prompt is used.</li>
   </ul>
@@ -346,7 +347,7 @@ details p,details ul{font:14.5px/1.55 var(--sans);color:var(--muted)}
     <tbody>
       <tr><td><b>Position</b></td><td>Randomise order. For pairwise comparisons, score both orderings and require agreement.</td><td><span class="ev e-s">Sourced</span> In one benchmark study GPT-4 gave consistent verdicts on only 65% of pairs when answer order was swapped; few-shot prompting raised that to 77.5%. A later study found the effect grows with three or four options.</td></tr>
       <tr><td><b>Verbosity</b></td><td>State in the rubric that length is not rewarded. Inject length-matched pairs into calibration.</td><td><span class="ev e-s">Sourced</span> A &ldquo;repetitive list&rdquo; padding test fooled two of three judges more than 90% of the time and GPT-4 under 10%.</td></tr>
-      <tr><td><b>Self-enhancement</b></td><td>Judge from a different model family than the agent. Use multiple judges where stakes justify it.</td><td><span class="ev e-s">Sourced</span> One study measured a 10% (GPT-4) and 25% (Claude-v1) higher win rate for the judge&rsquo;s own outputs; a later study found the preference persists when outputs are anonymised.</td></tr>
+      <tr><td><b>Self-enhancement</b></td><td>Judge from a different model family than the agent. Use multiple judges where stakes justify it.</td><td><span class="ev e-s">Sourced</span> One study measured a 10% (GPT-4) and 25% (Claude-v1) higher win rate for the judge&rsquo;s own outputs; a later study found the preference persists when outputs are anonymised. These figures come from older models; the size of the effect for current models is not established here.</td></tr>
       <tr><td><b>Authority</b></td><td>Verify cited sources against retrieved context instead of crediting the presence of a citation.</td><td><span class="ev e-s">Sourced</span> <span class="ev e-a">Added</span> Fabricated citations shifted judgments in a bias study. This matters for the faithfulness judge in particular.</td></tr>
       <tr><td><b>Bandwagon / anchoring</b></td><td>Do not include prior scores or human opinions in the judge prompt.</td><td><span class="ev e-s">Sourced</span> Majority-opinion cues had minimal consistent effects in the bias study, so this is a cheap precaution rather than a known large effect.</td></tr>
       <tr><td><b>Format</b></td><td>Strip or normalise formatting before judging where feasible.</td><td><span class="ev e-p">Practice</span> Frequently reported by practitioners; not verified against a primary study for this draft.</td></tr>
@@ -359,7 +360,7 @@ details p,details ul{font:14.5px/1.55 var(--sans);color:var(--muted)}
 <!-- CALIBRATION -->
 <section class="panel" id="p-calib">
   <h2>Calibration</h2>
-  <p>Calibration turns a plausible-looking judge into a measurement instrument. A gold set is built from 200 to 500 traces stratified across intents, outcomes and tiers, scored by two trained human raters working blind, with a third rater or documented rule to resolve disagreements. It is a living asset, refreshed quarterly. <span class="ev e-d">Starting value</span> The set size.</p>
+  <p>Calibration turns a plausible-looking judge into a measurement instrument. A gold set is built from 200 to 500 traces stratified across intents, outcomes and tiers, scored by two trained human raters working blind, with a third rater or documented rule to resolve disagreements. It is a living asset, refreshed quarterly. <span class="ev e-d">Starting value</span> The set size. <span class="ev e-a">Added</span> Raters score without seeing model-suggested scores or labels, and any model-assisted drafting of gold-set items is recorded, because a judge from the same model family is expected to favour such items (see the self-enhancement row in the bias table).</p>
   <h3>Agreement measures</h3>
   <ul class="plain">
     <li><b>Quadratic weighted kappa</b> per dimension, which penalises large disagreements more than small ones and suits ordinal scores.</li>
@@ -516,7 +517,7 @@ details p,details ul{font:14.5px/1.55 var(--sans);color:var(--muted)}
 </section>
 
 <footer>
-  <div style="margin-bottom:8px">Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible.</div>
+  <div style="margin-bottom:8px">Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible. Models tend to favour outputs from their own family (see the bias table), so a review by the same family is not independent; the human review is the check.</div>
   <div>Draft framework; thresholds are starting values to be tuned on a deployment&rsquo;s own data. Previous article: <a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a>.</div>
 </footer>
 </main>
