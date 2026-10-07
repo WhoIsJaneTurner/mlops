@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent harness comparison · WhoIsJaneTurner</title>
+<meta name="description" content="A field guide to agent harnesses (Claude Code, Codex, Cursor, Pi, OpenCode and others), how they differ from the libraries they are built on, and the new layer of harnesses that wrap other harnesses.">
+<link rel="canonical" href="https://whoisjaneturner.ai/agent_harness_comparison.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="WhoIsJaneTurner">
+<meta property="og:title" content="Agent harness comparison · WhoIsJaneTurner">
+<meta property="og:description" content="Harnesses, the libraries beneath them, and the harnesses that wrap harnesses.">
+<meta property="og:url" content="https://whoisjaneturner.ai/agent_harness_comparison.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#fbfaf7;--paper:#ffffff;--ink:#1f1e1c;--muted:#5f5e5a;--faint:#8a8984;--line:#e4e2da;
+  --accent:#3C3489;--accent-2:#534AB7;--accent-bg:#EEEDFE;--teal:#0F6E56;--teal-bg:#E1F5EE;--coral:#993C1D;--coral-bg:#FAECE7;--gray-bg:#F1EFE8;
+  --serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15141a;--paper:#1d1c24;--ink:#ece9e2;--muted:#b4b1a9;--faint:#85827b;--line:#2f2d38;
+    --accent:#AFA9EC;--accent-2:#C7C2F4;--accent-bg:#2a2650;--teal:#7fd3b8;--teal-bg:#173a30;--coral:#f0a585;--coral-bg:#3d241a;--gray-bg:#26252e}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--serif)}
+a{color:var(--accent-2)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+@media(max-width:600px){.wrap{padding:0 16px}}
+.mast{border-bottom:1px solid var(--line)}
+.mast .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+.brand{font:600 15px/1 var(--sans);letter-spacing:.02em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}
+.brand .mark{width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--bg);display:grid;place-items:center;font:700 13px/1 var(--serif)}
+.brand small{font-weight:400;color:var(--muted)}
+.mast a.back{font:14px var(--sans);color:var(--muted);text-decoration:none}
+.mast a.back:hover{color:var(--ink)}
+.head{padding:56px 0 28px;max-width:780px}
+.kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font-weight:500;font-size:clamp(32px,5vw,48px);line-height:1.1;letter-spacing:-.015em;margin:14px 0 16px}
+.lede{font-size:20px;line-height:1.55;color:var(--muted);margin:0 0 16px}
+.meta{font:13px/1.5 var(--sans);color:var(--faint);display:flex;flex-wrap:wrap;gap:4px 14px}
+.meta b{font-weight:500;color:var(--muted)}
+.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px;padding-bottom:80px}
+@media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);gap:0}}
+article{min-width:0}
+.side{position:sticky;top:20px;align-self:start;font:14px/1.4 var(--sans)}
+.side .label{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.side a{display:block;color:var(--muted);text-decoration:none;padding:5px 0 5px 12px;border-left:2px solid var(--line)}
+.side a:hover{color:var(--ink);border-left-color:var(--accent-2)}
+@media(max-width:900px){.side{position:static;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--line)}.side a{display:inline-block;border:none;padding:4px 12px 4px 0}}
+article section{margin:0 0 56px;scroll-margin-top:16px}
+h2{font-weight:500;font-size:28px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em;border-bottom:1px solid var(--ink);padding-bottom:10px}
+h3{font:600 16px/1.3 var(--sans);margin:28px 0 8px}
+p{margin:14px 0}
+.note{font:14px/1.55 var(--sans);color:var(--muted);background:var(--gray-bg);border-left:3px solid var(--accent-2);padding:12px 16px;border-radius:0 8px 8px 0;margin:18px 0}
+.note b{color:var(--ink)}
+code{font:14px var(--mono);background:var(--gray-bg);padding:1px 6px;border-radius:4px}
+
+/* stack diagram */
+.stack{display:flex;flex-direction:column;gap:8px;margin:22px 0;font-family:var(--sans)}
+.layer{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 18px;padding:14px 18px;border-radius:10px;border:1px solid var(--line);background:var(--paper)}
+@media(max-width:600px){.layer{grid-template-columns:1fr}}
+.layer .n{font:600 14px/1.3 var(--sans)}
+.layer .n small{display:block;font-weight:400;color:var(--faint);font-size:12px;margin-top:2px}
+.layer .d{font-size:14px;color:var(--muted);line-height:1.5}
+.layer .d b{color:var(--ink);font-weight:600}
+.l4{background:var(--coral-bg);border-color:transparent}.l4 .n{color:var(--coral)}
+.l3{background:var(--accent-bg);border-color:transparent}.l3 .n{color:var(--accent)}
+.l2{background:var(--teal-bg);border-color:transparent}.l2 .n{color:var(--teal)}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--paper);margin:16px 0}
+table{width:100%;border-collapse:collapse;font:14px/1.5 var(--sans);min-width:760px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.nm{font-weight:600;white-space:nowrap}
+td.nm small{display:block;font-weight:400;color:var(--faint);font-size:12px}
+.pill{display:inline-block;font:12px/1.5 var(--sans);padding:0 8px;border-radius:10px;white-space:nowrap}
+.p-open{background:var(--teal-bg);color:var(--teal)}.p-closed{background:var(--coral-bg);color:var(--coral)}.p-misc{background:var(--accent-bg);color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.chip{font:13px/1 var(--sans);border:1px solid var(--line);background:transparent;color:var(--muted);padding:7px 12px;border-radius:999px;cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--faint)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,a:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.count{font:13px var(--sans);color:var(--faint);margin-top:8px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:16px 0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font:14px/1.55 var(--sans)}
+.card h4{margin:0 0 4px;font:600 15px/1.3 var(--sans)}
+.card .tag{font:600 11px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:8px}
+.card p{margin:6px 0;color:var(--muted)}
+.card ul{margin:6px 0 0;padding-left:18px;color:var(--muted)}
+.card li{margin:3px 0}
+
+/* tiers */
+.tier{display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;padding:20px 0;border-bottom:1px solid var(--line)}
+.tier:last-of-type{border-bottom:none}
+.tier .num{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--bg);display:grid;place-items:center;font:600 15px var(--sans)}
+.tier h3{margin:0 0 4px}
+.tier p{margin:6px 0;font-size:16px}
+.tier .ex{font:13px/1.5 var(--sans);color:var(--faint)}
+.tier .ex b{color:var(--muted);font-weight:600}
+
+
+.plain{margin:12px 0;padding-left:20px}.plain li{margin:8px 0}
+.prefix{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:16px 0 4px;font:13px/1.3 var(--sans)}
+.prefix .seg{padding:12px 14px;border-radius:8px;flex:1 1 110px;text-align:center;color:var(--ink)}
+.prefix .s1{background:var(--teal-bg)}.prefix .s2{background:var(--accent-bg)}.prefix .s3{background:var(--gray-bg)}.prefix .s4{background:var(--coral-bg)}.prefix .s5{background:transparent;border:1px dashed var(--faint);color:var(--muted)}
+.prefix .bp{display:flex;align-items:center;color:var(--accent-2);padding:0 3px;font-size:12px}
+.cap{font:13px/1.5 var(--sans);color:var(--faint);margin:4px 0 16px}
+.bars td.bc{min-width:210px}.bars td.bc .bar{display:block;height:7px;border-radius:4px;background:var(--accent-2);margin-top:5px}.bars td.bc .bar.t{background:var(--teal)}.na{color:var(--faint)}
+.lim{min-width:720px}.lim td{font-size:13.5px}
+#hTable{min-width:0}#hTable th,#hTable td{padding:10px 9px}#hTable td{font-size:13.5px}#hTable td.nm{white-space:normal;min-width:104px;max-width:150px}#hTable td.nm small{font-size:11.5px}
+/* sources */
+.src{font:14px/1.6 var(--sans);color:var(--muted);padding-left:20px}
+.src li{margin:4px 0}
+footer{border-top:1px solid var(--line);padding:28px 0 48px;font:13px/1.6 var(--sans);color:var(--faint)}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="mast"><div class="wrap">
+  <a class="brand" href="index.html"><span class="mark">J</span>WhoIsJaneTurner <small>Research</small></a>
+  <a class="back" href="index.html">&larr; All articles</a>
+</div></header>
+
+<div class="wrap">
+  <div class="head">
+    <div class="kicker">Field guide</div>
+    <h1>Agent harness comparison</h1>
+    <p class="lede">What a harness is, which ones people actually use, how they differ from the libraries they are built on, and the new layer of tools that wrap harnesses to run them in loops, in parallel and in the cloud.</p>
+    <div class="meta"><span><b>October 6, 2026</b></span><span>Version 1.4</span><span>~25 min read</span></div>
+  </div>
+
+  <div class="layout">
+    <nav class="side" aria-label="In this article">
+      <div class="label">In this article</div>
+      <a href="#definition">What a harness is</a>
+      <a href="#substrate">Substrate libraries</a>
+      <a href="#harnesses">Harness comparison</a>
+      <a href="#limitations">Limitations</a>
+      <a href="#axes">Where they differ</a>
+      <a href="#footprint">Process footprint</a>
+      <a href="#caching">Prompt caching</a>
+      <a href="#meta">Harness of harnesses</a>
+      <a href="#anthropic">Anthropic's agents</a>
+      <a href="#choosing">Choosing</a>
+      <a href="#sources">Sources and caveats</a>
+    </nav>
+
+    <article>
+
+<section id="definition">
+  <h2>What a harness is</h2>
+  <p>A model by itself only turns text into text. A <strong>harness</strong> is everything wrapped around it that lets it act: the agent loop, tool definitions (read, write, edit, shell), context management, the system prompt, permissions and the interface a person works through. One survey puts it plainly: a wrapper around an LLM that gives it tools to read and write files, run commands and iterate on code autonomously.</p>
+  <p>The vocabulary is still settling, so it helps to separate four layers. The lower two are used to build agents. The upper two are run as tools.</p>
+
+  <div class="stack" role="img" aria-label="Four layers: models, substrate libraries, harnesses, harnesses of harnesses">
+    <div class="layer l4"><div class="n">4 &middot; Harness of harnesses<small>wraps other harnesses</small></div><div class="d">Loops, parallel fleets, supervisors and hosted runtimes that <b>drive one or many harnesses</b> as workers. Examples: ralph-orchestrator, Claude Squad, Gas Town, Claude Managed Agents.</div></div>
+    <div class="layer l3"><div class="n">3 &middot; Harness<small>batteries included</small></div><div class="d">An opinionated, ready-to-run agent with tools, prompt and UI. Examples: <b>Claude Code, Codex CLI, Cursor, Pi, OpenCode</b>.</div></div>
+    <div class="layer l2"><div class="n">2 &middot; Substrate<small>libraries, frameworks, runtimes</small></div><div class="d">Abstractions and infrastructure from which agents are assembled. Examples: <b>LangChain, LangGraph, CrewAI, OpenAI Agents SDK, Google ADK</b>.</div></div>
+    <div class="layer"><div class="n">1 &middot; Model<small>the weights</small></div><div class="d">Claude, GPT, Gemini, Kimi, open-weight models. Reached through an API.</div></div>
+  </div>
+
+  <div class="note"><b>The boundary is blurry on purpose.</b> Some products ship as a library <em>and</em> a harness: the Claude Agent SDK exposes the same loop Claude Code runs, and Pi is a monorepo of reusable packages with a CLI on top. The test applied here: a product counts as a harness if work can be started on a task without the loop first being written or the tools first being chosen.</div>
+</section>
+
+<section id="substrate">
+  <h2>Substrate libraries: what harnesses are built from</h2>
+  <p>LangChain's own taxonomy is the clearest found. It splits the space into frameworks (abstractions that make building easier), runtimes (production infrastructure such as durable execution and persistence) and harnesses (opinionated, batteries-included agents built on top). Under that scheme, most of the names people call &ldquo;agent frameworks&rdquo; belong below the harness line.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Name</th><th>Role</th><th>Core abstraction</th><th>Reach for it when</th></tr></thead>
+    <tbody>
+      <tr><td class="nm">LangChain</td><td><span class="pill p-misc">Framework</span></td><td>Standard components for models, tools and chains; v1.0 is built on LangGraph</td><td>A common interface across providers and tools is wanted</td></tr>
+      <tr><td class="nm">LangGraph</td><td><span class="pill p-misc">Runtime + framework</span></td><td>Stateful graph of nodes and transitions, with persistence and human-in-the-loop</td><td>Explicit control over branching, looping and recovery is needed in production</td></tr>
+      <tr><td class="nm">CrewAI</td><td><span class="pill p-misc">Framework</span></td><td>Role-based crews of agents working through tasks</td><td>Fast prototyping of multi-agent workflows</td></tr>
+      <tr><td class="nm">OpenAI Agents SDK</td><td><span class="pill p-misc">Framework</span></td><td>Agents, handoffs and guardrails</td><td>Quick onboarding on OpenAI's stack</td></tr>
+      <tr><td class="nm">Google ADK</td><td><span class="pill p-misc">Framework</span></td><td>Agent Development Kit for composing agents</td><td>Work is built on Google's models and cloud</td></tr>
+      <tr><td class="nm">AutoGen</td><td><span class="pill p-misc">Framework</span></td><td>Conversational agents exchanging structured messages</td><td>Research on agent-to-agent dialogue</td></tr>
+      <tr><td class="nm">Vercel AI SDK, LlamaIndex</td><td><span class="pill p-misc">Framework</span></td><td>Model and retrieval abstractions for application code</td><td>An agent embedded in a product, not run as a standalone tool</td></tr>
+      <tr><td class="nm">Temporal, Inngest</td><td><span class="pill p-misc">Runtime</span></td><td>Durable workflow execution</td><td>Long-running agents must survive crashes and retries</td></tr>
+      <tr><td class="nm">Deep Agents, Claude Agent SDK</td><td><span class="pill p-open">Harness as library</span></td><td>Planning, filesystem and sub-agents packaged as a programmable agent</td><td>A Claude Code-style agent is wanted inside an existing application</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><b>A note on CrewAI.</b> It is often listed beside Claude Code and Cursor, but by the definition above it is a framework: the roles, tasks and tools are defined by the developer. It sits one layer down from the products in the next section.</div>
+</section>
+
+<section id="harnesses">
+  <h2>Harness comparison</h2>
+  <p>These are the harnesses that recurred across independent comparisons. The table can be filtered by licence or model strategy and scrolls sideways on small screens.</p>
+
+  <div class="chips" id="chips" role="group" aria-label="Filter harnesses">
+    <button class="chip" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" data-f="open" aria-pressed="false">Open source</button>
+    <button class="chip" data-f="closed" aria-pressed="false">Closed source</button>
+    <button class="chip" data-f="multi" aria-pressed="false">Multi-model</button>
+    <button class="chip" data-f="locked" aria-pressed="false">Single-vendor models</button>
+  </div>
+  <div class="count" id="count" aria-live="polite"></div>
+
+  <div class="tw"><table id="hTable">
+    <thead><tr><th>Harness</th><th>Licence</th><th>Models</th><th>What sets it apart</th><th>Extension</th><th>Cost (as reported)</th></tr></thead>
+    <tbody>
+      <tr data-os="closed" data-m="locked"><td class="nm">Claude Code<small>Anthropic &middot; CLI, IDE, web</small></td><td><span class="pill p-closed">Proprietary</span></td><td>Claude only (Anthropic, Bedrock, Vertex, Azure)</td><td>Deepest feature set: sub-agents, agent teams, hooks, scheduling, cloud sessions</td><td>MCP, skills, plugins, hooks, mods (TypeScript, Oct 2026)</td><td>$20/mo Pro; heavy use often $100&ndash;200/mo</td></tr>
+      <tr data-os="open" data-m="locked"><td class="nm">Codex CLI<small>OpenAI &middot; CLI, IDE, web, desktop</small></td><td><span class="pill p-open">Apache 2.0</span></td><td>GPT-5 family by default; Ollama supported; community routes to others</td><td>Rust core; OS-level sandboxing; one harness behind every Codex surface</td><td>App Server (JSON-RPC), MCP server, <code>codex exec</code>, TypeScript SDK</td><td>Included with ChatGPT plans; BYOK free</td></tr>
+      <tr data-os="closed" data-m="multi"><td class="nm">Cursor 3<small>Anysphere &middot; IDE / agent workspace</small></td><td><span class="pill p-closed">Proprietary</span></td><td>Multi-model plus its own Composer 2</td><td>Agents Window to run many agents; <code>/best-of-n</code> across models in worktrees; cloud agents on VMs</td><td>Self-hosted cloud agents for Enterprise; design-mode browser</td><td>Free; $20 Pro; $60 Pro+; $200 Ultra</td></tr>
+      <tr data-os="open" data-m="multi"><td class="nm">Pi<small>Mario Zechner / Earendil &middot; CLI</small></td><td><span class="pill p-open">MIT</span></td><td>15+ providers</td><td>Deliberately minimal: four tools, a system prompt under 1,000 tokens, branching JSONL sessions. No built-in sub-agents or plan mode</td><td>TypeScript extensions, skills, prompt templates, npm/git packages; MCP via Codemode since Pi 1.0 (Oct 2, 2026)</td><td>Free; provider billed directly</td></tr>
+      <tr data-os="open" data-m="multi"><td class="nm">OpenCode<small>Anomaly &middot; CLI, desktop</small></td><td><span class="pill p-open">MIT</span></td><td>75+ providers; optional managed &ldquo;Zen&rdquo; models</td><td>Client/server design: sessions survive disconnects and can run remotely or in Docker</td><td>Docker sandboxing; phone and browser remote access</td><td>Free BYOK; $10/mo Go plan</td></tr>
+      <tr data-os="open" data-m="locked"><td class="nm">Gemini CLI<small>Google &middot; CLI</small></td><td><span class="pill p-open">Apache 2.0</span></td><td>Gemini only</td><td>Consumer free and Pro access ended June 18, 2026; repository remains Apache 2.0 with public prompts and memory logic. Successor: Antigravity CLI (closed source)</td><td>None to speak of (Gemini-only)</td><td>Paid API keys or enterprise licences only</td></tr>
+      <tr data-os="open" data-m="multi"><td class="nm">Aider<small>Paul Gauthier &middot; CLI</small></td><td><span class="pill p-open">Apache 2.0</span></td><td>100+ via LiteLLM</td><td>Git-first: every AI edit becomes a commit. Closer to pair programming than autonomy</td><td>Community forks; any LiteLLM provider</td><td>Free; provider billed directly</td></tr>
+      <tr data-os="open" data-m="multi"><td class="nm">Goose<small>Block &middot; CLI, desktop</small></td><td><span class="pill p-open">Apache 2.0</span></td><td>15+ providers, local models</td><td>MCP-native with a large extension catalogue and sub-agents</td><td>70+ MCP extensions</td><td>Free; provider billed directly</td></tr>
+      <tr data-os="closed" data-m="multi"><td class="nm">Amp<small>Amp Inc. (from Sourcegraph) &middot; CLI</small></td><td><span class="pill p-closed">Proprietary</span></td><td>Claude, GPT and Gemini via modes (Smart, Deep, Oracle); no direct BYOK</td><td>Mode-based model routing; went CLI-only in Feb 2026</td><td>JetBrains, Neovim, Zed integrations</td><td>Pass-through at cost; free daily allowance</td></tr>
+      <tr data-os="closed" data-m="multi"><td class="nm">Factory<small>Factory AI &middot; cloud, IDE, CLI</small></td><td><span class="pill p-closed">Proprietary</span></td><td>Claude, GPT, Gemini, open models, BYOK</td><td>Enterprise &ldquo;Droids&rdquo; for code, review, docs and tests on persistent cloud machines</td><td>GitHub, GitLab, Jira, Linear, Slack, PagerDuty</td><td>$20/mo; enterprise by model multiplier</td></tr>
+      <tr data-os="closed" data-m="multi"><td class="nm">Command Code<small>CommandCodeAI &middot; CLI</small></td><td><span class="pill p-closed">Proprietary</span></td><td>Claude, GPT, Gemini, Grok, DeepSeek, Qwen, Kimi, open models</td><td>Learns personal taste from accepts and rejects, stored as readable markdown. Very early (first release May 2026)</td><td>IDE extensions (early)</td><td>$1/mo open models; $15/mo frontier models</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><b>Prices and star counts are snapshots.</b> Plans, free tiers and model routing changed repeatedly during 2026, so figures should be confirmed on the vendor's page before being relied on.</div>
+</section>
+
+<section id="limitations">
+  <h2>Limitations of each harness</h2>
+  <p>Every harness above trades something away. The table groups the documented limitations into access and cost, capability gaps, and operational or safety concerns. Several entries rest on one reviewer's test or one report, and those are worded as such. Where a limitation has since been fixed, only the current state is listed.</p>
+
+  <div class="tw"><table class="lim">
+    <thead><tr><th>Harness</th><th>Access, cost and lock-in</th><th>Capability gaps</th><th>Operational and safety</th></tr></thead>
+    <tbody>
+      <tr><td class="nm">Claude Code</td><td>Claude models only; closed source. The $20 Pro tier was described as limited, with sustained use typically needing the $100+ tier. Subscription access was restricted to the official client in January 2026, so third-party harnesses cannot draw on it.</td><td>Model choice is limited to Claude. Project instructions (CLAUDE.md) must be kept accurate by hand to stay useful.</td><td>Highest token use in one four-harness test (741k tokens per task) and called the heaviest spender in another comparison. One CLI process per invocation: about 230 MB resident and 73&ndash;94 MB of private memory per concurrent child in a mock-model test, with public reports of memory leaks and idle processes that never exit.</td></tr>
+      <tr><td class="nm">Codex CLI</td><td>Default models are OpenAI's; other providers depend on community routes. The VS Code extension is closed. Usage is subject to rolling five-hour limits on subscription plans.</td><td>Described as less consistent on longer task chains (a single author's impression, not a measurement).</td><td>Slowest median run in one test (245 s against 123 s for Claude Code). The sandbox ships with network access off, so web access needs workarounds.</td></tr>
+      <tr><td class="nm">Cursor 3</td><td>Closed source. Usage-based pricing was described as confusing, and a public apology was issued over earlier pricing changes.</td><td>Agents still require developer review; the agent-first workspace does not remove the verification step.</td><td>Cloud-agent reliability problems and environment-setup failures are documented.</td></tr>
+      <tr><td class="nm">Pi</td><td>MIT licensed, with the provider billed directly.</td><td>Four built-in tools. Sub-agents and plan mode are absent by design (the oh-my-pi fork adds them). MCP arrived only with Pi 1.0 on October 2, 2026, through a Codemode sandbox. Long-running support is a separate experimental package (Pi Durable). TypeScript only.</td><td>No permission prompts and full system access by default. No turn, deadline or budget limit setting was found in the SDK documentation. Cache hit rates were variable in a community benchmark.</td></tr>
+      <tr><td class="nm">OpenCode</td><td>MIT licensed. Claude Pro and Max subscriptions cannot be used after the January 2026 enforcement, so an API key is required. The supported billing method depends on the provider.</td><td>Quality depends entirely on the model behind it. Lowest pass rate in one four-harness test (46.7%).</td><td>No OS-level sandbox. Heavier resource use than expected in one review.</td></tr>
+      <tr><td class="nm">Gemini CLI and Antigravity CLI</td><td>Gemini CLI stopped serving free, AI Pro and Ultra users on June 18, 2026. It remains available through paid API keys and enterprise licences, and the repository stays Apache 2.0. The successor, Antigravity CLI, is closed source and billed by consumption.</td><td>Gemini models only. The successor adds subagents, hooks and skills, but community feedback reported missing functionality compared with its predecessor.</td><td>The successor was reported to consume quota quickly with no cost controls. Roughly 432K tokens per task was reported for the earlier tool.</td></tr>
+      <tr><td class="nm">Aider</td><td>Apache 2.0; provider billed directly.</td><td>An edit-centred, git-first workflow, not broad agent orchestration. Automatic testing only runs when the test command and auto-test option are configured.</td><td>Pair-programming style keeps a person in the loop, so it is a weak fit for unattended runs.</td></tr>
+      <tr><td class="nm">Goose</td><td>Apache 2.0; provider billed directly.</td><td>Not zero-config: providers and models must be set up before the tool is productive. IDE support (VS Code, JetBrains) trails Claude Code, and the desktop interface is secondary to the terminal.</td><td>Reliability drops on long tool chains with smaller local models. A vendor red-team exercise showed a poisoned shared recipe compromising a laptop. Permission settings need care because of autonomous shell access. No authoritative benchmark exists.</td></tr>
+      <tr><td class="nm">Amp</td><td>Closed source. No direct bring-your-own-key option; models are reached only through modes. Enterprise use carries a 50% markup on pass-through pricing.</td><td>CLI only since February 2026: the VS Code and Cursor integrations were removed.</td><td>Not documented in the sources read.</td></tr>
+      <tr><td class="nm">Factory</td><td>Closed source. Pricing is by model-dependent multipliers at enterprise level.</td><td>Aimed at enterprise software-lifecycle automation (Droids for code, review, docs and tests) rather than individual use.</td><td>Not documented in the sources read.</td></tr>
+      <tr><td class="nm">Command Code</td><td>Closed source; a very young product (first release May 2026).</td><td>IDE extensions were early, with some non-functional at release. Personalisation depends on the vendor's own learned model.</td><td>Little operating history to judge reliability from.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><b>Limitations that cut across harnesses.</b> Answer quality was not measured in any of the sources, so speed and cost comparisons say nothing about correctness. Generation is no longer the bottleneck; verification of the output is. Subscription plans are increasingly tied to the vendor's own client, so a harness that works on an API key may not work on a consumer plan. Vendor policies and pricing changed several times in 2026, and an entry here can age within months.</div>
+</section>
+
+<section id="axes">
+  <h2>Where harnesses actually differ</h2>
+  <p>The same model can feel very different in two harnesses. A small hands-on test of Claude Code, Codex, OpenCode and Pi found large differences in speed, token use and cost per successful task on the same work, which supports a point several authors make: the harness, not just the model, decides how fast, safe and expensive the result is. The figures are illustrative, since they came from one reviewer's run.</p>
+
+  <div class="grid">
+    <div class="card"><span class="tag">Axis 1</span><h4>Model strategy</h4><p>Locked harnesses (Claude Code, Gemini CLI, Codex by default) are tuned to one vendor's models. Open ones (OpenCode, Pi, Aider, Goose) trade tuning for freedom to switch.</p></div>
+    <div class="card"><span class="tag">Axis 2</span><h4>Prompt and tool surface</h4><p>Pi ships four tools and a tiny published prompt. Claude Code ships ten or more tools plus sub-agents and hooks. Less surface means fewer tokens and more transparency; more means more built-in capability.</p></div>
+    <div class="card"><span class="tag">Axis 3</span><h4>Safety posture</h4><p>Codex leans on OS-level sandboxing (Seatbelt, seccomp). Pi runs with full system access and no prompts by default. OpenCode has no OS sandbox. The choice depends on where the agent will run.</p></div>
+    <div class="card"><span class="tag">Axis 4</span><h4>Extensibility</h4><p>Claude Code: skills, plugins, hooks, MCP. Pi: TypeScript extensions and packages. Codex: an embeddable App Server protocol that JetBrains and Xcode use.</p></div>
+    <div class="card"><span class="tag">Axis 5</span><h4>Where it runs</h4><p>Local terminal, IDE, desktop app, or a cloud VM to which work is handed. Cursor 3, Codex and Claude Code all now offer a cloud mode.</p></div>
+    <div class="card"><span class="tag">Axis 6</span><h4>Embeddability</h4><p>Whether it can be driven from code. Codex (SDK, <code>exec</code>, App Server), Claude (Agent SDK) and Pi (SDK) can; this is what makes the next layer possible.</p></div>
+    <div class="card"><span class="tag">Axis 7</span><h4>Process footprint</h4><p>A CLI call starts a full runtime each time. In a mock-model test, each concurrent Claude Code CLI child added about 73&ndash;94 MB of private memory, while each concurrent Pi session in a shared process added about 0.1&ndash;4 MB. See the next section.</p></div>
+    <div class="card"><span class="tag">Axis 8</span><h4>Cache discipline</h4><p>Where the harness places prompt-cache breakpoints and how stable it keeps the prefix. See the caching section.</p></div>
+  </div>
+</section>
+
+<section id="footprint">
+  <h2>Process footprint: CLI versus library</h2>
+  <p>Most of the harnesses above are Node or similar runtimes wrapped as a command-line tool. Each time one is invoked as a command, a new process is started with its own runtime, loaded tool definitions, session state and any MCP servers it launches. For one person in one terminal this is invisible. For a script, a CI job, an orchestrator or a service that invokes a harness many times at once, the memory cost accumulates quickly. The question measured here was narrow: what does each additional concurrent request cost in memory when a harness runs as a subprocess, compared with when it runs as a session inside the host process?</p>
+
+  <div class="grid">
+    <div class="card"><span class="tag">Subprocess per request</span><h4>73&ndash;94 MB of new memory per concurrent request</h4><p>Claude Code CLI children, launched one per request, each added about 73 MB with a trivial reply and about 94 MB when the request had read twelve large files. The figure grows with the context a child holds.</p></div>
+    <div class="card"><span class="tag">Sessions in one process</span><h4>About 0.1&ndash;4.0 MB per concurrent session</h4><p>Pi sessions hosted in a single Node process grew the process from about 133 MB to 200 MB at 600 trivial concurrent requests, and to 2,510 MB at 600 requests that each read the twelve files.</p></div>
+    <div class="card"><span class="tag">Reading the numbers</span><h4>Resident size misleads</h4><p>Each child reported 226&ndash;251 MB resident, but most of that is one binary image shared between children. At 28 children the resident figures sum to 6.2 GB while the machine actually used 2.0 GB.</p></div>
+  </div>
+
+  <h3>How it was measured, and why</h3>
+  <ul class="plain">
+    <li><strong>A mock model.</strong> A local server that imitates the Anthropic Messages API stood in for the model. This isolates harness overhead from model behaviour, avoids credentials and paid calls, and lets every reply be held open for 30 seconds so that all N requests are provably in flight at the same moment. The mock&rsquo;s own counter was required to equal N before each sample was taken, and it did at every level. One level (400 sessions with file reads) was re-run after the measurement script&rsquo;s own polling request to the mock failed; the re-run completed with no errors.</li>
+    <li><strong>Subprocess side.</strong> The Claude Code CLI (version 2.1.292, the binary bundled with the Claude Agent SDK) was started once per request in the way the SDK starts it, with streaming JSON over stdin and stdout, a clean environment and only the Read tool enabled. Levels ran from 1 to 28 concurrent children.</li>
+    <li><strong>In-process side.</strong> The Pi coding-agent SDK (version 1.0.4) created N sessions inside one fresh Node process per level, with in-memory session storage, compaction off, no resource discovery and only the read tool, against the same mock. Levels ran from 1 to 600.</li>
+    <li><strong>Two workloads.</strong> In the trivial workload the model returned one short streamed reply. In the tool workload the model first asked to read twelve text files of about 117 KB each (about 1.4 MB of tool output) and then replied, so the harness had to hold real tool results in memory.</li>
+    <li><strong>Three memory readings.</strong> Resident size (RSS) counts a shared page once in every process that maps it, so it overstates the total when children share a binary. Proportional size (PSS) divides each shared page among the processes sharing it. Private anonymous memory is what one more process adds that no other process holds. System memory used (total minus available, read before and after the children started) gives an independent cross-check, and its slope against N is the marginal cost per child.</li>
+    <li><strong>Environment.</strong> One Linux sandbox with 2 vCPUs and 8 GB of RAM on x86-64. One run per level; the per-child values were stable across levels, which is the evidence that the readings are not noise.</li>
+  </ul>
+
+  <h3>Result: one process per request</h3>
+  <div class="tw"><table class="bars">
+    <thead><tr><th>Concurrent children</th><th>RSS per child</th><th>PSS per child</th><th>Private per child (trivial)</th><th>System memory used (trivial)</th><th>Private per child (12 file reads)</th><th>System memory used (12 file reads)</th></tr></thead>
+    <tbody>
+      <tr><td class="nm">1</td><td>232 MB</td><td>230 MB</td><td>80 MB</td><td>67 MB</td><td>97 MB</td><td>88 MB</td></tr>
+      <tr><td class="nm">2</td><td>231 MB</td><td>154 MB</td><td>79 MB</td><td>154 MB</td><td>96 MB</td><td>208 MB</td></tr>
+      <tr><td class="nm">5</td><td>232 MB</td><td>109 MB</td><td>79 MB</td><td>374 MB</td><td>96 MB</td><td>570 MB</td></tr>
+      <tr><td class="nm">10</td><td>228 MB</td><td>91 MB</td><td>76 MB</td><td>750 MB</td><td>93 MB</td><td>1,078 MB</td></tr>
+      <tr><td class="nm">20</td><td>228 MB</td><td>82 MB</td><td>74 MB</td><td>1,470 MB</td><td>94 MB</td><td>1,864 MB</td></tr>
+      <tr><td class="nm">28</td><td>226 MB</td><td>78 MB</td><td>72 MB</td><td>2,034 MB</td><td>94 MB</td><td>2,700 MB</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">Memory with all N requests in flight. System memory used is the increase over the machine&rsquo;s memory before the children started.</p>
+  <ul class="plain">
+    <li><strong>Resident size is flat and large.</strong> It stayed between 226 and 251 MB per child at every level. This is the figure a process monitor shows, and it is what a naive estimate would multiply by N.</li>
+    <li><strong>Most of that is shared.</strong> About 154 MB of each child is the executable image (the bundled binary is 240 MB on disk), mapped from the same file by every child, so it is paid for once. PSS therefore falls from 230 MB per child with one child to 78 MB with 28.</li>
+    <li><strong>The marginal cost is the private part.</strong> The slope of system memory against N is 72.7 MB per child in the trivial workload and 94.3 MB in the tool workload. An idle, initialised child with no request yet added 61.2 MB, so a trivial request in flight added about 11.6 MB more and twelve large file reads added about 33.1 MB more.</li>
+    <li><strong>Sizing follows from that.</strong> By linear extrapolation, 100 concurrent children would need roughly 7.1 to 9.2 GB beyond the shared image, and more as conversations lengthen. These figures are floors for this version and workload, not constants.</li>
+  </ul>
+
+  <h3>Result: sessions inside one process</h3>
+  <div class="tw"><table class="bars">
+    <thead><tr><th>Concurrent sessions</th><th>Process RSS (trivial)</th><th>Growth over empty process (trivial)</th><th>Process RSS (12 file reads)</th><th>Growth over empty process (12 file reads)</th></tr></thead>
+    <tbody>
+      <tr><td class="nm">1</td><td>137 MB</td><td>2.9 MB</td><td>141 MB</td><td>8.8 MB</td></tr>
+      <tr><td class="nm">10</td><td>135 MB</td><td>3.9 MB</td><td>190 MB</td><td>55.1 MB</td></tr>
+      <tr><td class="nm">50</td><td>142 MB</td><td>8.3 MB</td><td>388 MB</td><td>248.3 MB</td></tr>
+      <tr><td class="nm">100</td><td>146 MB</td><td>10.1 MB</td><td>636 MB</td><td>509.7 MB</td></tr>
+      <tr><td class="nm">200</td><td>158 MB</td><td>21.4 MB</td><td>1,116 MB</td><td>981.7 MB</td></tr>
+      <tr><td class="nm">400</td><td>179 MB</td><td>44.9 MB</td><td>1,976 MB</td><td>1,844.1 MB</td></tr>
+      <tr><td class="nm">600</td><td>200 MB</td><td>68.8 MB</td><td>2,510 MB</td><td>2,382.5 MB</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">Memory of the single host process with all N sessions in flight. The empty process (Node plus Pi loaded, no sessions) was about 133 MB in every run.</p>
+  <ul class="plain">
+    <li><strong>A fixed base, then slow growth.</strong> Loading the runtime and Pi cost about 133 MB once. In the trivial workload each additional in-flight session added about 0.1 MB; at 600 sessions the whole process was 200 MB.</li>
+    <li><strong>Tool output is the dominant cost.</strong> With twelve file reads per session, growth was about 4.1 MB per session, because each session holds roughly 1.4 MB of tool results as strings in the same heap. At 600 sessions that came to 2,510 MB. A session is a message array, a stream parser and an open HTTP request The code and the runtime are shared by all sessions.</li>
+    <li><strong>Memory is released only partly and lazily.</strong> In the trivial run, resident size fell by 15 MB once the replies finished and the sessions were disposed; a JavaScript runtime does not always hand freed heap back to the operating system at once.</li>
+    <li><strong>No errors.</strong> Every one of the 2,722 sessions completed without error.</li>
+  </ul>
+
+  <div class="note"><b>What the comparison does and does not establish.</b> At 28 concurrent requests the subprocess approach had used 2.0 GB with trivial replies and 2.6 GB with the file reads, against 142 MB and 388 MB for 50 sessions in one process in the same two workloads. The mechanism is the difference between duplicating a runtime per request and sharing one. It says nothing about model latency, number of turns, token cost or answer quality, because the model was a mock; those need a real model and a fixed task. The in-process sessions also share fate: a crash, a memory leak or a blocked event loop in the host affects all of them, which separate processes would contain. The Pi runs used a minimal configuration, so a default product install that discovers skills, extensions and MCP servers would add to the base. One run was made per level on one machine.</div>
+
+  <h3>Ways to call a harness, and what each costs in processes</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Harness</th><th>Programmatic route</th><th>Process model</th><th>Many callers</th></tr></thead>
+    <tbody>
+      <tr><td class="nm">Pi</td><td>CLI, or library: <code>createAgentSession()</code> from <code>@earendil-works/pi-coding-agent</code></td><td><span class="pill p-open">In-process</span> as a library; one process per call as a CLI</td><td>The library route was the one measured above. One <code>AgentSessionRuntime</code> can create, switch and fork sessions inside a single process, and <code>SessionManager.inMemory()</code> avoids session files. The CLI was not measured separately; as with any Node CLI, one runtime is started per call. In the SDK, the MCP, codemode and tool-search extensions are not loaded unless added explicitly.</td></tr>
+      <tr><td class="nm">Claude Code</td><td><code>claude -p</code> in scripts; Claude Agent SDK (Python, TypeScript)</td><td><span class="pill p-closed">Subprocess</span> either way: the SDK spawns the CLI and communicates over stdin/stdout</td><td>The SDK does not remove the per-process cost. Its one-shot <code>query</code> mode starts and stops a process per call; client mode keeps one process across several queries. Pooling and reusing clients is preferable to spawning per task.</td></tr>
+      <tr><td class="nm">Codex CLI</td><td>App Server (JSON-RPC), <code>codex exec</code>, MCP server, TypeScript SDK</td><td><span class="pill p-open">Long-lived server</span> via App Server; one process per call via <code>exec</code></td><td>OpenAI describes the App Server as a long-lived process hosting many Codex threads, the shape suited to concurrency. It is preferable to repeated <code>exec</code> calls. Its footprint was not measured here.</td></tr>
+      <tr><td class="nm">OpenCode</td><td>Client/server: clients attach to a running server</td><td><span class="pill p-open">Long-lived server</span></td><td>The server keeps sessions alive across disconnects, so many clients share one runtime. Its footprint was not measured here.</td></tr>
+      <tr><td class="nm">Managed Agents</td><td>REST API</td><td><span class="pill p-misc">Remote</span></td><td>No local process. The provider carries the footprint and bills session time instead.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><b>Rule of thumb.</b> The measurements point to a simple sizing rule. A subprocess harness costs its shared image once plus a private share per concurrent request, which here was roughly 70 to 95 MB and rises with the amount of tool output held. An in-process session costs a base process once plus about 0.1 MB to 4 MB per concurrent session in these workloads. Where a harness will be invoked more than a few times at once, a shared runtime is therefore advisable: a library call in the host process, a long-lived server, or a hosted service. Spawning a CLI per task is best reserved for low concurrency, with an idle timeout so that abandoned processes do not accumulate.</div>
+</section>
+
+<section id="caching">
+  <h2>Prompt caching and cache breakpoints</h2>
+  <p>An agent resends nearly the same prompt on every step: tool definitions, system prompt, project instructions, then a conversation that grows with each tool result. <strong>Prompt caching</strong> lets the provider reuse its work on the unchanged beginning of that prompt, so that only a fraction of the normal input price is paid for it and the wait for the first token is shorter. A <strong>cache breakpoint</strong> is a marker on a block of the prompt that says &ldquo;cache everything up to and including here&rdquo;. For a long-running coding agent, the difference between good and bad breakpoint placement is often the largest line in the bill.</p>
+
+  <h3>How breakpoints work on Anthropic's API</h3>
+  <div class="prefix" role="img" aria-label="Prompt prefix order: tools, system prompt, project instructions, conversation history, new turn, with breakpoints after the stable blocks">
+    <div class="seg s1">Tool definitions</div><span class="bp" title="breakpoint">&#9660;</span>
+    <div class="seg s2">System prompt</div><span class="bp">&#9660;</span>
+    <div class="seg s3">Project instructions</div><span class="bp">&#9660;</span>
+    <div class="seg s4">Conversation so far</div><span class="bp">&#9660;</span>
+    <div class="seg s5">New turn</div>
+  </div>
+  <p class="cap">Cached prefix, left to right. Each marker is a breakpoint; the new turn is always processed fresh.</p>
+
+  <ul class="plain">
+    <li><strong>Prefix order is fixed:</strong> tools, then system prompt, then messages. A change at any point invalidates everything after it. Edit one tool definition and the whole cache goes cold.</li>
+    <li><strong>Up to four explicit breakpoints</strong> per request. Automatic placement can also be requested, where the breakpoint sits on the last cacheable block and moves forward as the conversation grows; that uses one of the four slots.</li>
+    <li><strong>Writes only happen at breakpoints,</strong> and a lookup checks about 20 blocks back from each one. In a long agent turn with many tool calls, an old entry can fall outside that window, so long sessions need a second breakpoint further back.</li>
+    <li><strong>Lifetime:</strong> five minutes by default, refreshed each time the entry is read; one hour at a higher write price. Pricing as published: writes cost 1.25&times; the base input price (2&times; for the one-hour option) and reads cost a small fraction, 0.1&times; on most models and lower on some.</li>
+    <li><strong>Minimum size:</strong> a prefix below the model's minimum (512 tokens on the current Sonnet and Opus models, more on older and smaller ones) is silently not cached.</li>
+  </ul>
+
+  <div class="note"><b>The classic mistake.</b> Putting the only breakpoint on a block that contains something that changes every request, such as a timestamp or the user's newest message. The prefix hash differs each time, so the write premium is paid and no read ever occurs. Breakpoints belong on the last <em>stable</em> block.</div>
+
+  <h3>Why it matters when choosing a harness</h3>
+  <p>The harness decides what goes in the prefix, in what order, and where the markers go. Two harnesses on the same model can differ several-fold in cached share and in total tokens processed. Things to look for:</p>
+  <ul class="plain">
+    <li>Static content first, dynamic content last; dates and file status injected into messages rather than the system prompt.</li>
+    <li>A tool list that stays fixed for the session. Adding one MCP tool mid-conversation invalidates the cached history, which is why Claude Code defers unused tools as lightweight stubs.</li>
+    <li>No model or reasoning-level switching mid-session; caches are per model.</li>
+    <li>Breakpoints anchored on the stable head (tools and system prompt) as well as the growing tail.</li>
+    <li>Cache read and write token counts exposed in usage output, so that it can be verified whether caching works.</li>
+  </ul>
+
+  <h3>What each harness does, as far as is documented</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Harness</th><th>Approach to breakpoints</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="nm">Claude Code</td><td>Explicit <code>cache_control</code> layered static to dynamic: system prompt, tool definitions, project instructions (CLAUDE.md), then conversation</td><td>Tools are locked at session start. Changing tools, switching model or editing CLAUDE.md breaks the cache. Dynamic details travel as system reminders inside messages. Compaction reuses the cached prefix.</td></tr>
+      <tr><td class="nm">Claude Agent SDK</td><td>Inherits Claude Code's loop</td><td>No separate documentation was found; the same layout and pitfalls are assumed.</td></tr>
+      <tr><td class="nm">OpenCode</td><td>Anthropic-style providers: markers on the first two system messages and the last two non-system messages. OpenAI-style providers: a cache key set to the session ID</td><td>Opt-in <code>setCacheKey</code> option for providers that do not cache automatically. Its larger stable prefix (about 6,300 tokens in one benchmark) warms the cache early.</td></tr>
+      <tr><td class="nm">Pi</td><td>Historically anchored on the last one or two messages only, a rolling window; the stable head did not get its own marker</td><td>The oh-my-pi fork reported hit rates well below competitors for this reason and fixed it in version 18.2.1 by anchoring on the system prompt and last tool definition. The version in use should be checked. Pi's very small prefix (about 1,100&ndash;1,400 tokens) also leaves little to cache. Pi 1.0 (October 2, 2026) added cache warming for Anthropic models, which postdates these findings.</td></tr>
+      <tr><td class="nm">Codex CLI</td><td>No manual markers on OpenAI models: prefix matching is automatic, with a session-level cache key for routing</td><td>Newer OpenAI models add an optional explicit mode and a configurable lifetime. Current OpenAI documentation should be checked for the model in use.</td></tr>
+      <tr><td class="nm">Gemini CLI</td><td>Automatic caching on the provider side</td><td>No breakpoint control is exposed.</td></tr>
+      <tr><td class="nm">Cursor, Amp, Factory, Aider, Goose</td><td>Not publicly documented</td><td>Cache read and write tokens can be measured through a proxy.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><b>Cache-hit percentage is a poor efficiency metric on its own.</b> In one head-to-head benchmark OpenCode reached an 84.8% cache hit rate against Pi's 48.9% on the same task, yet Pi sent far fewer input tokens overall (about 27,000 versus 70,000 across a two-turn task), so its total cost was still lower. A large, stable boilerplate prompt inflates the hit rate without making anything cheaper. <em>Uncached</em> input tokens and dollars should be compared rather than percentages. That benchmark was a single community run on OpenAI-style automatic caching, so it is illustrative.</div>
+
+  <h3>Caching and the harness of harnesses</h3>
+  <p>The wrapper layer can help or hurt. A loop that restarts the agent with fresh context every iteration, as ralph-orchestrator does by design, pays a cold prefix on each pass unless the next iteration begins inside the cache lifetime and rebuilds the same prefix byte for byte. A fleet of N parallel agents on the same repository writes N separate cache entries unless they share an identical prefix. Hosted runtimes manage this but cannot be tuned. This is an inference from how the mechanism works, not a measured result, so cache read counts should be checked on real runs before it is relied upon.</p>
+  <p>Practical habits include keeping the prefix identical across runs (same tools, same order, same instructions), using the one-hour lifetime for work that pauses between steps, placing volatile content at the end, and logging cache read and write counts on every call.</p>
+</section>
+
+<section id="meta">
+  <h2>The harness of harnesses</h2>
+  <p>Once a harness can be driven programmatically, the next step is obvious: write something that starts it, watches it and restarts it. These tools do not replace Claude Code or Codex; they treat them as workers. They are grouped here by what they add.</p>
+
+  <div class="tier"><div class="num">1</div><div>
+    <h3>Loop wrappers: keep one agent going until it is done</h3>
+    <p><strong>ralph-orchestrator</strong> is the clearest example. It implements the &ldquo;Ralph Wiggum&rdquo; technique: run the same agent again and again against a task until it reports completion or hits an iteration limit. It is a Rust tool (MIT) that wraps whichever CLI is already in use: Claude Code, Codex, Gemini CLI, Amp, Copilot CLI, OpenCode, Pi, Kiro and others. It adds <em>hats</em> (specialist personas that hand off through events), <em>backpressure gates</em> (tests, lint and type checks that reject unfinished work), persistent memories and tasks, and a Telegram channel for asking a human.</p>
+    <p>The design idea worth noting is backpressure: instead of trusting the agent's claim that it is finished, the wrapper makes the environment say no.</p>
+    <div class="ex"><b>Also here:</b> hand-rolled <code>while true</code> loops around <code>claude -p</code> or <code>codex exec</code>.</div>
+  </div></div>
+
+  <div class="tier"><div class="num">2</div><div>
+    <h3>Parallel fleets: many agents, isolated worktrees</h3>
+    <p>A human assigns several tasks; the tool gives each agent its own git worktree so they do not collide, then shows status and diffs for review. Three to ten agents is the range commonly reported as workable on one machine. The bottleneck moves from generating code to verifying it.</p>
+    <div class="ex"><b>Examples:</b> Claude Squad (MIT, Claude Code, Codex, Aider, Gemini), Conductor (proprietary, Claude and Codex), dmux (MIT, 11 backends), Vibe Kanban, amux, Kilo Code's Agent Manager. Cursor's Agents Window and <code>/best-of-n</code> are the same idea built into a harness.</div>
+  </div></div>
+
+  <div class="tier"><div class="num">3</div><div>
+    <h3>Hierarchies: roles, supervisors and merge queues</h3>
+    <p><strong>Gas Town</strong> (MIT) models an engineering org: a Mayor coordinates, Polecats do the work, a Witness and Deacon watch for stuck agents, and a Refinery runs a merge queue. State lives in git-backed hooks and a structured issue tracker called Beads so work survives crashes. Heavier than a fleet manager, aimed at running many agents continuously.</p>
+    <div class="ex"><b>Also here:</b> Claude Code Agent Teams (experimental; teammates share a task list and message each other) and Factory's multi-Droid setup.</div>
+  </div></div>
+
+  <div class="tier"><div class="num">4</div><div>
+    <h3>Hosted runtimes: hand over the sandbox too</h3>
+    <p>The provider runs the harness, the sandbox and the session log. Work is assigned, and a pull request or result is returned later. This is where vendors are putting the most effort in 2026.</p>
+    <div class="ex"><b>Examples:</b> Claude Managed Agents, Claude Code on the web, Codex cloud, GitHub Copilot coding agent, Google Jules, Devin, Cursor cloud agents.</div>
+  </div></div>
+
+  <div class="note"><b>Why the layering matters.</b> Each tier assumes the one below can be started non-interactively and observed. A harness with a headless mode, a stable protocol and readable session logs is easy to wrap; one that only works in a GUI is not. The process model matters too: a wrapper that spawns a CLI per task multiplies the footprint described above. This is a practical reason to check embeddability (axis 6) before a harness is standardised on.</div>
+</section>
+
+<section id="anthropic">
+  <h2>Anthropic's agent products</h2>
+  <p>Anthropic now sells several things that touch this stack at different levels, so it is worth separating them. &ldquo;Anthropic's new Agents&rdquo; is read here as the Managed Agents line, with the Agent SDK and Claude Code features beside it.</p>
+
+  <div class="grid">
+    <div class="card"><span class="tag">Harness</span><h4>Claude Code</h4><p>The reference harness. Recent additions include agent teammates (<code>agent.spawn</code>), a background &ldquo;side agent&rdquo; that monitors sessions, and <em>mods</em>: TypeScript functions that can rewrite prompts, add UI or replace built-in features (October 1, 2026).</p></div>
+    <div class="card"><span class="tag">Harness as library</span><h4>Claude Agent SDK</h4><p>Python and TypeScript. Runs the Claude Code loop by spawning the bundled CLI as a subprocess of the host application, with built-in file and shell tools, skills, sub-agents, MCP, session resume and permission controls. The loop, the sandbox and the session store are operated by the host&rsquo;s own infrastructure.</p></div>
+    <div class="card"><span class="tag">Hosted harness of harnesses</span><h4>Claude Managed Agents</h4><p>A hosted REST API (public beta since April 8, 2026). An <em>agent</em> (model, prompt, tools, MCP, skills) and an <em>environment</em> (a configured cloud container) are defined, and <em>sessions</em> that exchange <em>events</em> are started. Anthropic runs the loop, sandbox and durable log. Reported pricing: standard token rates plus $0.08 per active session-hour.</p></div>
+  </div>
+
+  <p>Managed Agents also carries the features that look most like orchestration: <strong>outcomes</strong> (a separate grader agent checks work against a rubric and the agent iterates), <strong>multi-agent coordination</strong> (a lead delegates to specialists on a shared filesystem, auditable in the Console) and <strong>memory</strong> with a scheduled &ldquo;dreaming&rdquo; pass that curates it. Per the launch coverage, outcomes, multi-agent and memory were research-preview features needing separate access at the time of checking. Anthropic's stated guidance is to prototype locally with the Agent SDK and move to Managed Agents for production.</p>
+
+  <p>Compare this with ralph-orchestrator. Ralph wraps <em>any</em> CLI that is run locally and uses tests as the stop condition. Managed Agents wraps <em>Anthropic's</em> harness, hosts it, and uses a grader agent as the stop condition. Same shape, opposite trade: portability against convenience and lock-in.</p>
+</section>
+
+<section id="choosing">
+  <h2>Choosing</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Need</th><th>Start with</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>The most capable out-of-the-box coding agent</td><td>Claude Code or Codex CLI</td><td>Deepest tooling from the model vendors themselves; both embeddable</td></tr>
+      <tr><td>Switching models freely or running local ones</td><td>OpenCode, Pi, Aider or Goose</td><td>Open source, many providers, no vendor lock</td></tr>
+      <tr><td>A small, inspectable harness to modify</td><td>Pi</td><td>Four tools, public prompt, extension packages</td></tr>
+      <tr><td>An IDE-centred workflow with parallel agents</td><td>Cursor 3</td><td>Agents Window, worktrees, cloud handoff</td></tr>
+      <tr><td>Strong sandboxing by default</td><td>Codex CLI</td><td>OS-level isolation on macOS and Linux</td></tr>
+      <tr><td>A custom agent inside a product</td><td>Claude Agent SDK, Deep Agents or LangGraph</td><td>Harness-as-library or runtime, depending on how much control you need</td></tr>
+      <tr><td>Many concurrent callers on one machine</td><td>Pi as a library, Codex App Server or OpenCode server</td><td>One shared runtime instead of a process per call</td></tr>
+      <tr><td>Low cost on long sessions</td><td>A harness with a stable prefix and breakpoints on the stable head</td><td>Cached reads are a fraction of the base input price; see the caching section</td></tr>
+      <tr><td>An agent to grind on a task unattended</td><td>ralph-orchestrator around the chosen harness</td><td>Test-gated loop, harness-agnostic</td></tr>
+      <tr><td>Several agents in parallel on one repo</td><td>Claude Squad, Conductor, dmux or Agent Teams</td><td>Worktree isolation and status view</td></tr>
+      <tr><td>No infrastructure to run</td><td>Managed Agents, Codex cloud or Cursor cloud agents</td><td>Provider hosts sandbox and state</td></tr>
+    </tbody>
+  </table></div>
+  <p>One pattern holds up across sources: use the thinnest layer that does the job. Most teams that reach for a graph runtime or a fleet manager first would have been served by a harness in a loop.</p>
+</section>
+
+<section id="sources">
+  <h2>Sources and caveats</h2>
+  <div class="note"><b>How this was compiled.</b> From public documentation, vendor posts and third-party comparisons read on October 6, 2026. Most of these tools were not run first-hand. The performance and caching comparisons cited are single community or reviewer runs and are illustrative, not benchmarks. The memory figures in the process-footprint section were measured for this article against a mock model on one machine, one run per level, and will vary by version, platform and workload. Licences, prices and model support change often; verify before deciding. This guide will be versioned as the landscape moves.</div>
+  <ol class="src">
+    <li><a href="https://techstackups.com/comparisons/coding-agent-harness-comparison-2026/">Coding Agent Harness Comparison 2026</a> (TechStackups): harness definition, vendors, licences, pricing.</li>
+    <li><a href="https://www.langchain.com/blog/agent-frameworks-runtimes-and-harnesses-oh-my">Agent frameworks, runtimes and harnesses, oh my</a> (LangChain): the framework / runtime / harness taxonomy.</li>
+    <li><a href="https://www.tensorlake.ai/blog/best-ai-coding-agents-2026">Best AI Coding Agents in 2026: I tested Claude Code, Codex, OpenCode and Pi</a> (Tensorlake): hands-on speed, token and cost comparison.</li>
+    <li><a href="https://urandom.io/blog/2026-03-07-pi-dev-deep-dive">pi.dev deep dive</a> (urandom.io): Pi's design and package structure.</li>
+    <li><a href="https://openai.com/index/unlocking-the-codex-harness">Unlocking the Codex harness</a> (OpenAI): App Server and embedding options.</li>
+    <li><a href="https://www.datacamp.com/blog/cursor-3">Cursor 3</a> (DataCamp): Agents Window, cloud agents, Composer 2, pricing.</li>
+    <li><a href="https://cdn.jsdelivr.net/gh/mikeyobrien/ralph-orchestrator@main/README.md">ralph-orchestrator README</a> (GitHub, mikeyobrien): hats, backpressure, supported backends.</li>
+    <li><a href="https://github.com/steveyegge/gastown">Gas Town</a> (GitHub, steveyegge): roles, hooks, Beads.</li>
+    <li><a href="https://addyosmani.com/blog/code-agent-orchestra/">The Code Agent Orchestra</a> (Addy Osmani): tiers of multi-agent orchestration.</li>
+    <li><a href="https://amux.io/blog/best-multi-agent-orchestrators-2026/">Best multi-agent coding orchestrators in 2026</a> (amux): orchestrator licences and backends.</li>
+    <li><a href="https://hatchworks.com/blog/claude/claude-agent-sdk-and-managed-agents/">Claude Agent SDK and Managed Agents</a> (HatchWorks) and <a href="https://www.lowcode.agency/blog/claude-managed-agents">Claude Managed Agents explained</a> (LowCode Agency): components, pricing, status.</li>
+    <li><a href="https://www.mindstudio.ai/blog/code-with-claude-2026-new-agent-features">Code with Claude 2026: new agent features</a> (MindStudio): outcomes, multi-agent orchestration, dreaming.</li>
+    <li><a href="https://releasebot.io/updates/anthropic">Anthropic release notes, October 2026</a> (Releasebot): Claude Code mods and agent updates.</li>
+    <li><a href="https://aiagentrank.io/blog/langgraph-vs-crewai-vs-autogen-vs-openai-agents-sdk-2026">LangGraph vs CrewAI vs AutoGen vs OpenAI Agents SDK</a> (AIAgentRank): framework abstractions.</li>
+    <li><a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching">Prompt caching</a> (Anthropic docs): breakpoints, prefix order, lookback, lifetimes, pricing.</li>
+    <li><a href="https://www.claudecodecamp.com/p/how-prompt-caching-actually-works-in-claude-code">How prompt caching actually works in Claude Code</a> (Claude Code Camp): layering and cache-breaking events.</li>
+    <li><a href="https://github.com/earendil-works/pi/discussions/6646">Benchmark: Pi vs OpenCode vs Codex token overhead, prompt caching, MCP and cost</a> (Pi discussion #6646) and <a href="https://github.com/can1357/oh-my-pi/issues/10560">oh-my-pi issue #10560</a>: Pi cache behaviour and breakpoint anchoring.</li>
+    <li><a href="https://forums.basehub.com/anomalyco/opencode/32">How does prompt caching work across models?</a> (OpenCode forum): OpenCode breakpoint placement and <code>setCacheKey</code>.</li>
+    <li><a href="https://developers.openai.com/api/docs/guides/prompt-caching">Prompt caching</a> (OpenAI docs) and <a href="https://docs.openclaw.ai/reference/prompt-caching">OpenClaw prompt caching reference</a>: automatic caching on OpenAI and Gemini.</li>
+    <li><a href="https://pi.dev/docs/latest/sdk">Pi SDK docs</a>: <code>createAgentSession</code> and in-process sessions. <a href="https://buildwithaws.substack.com/p/inside-the-claude-agent-sdk-from">Inside the Claude Agent SDK</a>: the SDK spawns the CLI as a subprocess. <a href="https://github.com/anthropics/claude-code/issues/11122">Claude Code issue #11122</a>: per-instance memory and idle processes.</li>
+    <li><a href="https://www.firecrawl.dev/blog/best-ai-coding-agents">Best AI Coding Agents in 2026</a> (Firecrawl) and <a href="https://thoughts.jock.pl/p/ai-coding-harness-agents-2026">Claude Code vs Codex CLI vs Aider vs OpenCode vs Pi vs Cursor</a> (thoughts.jock.pl): cost, usage-limit and consistency caveats.</li>
+    <li><a href="https://dev.to/jangwook_kim_e31e7291ad98/goose-by-block-a-free-open-source-ai-agent-review-2026-fno">Goose by Block review</a> (DEV Community): Goose setup, reliability and security caveats.</li>
+    <li><a href="https://www.theregister.com/ai-and-ml/2026/10/02/pi-coding-agent-pulls-a-180-and-adds-mcp-support/5300678">Pi coding agent pulls a 180 and adds MCP support</a> (The Register) and <a href="https://www.techzine.eu/news/devops/144715/pi-1-0-will-include-mcp-and-a-dedicated-layer-for-long-running-ai-agents/">Pi 1.0</a> (Techzine): MCP, Pi Durable, cache warming.</li>
+    <li><a href="https://github.com/google-gemini/gemini-cli/discussions/27274">Transitioning Gemini CLI to Antigravity CLI</a> (GitHub discussion): June 18, 2026 change in access.</li>
+    <li><a href="https://venturebeat.com/ai/anthropic-cracks-down-on-unauthorized-claude-usage-by-third-party-harnesses/">Anthropic cracks down on unauthorized Claude usage by third-party harnesses</a> (VentureBeat): subscription access and third-party harnesses.</li>
+    <li>Measurements run for this article: a local mock of the Anthropic Messages API, Claude Code CLI 2.1.292 launched as one subprocess per request, and the Pi coding-agent SDK 1.0.4 hosting sessions in one Node process; Linux sandbox with 2 vCPUs and 8 GB of RAM. Method and limits are described in the process-footprint section.</li>
+  </ol>
+</section>
+
+    </article>
+  </div>
+</div>
+
+<footer><div class="wrap">&copy; 2026 WhoIsJaneTurner, LLC &middot; <a href="index.html">Research index</a></div></footer>
+
+<script>
+(function(){
+  var chips=document.getElementById("chips"),rows=[].slice.call(document.querySelectorAll("#hTable tbody tr")),count=document.getElementById("count");
+  function apply(f){
+    var n=0;
+    rows.forEach(function(r){
+      var show=f==="all"||r.dataset.os===f||r.dataset.m===f;
+      r.style.display=show?"":"none"; if(show)n++;
+    });
+    count.textContent=n+" of "+rows.length+" harnesses";
+  }
+  chips.addEventListener("click",function(e){
+    var b=e.target.closest(".chip"); if(!b)return;
+    [].forEach.call(chips.children,function(c){c.setAttribute("aria-pressed",c===b?"true":"false")});
+    apply(b.dataset.f);
+  });
+  apply("all");
+})();
+</script>
+</body>
+</html>

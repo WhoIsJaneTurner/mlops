@@ -173,6 +173,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
     </div>
     <ul class="list" id="list">
       <!-- Fallback when JavaScript is off -->
+      <li class="item"><time>Oct 6, 2026</time><div><h3><a href="agent_harness_comparison.html">Agent harness comparison</a></h3></div><div class="side">v1.4</div></li>
       <li class="item"><time>Oct 4, 2026</time><div><h3><a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a></h3></div><div class="side">v1.2</div></li>
     </ul>
   </section>
@@ -206,6 +207,18 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
    featured: true puts an article in the lead slot (else the newest).
    --------------------------------------------------------------- */
 const ARTICLES = [
+  {
+    href: "agent_harness_comparison.html",
+    title: "Agent harness comparison",
+    dek: "What an agent harness is, which ones people use (Claude Code, Codex, Cursor, Pi, OpenCode and more), how they differ from the libraries beneath them like LangChain and CrewAI, measured memory cost per concurrent request for a CLI subprocess versus an embedded library, how prompt-cache breakpoints work, the documented limitations of each harness, and the new layer of tools that wrap harnesses, from ralph-orchestrator to Claude Managed Agents.",
+    date: "2026-10-06",
+    version: "1.4",
+    type: "Field guide",
+    topics: ["Agents", "Developer tools"],
+    minutes: 25,
+    featured: false,
+    sections: ["What a harness is","Substrate libraries","Harness comparison","Limitations","Where they differ","Process footprint","Prompt caching","Harness of harnesses","Anthropic's agents","Choosing","Sources and caveats"]
+  },
   {
     href: "mlops_architecture.html",
     title: "MLOps reference architecture with an LLM interface",
