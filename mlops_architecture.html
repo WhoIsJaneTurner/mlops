@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MLOps reference architecture with an LLM interface</title>
 <style>
-:root{color-scheme:light;--bg:#fbfaf7;--card:#fff;--ink:#1f1e1c;--muted:#5f5e5a;--faint:#8a8984;--line:#e4e2da;
---purple:#534AB7;--purple-bg:#EEEDFE;--teal:#0F6E56;--teal-bg:#E1F5EE;--coral:#993C1D;--coral-bg:#FAECE7;--gray:#5F5E5A;--gray-bg:#F1EFE8}
+:root{color-scheme:light dark;--bg:#fbfaf7;--card:#fff;--ink:#1f1e1c;--muted:#5f5e5a;--faint:#8a8984;--line:#e4e2da;
+--purple:#534AB7;--purple-bg:#EEEDFE;--teal:#0F6E56;--teal-bg:#E1F5EE;--coral:#993C1D;--coral-bg:#FAECE7;--gray:#5F5E5A;--gray-bg:#F1EFE8;--amber:#854F0B;--amber-bg:#FAEEDA;--flash:#fff7d6;--line-p:#D6D3F5;--on-accent:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#15141a;--card:#1d1c24;--ink:#ece9e2;--muted:#b4b1a9;--faint:#85827b;--line:#2f2d38;--purple:#AFA9EC;--purple-bg:#2a2650;--teal:#7fd3b8;--teal-bg:#173a30;--coral:#f0a585;--coral-bg:#3d241a;--gray:#b4b1a9;--gray-bg:#26252e;--amber:#e8c07a;--amber-bg:#3a2d14;--flash:#3a3418;--line-p:#3d3870;--on-accent:#15141a}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
 body{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto auto 1fr}
@@ -33,7 +34,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}
 th{text-align:left;font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.03em;padding:8px 10px;border-bottom:1px solid var(--line)}
 td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 tr:last-child td{border-bottom:none}
-tr.flash td{background:#fff7d6;transition:background .3s}
+tr.flash td{background:var(--flash);transition:background .3s}
 .pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;white-space:nowrap}
 .g-llm{background:var(--purple-bg);color:var(--purple)}.g-lib{background:var(--teal-bg);color:var(--teal)}
 .g-plat{background:var(--coral-bg);color:var(--coral)}.g-prod{background:var(--gray-bg);color:var(--gray)}
@@ -72,7 +73,8 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--
 footer{color:var(--faint);font-size:12px;margin-top:40px}
 
 /* violet theme: page on blue, content stays on white cards */
-:root{--accent:#3C3489;--accent-bg:#EEEDFE;--on-bg:#1f1e1c;--on-bg-muted:#5f5e5a;--on-bg-faint:#8a8984}
+:root{--accent:#3C3489;--accent-bg:#EEEDFE;--on-bg:var(--ink);--on-bg-muted:var(--muted);--on-bg-faint:var(--faint)}
+@media (prefers-color-scheme:dark){:root{--accent:#AFA9EC;--accent-bg:#2a2650}}
 header h1{color:var(--on-bg)}header .sub{color:var(--on-bg-muted)}
 .tabs{background:transparent;border-right-color:var(--line)}
 .tabs button{color:var(--on-bg-muted)}.tabs button:hover{color:var(--on-bg);background:var(--gray-bg)}
@@ -82,10 +84,10 @@ header h1{color:var(--on-bg)}header .sub{color:var(--on-bg-muted)}
 footer{color:var(--on-bg-muted)}
 .card,.tcard{border-color:var(--line)}
 .chain b{background:var(--gray-bg);border-color:var(--line)}.chain span{color:var(--on-bg-muted)}
-.panel a{color:#3C3489}
+.panel a{color:var(--accent)}
 .simctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.simctl button{font:inherit;font-size:14px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer}
-.simctl button:hover{background:#534AB7}
+.simctl button{font:inherit;font-size:14px;background:var(--accent);color:var(--on-accent);border:none;border-radius:8px;padding:6px 14px;cursor:pointer}
+.simctl button:hover{background:var(--purple)}
 #simCount{color:var(--on-bg-muted);font-size:14px;margin-left:6px}
 #simBar{flex:1;min-width:160px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
 #simBar div{height:100%;width:0;background:var(--accent);transition:width .3s}
@@ -104,19 +106,19 @@ footer{color:var(--on-bg-muted)}
 #simStep h4{margin:2px 0 8px;font-size:17px}
 .bub{border-radius:12px;padding:8px 12px;margin:8px 0;font-size:14px;max-width:92%}
 .bub .who{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
-.bub.analyst{background:#F1EFE8;margin-left:auto}.bub.analyst .who{color:#5F5E5A}
-.bub.agent{background:#EEEDFE}.bub.agent .who{color:#534AB7}
-.bub table{font-size:13px;margin-top:6px;background:#fff;border-radius:6px}
+.bub.analyst{background:var(--gray-bg);margin-left:auto}.bub.analyst .who{color:var(--gray)}
+.bub.agent{background:var(--purple-bg)}.bub.agent .who{color:var(--purple)}
+.bub table{font-size:13px;margin-top:6px;background:var(--card);border-radius:6px}
 .bub td,.bub th{padding:4px 8px}
 .narr{font-size:14px;color:var(--ink);margin:6px 0}
-.gate{font-size:13px;border-left:3px solid #534AB7;background:#EEEDFE;color:#3C3489;padding:6px 10px;margin-top:10px}
+.gate{font-size:13px;border-left:3px solid var(--purple);background:var(--purple-bg);color:var(--accent);padding:6px 10px;margin-top:10px}
 .st{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;font-weight:500}
-.st-production,.st-COMPLETED{background:#E1F5EE;color:#0F6E56}
-.st-candidate,.st-PENDING,.st-RUNNING{background:#FAEEDA;color:#854F0B}
-.st-previous{background:#F1EFE8;color:#5F5E5A}
-tr.new td{background:#fff7d6}
+.st-production,.st-COMPLETED{background:var(--teal-bg);color:var(--teal)}
+.st-candidate,.st-PENDING,.st-RUNNING{background:var(--amber-bg);color:var(--amber)}
+.st-previous{background:var(--gray-bg);color:var(--gray)}
+tr.new td{background:var(--flash)}
 .fb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.fb span{font-size:12px;background:#fff;border:1px solid #D6D3F5;color:#534AB7;border-radius:6px;padding:1px 8px}
+.fb span{font-size:12px;background:var(--card);border:1px solid var(--line-p);color:var(--purple);border-radius:6px;padding:1px 8px}
 .mast{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 32px;background:transparent;border-bottom:1px solid var(--line)}
 .brand{font:600 15px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;letter-spacing:.02em;text-decoration:none;color:var(--on-bg);display:flex;align-items:center;gap:10px}
 .brand .mark{width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--bg);display:grid;place-items:center;font:700 13px/1 Georgia,serif}
@@ -508,7 +510,7 @@ tr.new td{background:#fff7d6}
 </main>
 
 <script>
-const COLORS={llm:["#534AB7","#EEEDFE"],lib:["#0F6E56","#E1F5EE"],plat:["#993C1D","#FAECE7"],prod:["#5F5E5A","#F1EFE8"]};
+const COLORS={llm:["var(--purple)","var(--purple-bg)"],lib:["var(--teal)","var(--teal-bg)"],plat:["var(--coral)","var(--coral-bg)"],prod:["var(--gray)","var(--gray-bg)"]};
 const GROUPNAME={llm:"LLM interface",lib:"Shared library",plat:"Platform",prod:"Product lines"};
 const NODES=[
  {id:"playbooks",name:"Agent playbooks",sub:"Staged work + gates",g:"llm",col:0,
@@ -566,7 +568,7 @@ const W=1000,NW=166,NH=60,TOP=48,AREA=340,COLS=5,colX=c=>20+c*((W-40-NW)/(COLS-1
 const cols={};NODES.forEach(n=>(cols[n.col]=cols[n.col]||[]).push(n));
 Object.values(cols).forEach(list=>{const gap=(AREA-list.length*NH)/(list.length+1);
  list.forEach((n,i)=>{n.x=colX(n.col);n.y=TOP+gap+(i*(NH+gap));});});
-function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a){if(k==="fill"||k==="stroke")e.style[k]=a[k];else e.setAttribute(k,a[k]);}return e;}
 const outs={},ins={};NODES.forEach(n=>{outs[n.id]=[];ins[n.id]=[];});
 LINKS.forEach((l,i)=>{if(!l[3]){outs[l[0]].push(i);ins[l[1]].push(i);}});
 const port={};
