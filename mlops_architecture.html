@@ -132,6 +132,10 @@ tr.new td{background:var(--flash)}
 .brand small{font-weight:400;color:var(--on-bg-muted)}
 .mast a.back{font-size:14px;color:var(--on-bg-muted);text-decoration:none}.mast a.back:hover{color:var(--on-bg)}
 @media(max-width:600px){.mast{padding:0 16px}header{padding-left:16px;padding-right:16px}main{padding-left:16px;padding-right:16px}}
+
+.tag{display:inline-block;font-weight:600;font-size:11.5px;line-height:1;padding:4px 8px;border-radius:99px;white-space:nowrap}
+.tS{background:var(--teal-bg);color:var(--teal)}.tP{background:var(--purple-bg);color:var(--purple)}.tO{background:var(--amber-bg);color:var(--amber)}
+.basis td:first-child{width:112px}.basis a{word-break:break-word}
 </style>
 </head>
 <body>
@@ -155,6 +159,7 @@ tr.new td{background:var(--flash)}
   <button role="tab" data-tab="orch">Orchestration</button>
   <button role="tab" data-tab="built">Built as code</button>
   <button role="tab" data-tab="standards">Standards</button>
+  <button role="tab" data-tab="basis">Basis and sources</button>
   <button role="tab" data-tab="decisions">Decisions</button>
 </div></nav>
 <main>
@@ -162,7 +167,7 @@ tr.new td{background:var(--flash)}
 <!-- OVERVIEW -->
 <section class="panel" id="tab-overview">
   <h2>How the layers link</h2>
-  <p class="lead">Arrows show what calls or feeds what. Solid lines are calls; dashed lines return state or results. Hover a layer to trace its links; click it to jump to its definition below.</p>
+  <p class="lead">Arrows show what calls or feeds what. Solid lines are calls; dashed lines return state or results. Hover a layer to trace its links; click it to jump to its definition below. Each element is tagged by basis (sourced, practice or own design) on the Basis and sources tab.</p>
   <div id="flowwrap">
     <div class="card"><svg id="flow" role="img" aria-label="Flow diagram of the twelve architecture layers and their links"></svg>
       <div class="legend">
@@ -274,7 +279,7 @@ tr.new td{background:var(--flash)}
   <div class="tcard"><table>
     <thead><tr><th style="width:170px">Store</th><th>What it tracks</th><th style="width:220px">Main readers</th></tr></thead><tbody>
     <tr><td><b>Model store</b><div class="muted" style="font-size:12px">registry record + artifact</div></td><td>Identity, version, stage and stage history. Test metrics and holdout evaluation. Training data references. The full pipeline config. The audit, including the analyst's approval (who, when, why). Pointer to the artifact, which holds the complete pipeline result.</td><td>Promotion, orchestration, scoring</td></tr>
-    <tr><td><b>Metadata store</b><div class="muted" style="font-size:12px">key:value components</div></td><td>The model summary stored as key:value components, each under a stable dotted key path (e.g. <code>model_summary.roc_curve</code>), plus an index listing every key with its type and size. Components include feature importances, coefficients, thresholds, ROC and precision-recall curves, calibration, score stability, coverage, business metrics. The same key means the same thing in every version.</td><td>Read path, LLM interface, reporting, monitoring</td></tr>
+    <tr><td><b>Metadata store</b><div class="muted" style="font-size:12px">key:value components</div></td><td>The model summary stored as key:value components, each under a stable hierarchical key path (so the ROC curve, for example, always lives at the same path), plus an index listing every key with its type and size. Components include feature importances, coefficients, thresholds, ROC and precision-recall curves, calibration, score stability, coverage, business metrics. The same key means the same thing in every version.</td><td>Read path, LLM interface, reporting, monitoring</td></tr>
     <tr><td><b>Feature catalog</b></td><td>Feature metadata, not feature values: each feature's name, type, importance and tags, plus a feature group tying the set to its model.</td><td>Product lines, monitoring</td></tr>
     <tr><td><b>Job store</b></td><td>Each run, in platform terms: workflow, input source, input-check results, expected count, model version, output validation, hand-off, and the engine's run ID. Status (pending through completed or failed) is copied from the workflow engine's state-change events; the engine owns run state, and the job store records it.</td><td>Operator UI, LLM, alerts</td></tr>
     <tr><td><b>Tool registry</b></td><td>Tool definitions with version, parameter and return schemas, and execution strategy (function, module or API); plus access rules and trigger levels per environment.</td><td>LLM interface, agent framework</td></tr>
@@ -300,21 +305,21 @@ tr.new td{background:var(--flash)}
   <div class="steps">
     <div class="step"><div class="n">1</div><div class="k">Question</div><div class="muted">"Compare the top features across the last three versions."</div></div>
     <div class="step"><div class="n">2</div><div class="k">Skill loads</div><div class="muted">Maps the request to read-path actions and the call shape.</div></div>
-    <div class="step"><div class="n">3</div><div class="k">Tool registry</div><div class="muted">Agent calls <code>execute_tool</code>; the registry checks access and routes to the read path.</div></div>
+    <div class="step"><div class="n">3</div><div class="k">Tool registry</div><div class="muted">The agent calls a tool through the registry; the registry checks access and routes to the read path.</div></div>
     <div class="step"><div class="n">4</div><div class="k">Read path</div><div class="muted">Reads the metadata index, then only the requested keys.</div></div>
     <div class="step"><div class="n">5</div><div class="k">Interpreter</div><div class="muted">Builds the comparison table or plot in the agent's workspace.</div></div>
     <div class="step"><div class="n">6</div><div class="k">Answer</div><div class="muted">Results with figures inline, citing model ID, version and environment.</div></div>
   </div>
   <div class="grid2" style="margin-top:14px">
     <div class="tcard"><table>
-      <thead><tr><th>Read-path action</th><th>Used for</th></tr></thead><tbody>
-      <tr><td><code>get_details</code></td><td>Discover the action catalog instead of guessing</td></tr>
-      <tr><td><code>list_models</code> / <code>search_models</code></td><td>Find experiments by name (fuzzy)</td></tr>
-      <tr><td><code>list_model_versions</code></td><td>Enumerate the runs of one experiment</td></tr>
-      <tr><td><code>get_model_summary</code></td><td>Compact first look: version, sizes, top features</td></tr>
-      <tr><td><code>list_available_components</code></td><td>Discover which keys a version has</td></tr>
-      <tr><td><code>load_specific_components</code></td><td>Fetch only what's needed: ROC, precision-recall, calibration, coefficients</td></tr>
-      <tr><td><code>load_model_metadata</code></td><td>Everything; last resort</td></tr>
+      <thead><tr><th>Read-path capability</th><th>Used for</th></tr></thead><tbody>
+      <tr><td>Discover actions</td><td>Discover the action catalog instead of guessing</td></tr>
+      <tr><td>List and search models</td><td>Find experiments by name (fuzzy)</td></tr>
+      <tr><td>List versions</td><td>Enumerate the runs of one experiment</td></tr>
+      <tr><td>Summarize a version</td><td>Compact first look: version, sizes, top features</td></tr>
+      <tr><td>List components</td><td>Discover which keys a version has</td></tr>
+      <tr><td>Load selected components</td><td>Fetch only what's needed: ROC, precision-recall, calibration, coefficients</td></tr>
+      <tr><td>Load everything</td><td>Last resort</td></tr>
     </tbody></table></div>
     <div class="card">
       <div class="k">Design principles</div>
@@ -456,7 +461,7 @@ tr.new td{background:var(--flash)}
     <tr><td><b>AWS MLOps phases</b><div class="muted" style="font-size:12px">initial &middot; repeatable &middot; reliable &middot; scalable</div></td><td>Repeatable and reliable: infrastructure as code, separate environments from one definition, a shared registry, gated promotion and managed orchestration.</td></tr>
     <tr><td><b>NIST AI RMF</b><div class="muted" style="font-size:12px">Govern &middot; Map &middot; Measure &middot; Manage</div></td><td><b>Govern:</b> access rules, trigger levels and approval policy, all in version control. <b>Map:</b> product lines with their own gates and intended uses. <b>Measure:</b> input checks, eval evidence, drift monitoring, and agent evaluation before release and in use. <b>Manage:</b> promotion, re-promoting a previous version, and re-scoring.</td></tr>
     <tr><td><b>ISO/IEC 42001</b><div class="muted" style="font-size:12px">AI management system</div></td><td>Defined roles (the analyst approves), retained records (approvals on the model version, the action log), and a review loop (monitoring informs retraining decisions).</td></tr>
-    <tr><td><b>NIST AI Agent Standards Initiative</b><div class="muted" style="font-size:12px">launched February 2026</div></td><td>Its first focus, agent identity, authorization and auditing, maps to three parts of the design: approvals made under the analyst's own identity, access rules enforced in the tool registry, and the action log. Treating read content as data, never instructions, addresses its prompt-injection concern.</td></tr>
+    <tr><td><b>NIST AI Agent Standards Initiative</b><div class="muted" style="font-size:12px">launched February 2026</div></td><td>Its focus on agent security, identity and authorization maps to three parts of the design: approvals made under the analyst's own identity, access rules enforced in the tool registry, and the action log. Treating read content as data, never instructions, addresses its prompt-injection concern.</td></tr>
     <tr><td><b>Vibe coding to agentic engineering</b><div class="muted" style="font-size:12px">Google, The New SDLC With Vibe Coding, 2026</div></td><td>The agentic-engineering end of the spectrum. Tests cover the deterministic parts (input checks, gates); evals cover trajectory, tool use and response quality. The harness (skills, tools, hooks, routing, context) is versioned, reviewed and evaluated in CI, and people own the architecture and the approvals.</td></tr>
     <tr><td><b>Human oversight</b><div class="muted" style="font-size:12px">in-the-loop &middot; on-the-loop</div></td><td>Human-in-the-loop for promotion: nothing changes stage without an analyst. Human-on-the-loop for runs: confirmation before prod launches, alerts and monitoring.</td></tr>
   </tbody></table></div>
@@ -468,13 +473,13 @@ tr.new td{background:var(--flash)}
     <tr><td><b>Orchestration</b></td><td>Workflow engine: Airflow (Amazon MWAA), AWS Step Functions or SageMaker Pipelines. Compute: AWS Batch, Amazon EMR (or EMR Serverless) for Spark, or SageMaker training and processing jobs. State-change events through EventBridge or Airflow callbacks.</td></tr>
     <tr><td><b>Job store</b></td><td>MLflow runs or SageMaker Pipelines executions can hold the same record; either way, it carries the engine's run ID.</td></tr>
     <tr><td><b>Tool registry</b></td><td>Model Context Protocol. Tool definitions are published in MCP schema format, and the registry exposes an MCP-compatible JSON-RPC 2.0 endpoint for listing and calling tools, so any MCP client can use the platform's tools.</td></tr>
-    <tr><td><b>Read path</b></td><td>The same role as MLflow's MCP server, which exposes the registry and experiment history to agents; either can sit behind the tool registry.</td></tr>
+    <tr><td><b>Read path</b></td><td>The same role as the community MLflow MCP servers, which expose experiments, runs and the registry to agents; either can sit behind the tool registry.</td></tr>
     <tr><td><b>Agent framework and LLM knowledge</b></td><td>MCP client support for external tool servers; skills as markdown with front matter; the data dictionary served as markdown, a vector index or an MCP server.</td></tr>
     <tr><td><b>Agent evaluation</b></td><td>MLflow GenAI evaluation and tracing, or Amazon Bedrock evaluations (including RAG evaluation); Ragas-style metrics for retrieval and grounding; OpenTelemetry GenAI semantic conventions for traces, so feedback and scores join on the same trace ID.</td></tr>
     <tr><td><b>Built as code</b></td><td>AWS CDK (CloudFormation underneath); the same principles apply with Terraform or Pulumi.</td></tr>
   </tbody></table></div>
   <h3>Where the design goes further</h3>
-  <div class="card"><div class="muted">Most published patterns connect agents to a model registry read-only. Here the LLM reads results, starts jobs and proposes promotions, with guardrails sized to each action: free reads, confirmed launches, and analyst-approved stage changes, all recorded in the action log. The agent is also held to the same standard as the models: each agent version is evaluated and signed off before release, and scored by its users once it is in use.</div></div>
+  <div class="card"><div class="muted">Published patterns range from read-only registry access to agents that change the registry themselves. Here the LLM reads results, starts jobs and proposes promotions, with guardrails sized to each action: free reads, confirmed launches, and analyst-approved stage changes, all recorded in the action log. The agent is also held to the same standard as the models: each agent version is evaluated and signed off before release, and scored by its users once it is in use.</div></div>
   <h3>References</h3>
   <div class="card" style="font-size:14px"><ul>
     <li><a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/mlops-maturity-model">Microsoft: MLOps maturity model</a></li>
@@ -489,6 +494,50 @@ tr.new td{background:var(--flash)}
 </section>
 
 <!-- DECISIONS -->
+<!-- BASIS AND SOURCES -->
+<section class="panel" id="tab-basis">
+  <h2>Basis and sources</h2>
+  <p class="lead">Where each part of this design comes from. The tags describe origin, not proof that a part works for your workload.</p>
+  <div class="card"><div class="k">Tag key</div>
+    <ul>
+      <li><span class="tag tS">Sourced</span> backed by a published source, linked on the row.</li>
+      <li><span class="tag tP">Practice</span> consistent with published practice or tooling, but not tied to one document.</li>
+      <li><span class="tag tO">Own design</span> a choice made in this design. No public source is claimed for it.</li>
+    </ul>
+    <div class="muted" style="font-size:13px;margin-top:8px">Links were checked while preparing this version. Vendor documentation changes, so confirm details against the current source before relying on them. This is a design reference; nothing here was measured on a live deployment.</div>
+  </div>
+  <h3>Elements and their basis</h3>
+  <div class="tcard"><table class="basis">
+    <thead><tr><th>Basis</th><th>Element</th><th>Source or note</th></tr></thead><tbody>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Maturity framing: Google levels 0&ndash;2, Microsoft levels 0&ndash;4, NIST AI RMF, ISO/IEC 42001 (Standards tab)</td><td><a href="https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning" target="_blank" rel="noopener">Google Cloud: MLOps levels 0&ndash;2</a>; <a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/mlops-maturity-model" target="_blank" rel="noopener">Microsoft: MLOps maturity model</a>; <a href="https://www.vanta.com/collection/iso-42001/nist-ai-rmf-and-iso-42001" target="_blank" rel="noopener">NIST AI RMF and ISO/IEC 42001</a></td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>A person approves a model version before it is deployed</td><td><a href="https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry-approve.html" target="_blank" rel="noopener">AWS: SageMaker model approval status</a>. Registered versions wait for manual approval; approval triggers deployment.</td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Named aliases (such as production) on model versions</td><td><a href="https://github.com/mlflow/mlflow/issues/10336" target="_blank" rel="noopener">MLflow: model version aliases</a>; <a href="https://learn.microsoft.com/en-gb/azure/databricks/machine-learning/manage-model-lifecycle/upgrade-workflows" target="_blank" rel="noopener">Databricks (Microsoft Learn): deploy code, aliases</a></td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Deploy code across environments rather than copying models</td><td><a href="https://learn.microsoft.com/en-gb/azure/databricks/machine-learning/manage-model-lifecycle/upgrade-workflows" target="_blank" rel="noopener">Databricks (Microsoft Learn): deploy code, aliases</a>. Note: this page also keeps one shared registry, which is tagged Practice below.</td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Short-lived federated identity for build pipelines, no stored deploy keys</td><td><a href="https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws" target="_blank" rel="noopener">GitHub: OIDC with AWS</a></td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Run state copied from the engine's state-change events</td><td><a href="https://docs.aws.amazon.com/batch/latest/userguide/batch_job_events.html" target="_blank" rel="noopener">AWS Batch job state change events</a>. Compute services publish job state changes to EventBridge.</td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Tools described by schemas and listed and called over JSON-RPC 2.0</td><td><a href="https://modelcontextprotocol.io/specification" target="_blank" rel="noopener">MCP specification</a>. Tool definitions carry input schemas; clients list and call tools.</td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Agent traces with a shared vocabulary so feedback and scores join on a trace ID</td><td><a href="https://github.com/open-telemetry/semantic-conventions-genai" target="_blank" rel="noopener">OpenTelemetry GenAI semantic conventions</a>. The conventions are still being developed, so attribute names may change.</td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Agent-identity and authorization focus behind the signed-in approval and action log</td><td><a href="https://nist.gov/news-events/news/2026/02/announcing-ai-agent-standards-initiative-interoperable-and-secure" target="_blank" rel="noopener">NIST: AI Agent Standards Initiative</a></td></tr>
+    <tr><td><span class="tag tS">Sourced</span></td><td>Agentic-engineering end of the spectrum: versioned, reviewed, evaluated harness</td><td><a href="https://www.kaggle.com/whitepaper-the-new-SDLC-with-vibe-coding" target="_blank" rel="noopener">Google: The New SDLC With Vibe Coding</a></td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>One infrastructure definition deployed to dev, staging and prod; environment from config</td><td>Common infrastructure-as-code and twelve-factor practice. Not tied to one document.</td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>One shared registry across environments, with stages as aliases</td><td>Consistent with centralized registries and aliases such as <a href="https://learn.microsoft.com/en-gb/azure/databricks/machine-learning/manage-model-lifecycle/upgrade-workflows" target="_blank" rel="noopener">Databricks (Microsoft Learn): deploy code, aliases</a>. The "models register from any environment" rule is a choice of this design.</td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>Agents querying experiment results and the registry through MCP tools</td><td><a href="https://pypi.org/project/mlflow-mcp/" target="_blank" rel="noopener">community MLflow MCP server</a>; <a href="https://aws.amazon.com/blogs/machine-learning/enhance-ai-agents-using-predictive-ml-models-with-amazon-sagemaker-ai-and-model-context-protocol-mcp/" target="_blank" rel="noopener">AWS: agents with SageMaker AI and MCP</a>. Published servers vary in whether they can change the registry.</td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>A versioned catalog of tools</td><td><a href="https://mlflow.org/docs/latest/genai/mcp-registry/" target="_blank" rel="noopener">MLflow MCP Registry (experimental)</a> catalogs MCP servers with versions. Per-tool schemas and per-environment access rules here go beyond it.</td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>Input checks first, output validation last, in every pipeline</td><td>Standard data-validation practice. The specific two-check pairing is a design choice.</td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>Golden sets, deterministic checks before LLM judges, judges calibrated on human labels, agent versions re-evaluated on change</td><td>Consistent with published evaluation tooling (MLflow GenAI evaluation, Bedrock evaluations, Ragas). Judge design and bias studies: <a href="responsible_agent_framework.html" target="_blank" rel="noopener">Responsible agent framework (judge design and bias studies)</a>.</td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>Weekly sampling of production traces scored by the pre-release judges</td><td>Practice in LLM observability. The cadence is a starting value, not a measured result.</td></tr>
+    <tr><td><span class="tag tP">Practice</span></td><td>Workflow engine and compute options (MWAA, Step Functions, Batch, EMR, SageMaker jobs)</td><td>Managed AWS services used as documented. Choosing among them is left to the implementer.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Four layers: LLM interface, shared libraries, platform, product lines, and how they link</td><td>The layering and names are this design's own.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Registry refuses a stage change without passing evidence on that exact version</td><td>A gate check at the registry. Public registries record approval but do not generally enforce evidence.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Approval the agent cannot fake: a signed-in action under the analyst's identity, never relayed by the agent</td><td>The mechanism is this design's own, in the spirit of the NIST agent-identity work.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Trigger levels per environment: free reads, confirmed prod launches, analyst-approved promotion</td><td>Guardrails sized to each action.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Metadata kept as keyed components with an index; the agent reads the index, then only the keys it needs</td><td>A design choice for keeping agent context small.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Agent version = model + prompts + skills + tool schemas + hooks + routing + index; scores belong to an exact version; an agent is promoted like a model</td><td>This design's own framing.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Action log and eval store linked so feedback attaches to the trace behind each answer</td><td>This design's own joining of the two stores.</td></tr>
+    <tr><td><span class="tag tO">Own design</span></td><td>Job store as the platform's view of each run, with the engine owning run state</td><td>A design choice.</td></tr>
+  </tbody></table></div>
+</section>
+
 <section class="panel" id="tab-decisions">
   <h2>Decisions to make</h2>
   <p class="lead">Choices the design leaves to the implementer. Each has a reasonable default.</p>
@@ -651,7 +700,7 @@ const STEPS=[
  {t:"Start the build",nodes:["agentfw","client","services","orch"],links:[["agentfw","client"],["client","services"],["services","orch"]],
   chat:[["agent","Starting the build in staging. At this trigger level, staging builds run without confirmation."]],
   jobs:{add:{id:"job-0142",type:"Build",env:"staging",status:"PENDING"}},
-  log:[["Agent","start_job: build","staging","job-0142 created"]]},
+  log:[["Agent","Start job: build","staging","job-0142 created"]]},
  {t:"Input checks, then compute",nodes:["orch","mlfw","services"],links:[["orch","services"]],
   narr:"Orchestration runs the input checks: row counts match (6,492 and 102,254), the schema matches the data dictionary, and null rates are within the reference range. The workflow engine then submits the training tasks to managed compute, which provisions capacity, retries failed tasks and scales back down when they finish.",
   jobs:{set:["job-0142","RUNNING"]},
@@ -662,8 +711,8 @@ const STEPS=[
   log:[["ML framework","Register model","shared",V2+" as candidate"],["Workflow engine","Output validation","staging","job-0142 completed"]]},
  {t:"Compare to production",nodes:["llm","agentfw","read","services"],links:[["llm","agentfw"],["services","read"],["read","agentfw"]],
   chat:[["analyst","How does it compare to what's in production?"],
-        ["agent","I read <code>model_summary.pr_curve</code> and <code>model_summary.calibration_report</code> for both versions:<table><tr><th></th><th>"+V1+"<br><span class='muted'>production</span></th><th>"+V2+"<br><span class='muted'>candidate</span></th></tr><tr><td>Holdout PR-AUC</td><td>0.41</td><td>0.46</td></tr><tr><td>Holdout ROC AUC</td><td>0.74</td><td>0.78</td></tr><tr><td>Test vs. holdout gap</td><td>0.03</td><td>0.02</td></tr></table>Precision-recall curve attached."]],
-  log:[["Agent","Read path: load_specific_components","shared",V1+", "+V2],["Agent","Plot PR curve","&mdash;","pr_compare.png"]]},
+        ["agent","I read the precision-recall and calibration components for both versions:<table><tr><th></th><th>"+V1+"<br><span class='muted'>production</span></th><th>"+V2+"<br><span class='muted'>candidate</span></th></tr><tr><td>Holdout PR-AUC</td><td>0.41</td><td>0.46</td></tr><tr><td>Holdout ROC AUC</td><td>0.74</td><td>0.78</td></tr><tr><td>Test vs. holdout gap</td><td>0.03</td><td>0.02</td></tr></table>Precision-recall curve attached."]],
+  log:[["Agent","Read path: load selected components","shared",V1+", "+V2],["Agent","Plot PR curve","&mdash;","pr_compare.png"]]},
  {t:"Gates checked, promotion proposed",nodes:["agentfw","client","services"],links:[["agentfw","client"],["client","services"]],
   chat:[["agent","All gates pass on "+V2+": PR-AUC, holdout gap, and no audit flags. I've requested promotion; it needs your approval."]],
   gate:"The agent can request a stage change but can't make it.",
@@ -675,7 +724,7 @@ const STEPS=[
  {t:"Score a new table in prod",nodes:["llm","agentfw","client","services","orch"],links:[["llm","agentfw"],["agentfw","client"],["client","services"],["services","orch"]],
   chat:[["analyst","Score Acme's October customer table."],["agent","That's a prod launch, so I need your confirmation. It will use the production version, "+V2+", on 1.2M rows."],["analyst","Go."]],
   jobs:{add:{id:"job-0143",type:"Scoring",env:"prod",status:"RUNNING"}},
-  log:[["Agent","start_job: scoring","prod","Confirmed by j.rivera"],["Orchestration","Resolve production","prod",V2+" recorded on job"]]},
+  log:[["Agent","Start job: scoring","prod","Confirmed by j.rivera"],["Orchestration","Resolve production","prod",V2+" recorded on job"]]},
  {t:"Scoring completes",nodes:["orch","products","services"],links:[["orch","products"],["orch","services"]],
   narr:"Managed compute scores the table. Output validation compares outputs to sources, the run succeeds, and orchestration records the hand-off on the job.",
   jobs:{set:["job-0143","COMPLETED"]},
@@ -685,7 +734,7 @@ const STEPS=[
         ["analyst","Yes. Revert and re-score job-0143."]],
   reg:{promote:V1},jobs:{add:{id:"job-0144",type:"Re-score of job-0143",env:"prod",status:"PENDING"}},
   gate:"Reverting is promoting a previous version. Nothing is retrained or re-uploaded.",
-  log:[["Model monitoring","Drift alert","prod","PSI 0.18"],["j.rivera (analyst)","Approve promotion","shared",V1+" &rarr; production"],["Agent","start_job: re-score","prod","job-0144 created"]]}
+  log:[["Model monitoring","Drift alert","prod","PSI 0.18"],["j.rivera (analyst)","Approve promotion","shared",V1+" &rarr; production"],["Agent","Start job: re-score","prod","job-0144 created"]]}
 ];
 const src=document.getElementById("flow"),holder=document.getElementById("simDiagram");
 const svg=src.cloneNode(true);svg.removeAttribute("id");svg.classList.remove("focus");holder.appendChild(svg);
