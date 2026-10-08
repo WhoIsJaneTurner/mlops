@@ -173,6 +173,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
     </div>
     <ul class="list" id="list">
       <!-- Fallback when JavaScript is off -->
+      <li class="item"><time>Oct 7, 2026</time><div><h3><a href="verification_contract.html">The verification contract</a></h3></div><div class="side">v1.0</div></li>
       <li class="item"><time>Oct 6, 2026</time><div><h3><a href="responsible_agent_framework.html">Responsible agent deployment and evaluation (draft)</a></h3></div><div class="side">v0.4</div></li>
       <li class="item"><time>Oct 6, 2026</time><div><h3><a href="belief_engineering_provenance.html">Belief engineering and code provenance (preliminary)</a></h3></div><div class="side">v0.1</div></li>
       <li class="item"><time>Oct 6, 2026</time><div><h3><a href="agent_harness_comparison.html">Agent harness comparison</a></h3></div><div class="side">v1.4</div></li>
@@ -209,6 +210,18 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
    featured: true puts an article in the lead slot (else the newest).
    --------------------------------------------------------------- */
 const ARTICLES = [
+  {
+    href: "verification_contract.html",
+    title: "The verification contract",
+    dek: "A proposed methodology, synthesised from current standards, for stating in writing what is guaranteed to be checked before a change merges and what only could be: a short list of guarded surfaces, one check each, an automated and a manual column, and a named excluded zone. Set against Yegge's eight levels of AI-assisted coding and what Google, Microsoft and GitHub now expect of verification when agents write the code. Includes an autonomy-level explorer and a builder that drafts the contract table, an AGENTS.md block and a PR checklist.",
+    date: "2026-10-07",
+    version: "1.0",
+    type: "Pattern",
+    topics: ["Agents", "Governance", "Developer tools"],
+    minutes: 18,
+    featured: false,
+    sections: ["Overview","Why now","The contract","By autonomy level","Build yours","Field lessons","Sources and limits"]
+  },
   {
     href: "responsible_agent_framework.html",
     title: "Responsible agent deployment and evaluation (draft)",

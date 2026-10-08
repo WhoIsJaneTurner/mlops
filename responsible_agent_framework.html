@@ -396,6 +396,7 @@ details p,details ul{font:14.5px/1.55 var(--sans);color:var(--muted)}
 <!-- TESTS -->
 <section class="panel" id="p-tests">
   <h2>Testing and operating the evaluation</h2>
+  <p class="small">This tab covers testing the agent&rsquo;s behaviour. For verifying the code changes agents make before they merge, see <a href="verification_contract.html">The verification contract</a>.</p>
   <h3>Test categories</h3>
   <details open><summary>Capability tests (offline)</summary><p>Canonical happy paths for every intent in the taxonomy, two to ten examples each, with reference answers and expected tool calls. <span class="ev e-s">Sourced</span> <span class="ev e-a">Added</span> Agent behaviour varies between runs, so each case is run several times. Two measures answer different questions: <b>pass@k</b> is the chance that at least one of <i>k</i> attempts succeeds, and <b>pass^k</b> is the chance that <em>all</em> <i>k</i> succeed. The first suits tools where one success matters; the second suits customer-facing agents, where consistency is the requirement. The two diverge as <i>k</i> grows, so a customer-facing suite should report pass^k.</p><p>Suite size: published guidance suggests 20 to 50 simple tasks drawn from real failures is a good start. That is the size of a starting regression suite. The 200 to 500 trace gold set on the Calibration tab serves a different purpose, calibrating the judge.</p></details>
   <details><summary>Edge-case tests (offline)</summary><p>Ambiguous requests, multi-turn dependencies, other languages if supported, typos and unusual phrasing, requests that span several intents.</p></details>
@@ -518,7 +519,7 @@ details p,details ul{font:14.5px/1.55 var(--sans);color:var(--muted)}
 
 <footer>
   <div style="margin-bottom:8px">Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources and any computed figures are described on the page. Errors are still possible. Models tend to favour outputs from their own family (see the bias table), so a review by the same family is not independent; the human review is the check.</div>
-  <div>Draft framework; thresholds are starting values to be tuned on a deployment&rsquo;s own data. Previous article: <a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a>.</div>
+  <div>Draft framework; thresholds are starting values to be tuned on a deployment&rsquo;s own data. Previous article: <a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a>. Related: <a href="verification_contract.html">The verification contract</a>.</div>
 </footer>
 </main>
 

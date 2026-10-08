@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The verification contract · WhoIsJaneTurner</title>
+<meta name="description" content="A pattern for stating, in writing, what is guaranteed to be checked before a change merges and what only could be, set against what Google, Microsoft and GitHub expect for verifying code written by AI agents.">
+<link rel="canonical" href="https://whoisjaneturner.ai/verification_contract.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="WhoIsJaneTurner">
+<meta property="og:title" content="The verification contract · WhoIsJaneTurner">
+<meta property="og:description" content="What is guaranteed to be checked before a change merges, versus what merely could be. A pattern for teams working with coding agents.">
+<meta property="og:url" content="https://whoisjaneturner.ai/verification_contract.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#fbfaf7;--paper:#ffffff;--ink:#1f1e1c;--muted:#5f5e5a;--faint:#8a8984;--line:#e4e2da;
+  --accent:#3C3489;--accent-2:#534AB7;--accent-bg:#EEEDFE;--teal:#0F6E56;--teal-bg:#E1F5EE;--coral:#993C1D;--coral-bg:#FAECE7;--gray-bg:#F1EFE8;
+  --serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15141a;--paper:#1d1c24;--ink:#ece9e2;--muted:#b4b1a9;--faint:#85827b;--line:#2f2d38;
+    --accent:#AFA9EC;--accent-2:#C7C2F4;--accent-bg:#2a2650;--teal:#7fd3b8;--teal-bg:#173a30;--coral:#f0a585;--coral-bg:#3d241a;--gray-bg:#26252e}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--serif)}
+a{color:var(--accent-2)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+@media(max-width:600px){.wrap{padding:0 16px}}
+.mast{border-bottom:1px solid var(--line)}
+.mast .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+.brand{font:600 15px/1 var(--sans);letter-spacing:.02em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}
+.brand .mark{width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--bg);display:grid;place-items:center;font:700 13px/1 var(--serif)}
+.brand small{font-weight:400;color:var(--muted)}
+.mast a.back{font:14px var(--sans);color:var(--muted);text-decoration:none}
+.mast a.back:hover{color:var(--ink)}
+.head{padding:48px 0 24px;max-width:780px}
+.kicker{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font-weight:500;font-size:clamp(32px,5vw,46px);line-height:1.1;letter-spacing:-.015em;margin:14px 0 16px}
+.lede{font-size:20px;line-height:1.55;color:var(--muted);margin:0 0 16px}
+.meta{font:13px/1.5 var(--sans);color:var(--faint);display:flex;flex-wrap:wrap;gap:4px 14px}
+.meta b{font-weight:500;color:var(--muted)}
+h2{font-weight:500;font-size:26px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em;border-bottom:1px solid var(--ink);padding-bottom:10px}
+h3{font:600 16px/1.3 var(--sans);margin:30px 0 8px}
+p{margin:14px 0}
+.prose{max-width:760px}
+code{font:14px var(--mono);background:var(--gray-bg);padding:1px 6px;border-radius:4px;overflow-wrap:anywhere}
+.note{font:14px/1.55 var(--sans);color:var(--muted);background:var(--gray-bg);border-left:3px solid var(--accent-2);padding:12px 16px;border-radius:0 8px 8px 0;margin:18px 0}
+.note b{color:var(--ink)}
+blockquote.rule{margin:24px 0;padding:20px 24px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;font-size:21px;line-height:1.5}
+blockquote.rule small{display:block;font:13px/1.5 var(--sans);color:var(--faint);margin-top:10px}
+.ev{display:inline-block;font:600 11px/1 var(--sans);padding:4px 8px;border-radius:99px;white-space:nowrap;vertical-align:2px}
+.e-s{background:var(--teal-bg);color:var(--teal)}
+.e-p{background:var(--accent-bg);color:var(--accent)}
+.e-d{background:var(--coral-bg);color:var(--coral)}
+.e-a{background:var(--gray-bg);color:var(--muted)}
+.e-f{background:var(--ink);color:var(--bg)}
+details.fl{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin:10px 0;font-family:var(--sans)}
+details.fl summary{cursor:pointer;list-style:none;padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15.5px;font-weight:600;color:var(--ink)}
+details.fl summary::-webkit-details-marker{display:none}
+details.fl summary::before{content:"+";font:500 18px/1 var(--sans);color:var(--accent);width:14px}
+details.fl[open] summary::before{content:"\2212"}
+details.fl summary>span:first-of-type{flex:1 1 260px}
+details.fl .stp{font:500 12px/1 var(--sans);color:var(--faint)}
+details.fl p{margin:0;padding:0 18px 12px 42px;font-size:15px;line-height:1.6;color:var(--muted)}
+details.fl p b{color:var(--ink)}
+details.fl p:last-child{padding-bottom:16px}
+@media(max-width:520px){details.fl p{padding-left:18px}}
+.small{font:13px/1.5 var(--sans);color:var(--muted)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin:8px 0 28px;-webkit-overflow-scrolling:touch}
+.tabs button{font:500 14px/1 var(--sans);color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;padding:14px 14px;cursor:pointer;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.panel{display:none;min-width:0;padding-bottom:64px}
+.panel.active{display:block}
+
+/* stat cards */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:22px 0}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:var(--sans)}
+.stat .v{font:500 28px/1.1 var(--serif);color:var(--accent)}
+.stat .l{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--paper);margin:16px 0}
+table{width:100%;border-collapse:collapse;font:14px/1.5 var(--sans)}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font:600 11.5px/1 var(--sans);padding:4px 8px;border-radius:99px;white-space:nowrap}
+.auto{background:var(--teal-bg);color:var(--teal)}
+.man{background:var(--coral-bg);color:var(--coral)}
+.excl{background:var(--gray-bg);color:var(--muted)}
+.fid{background:var(--accent-bg);color:var(--accent)}
+.fid.bad{background:var(--coral-bg);color:var(--coral)}
+.fidl{list-style:none;padding:0;margin:14px 0;font-family:var(--sans)}
+.fidl li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.5;color:var(--muted)}
+.fidl li:last-child{border-bottom:0}
+@media(max-width:520px){.fidl li{grid-template-columns:1fr;gap:4px}}
+select{font:14px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+
+/* steps (the contract) */
+.step{display:grid;grid-template-columns:48px minmax(0,1fr);gap:4px 16px;padding:22px 0;border-bottom:1px solid var(--line)}
+.step:last-of-type{border-bottom:0}
+.step .num{font:500 30px/1 var(--serif);color:var(--accent)}
+.step h3{margin:4px 0 6px;font-size:18px}
+.step p,.step li{color:var(--ink)}
+.step ul{padding-left:20px;margin:10px 0}
+.step li{margin:6px 0}
+@media(max-width:520px){.step{grid-template-columns:minmax(0,1fr)}.step .num{font-size:22px}}
+
+/* level ladder */
+.ladder{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin:18px 0 14px}
+@media(max-width:640px){.ladder{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ladder button{font:600 14px/1.2 var(--sans);padding:12px 4px 10px;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;position:relative}
+.ladder button span{display:block;font:400 11px/1.3 var(--sans);margin-top:4px}
+.ladder button .bar{position:absolute;left:8px;right:8px;bottom:4px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.ladder button .bar i{display:block;height:100%;background:var(--teal)}
+.ladder button[aria-pressed=true]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.ladder button[aria-pressed=true] span{color:var(--bg)}
+.lvbox{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px 22px;font-family:var(--sans)}
+.lvbox h3{margin:0 0 4px;font-size:19px}
+.lvbox .sub{font-size:13px;color:var(--faint);margin-bottom:14px}
+.lvgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.lvgrid div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14.5px;line-height:1.5;color:var(--muted)}
+.lvgrid b{display:block;color:var(--ink);font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.lvgrid div.contract{grid-column:1/-1;border-color:var(--accent-2);background:var(--accent-bg)}
+.lvgrid div.contract b{color:var(--accent)}
+.lvgrid div.contract{color:var(--ink)}
+.meter{font:13px/1.4 var(--sans);color:var(--muted);margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.meter .track{flex:1 1 200px;height:8px;background:var(--gray-bg);border-radius:4px;overflow:hidden}
+.meter .track i{display:block;height:100%;background:var(--teal);transition:width .25s}
+
+/* builder */
+.card table{min-width:560px}
+.card td code{overflow-wrap:normal;white-space:nowrap}
+.builder{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;margin:16px 0}
+@media(max-width:860px){.builder{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;font-family:var(--sans);min-width:0}
+.card h3{margin:0 0 10px}
+.field{margin:0 0 12px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.field .hint{font-size:12.5px;color:var(--faint);margin-top:3px}
+input[type=text],textarea{width:100%;font:14px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+textarea{font:13px/1.55 var(--mono);min-height:110px;resize:vertical}
+.q{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--ink);margin:8px 0;line-height:1.45;cursor:pointer}
+.q input{margin-top:3px;flex:none}
+.q span small{display:block;color:var(--faint);font-size:12.5px}
+.verdict{font-size:14px;line-height:1.5;border-radius:8px;padding:10px 12px;margin:12px 0;background:var(--gray-bg);color:var(--muted)}
+.verdict b{color:var(--ink)}
+.verdict.g{background:var(--accent-bg);color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:500 14px/1 var(--sans);padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.p{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn.s{padding:6px 10px;font-size:12.5px}
+.warn{font-size:13px;color:var(--coral);margin-top:8px}
+pre.out{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font:12.5px/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);max-height:520px;overflow:auto}
+.seg{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 10px}
+.seg button{font:500 13px/1 var(--sans);padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+
+/* evidence ladder */
+.evl{list-style:none;padding:0;margin:14px 0;font-family:var(--sans)}
+.evl li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.5;color:var(--muted)}
+.evl li:last-child{border-bottom:0}
+.evl li b{color:var(--ink)}
+@media(max-width:520px){.evl li{grid-template-columns:1fr;gap:4px}}
+
+ul.plain{padding-left:20px}
+ul.plain li{margin:8px 0}
+footer{border-top:1px solid var(--line);padding:28px 0 48px;font:13px/1.6 var(--sans);color:var(--faint)}
+</style>
+</head>
+<body>
+<header class="mast"><div class="wrap">
+  <a class="brand" href="index.html"><span class="mark">J</span>WhoIsJaneTurner <small>Research</small></a>
+  <a class="back" href="index.html">&larr; All articles</a>
+</div></header>
+
+<main class="wrap">
+<div class="head">
+  <div class="kicker">Pattern &middot; Interactive reference</div>
+  <h1>The verification contract</h1>
+  <p class="lede">A short, written statement of what is guaranteed to be checked before a change merges, and what only could be checked if someone remembers to. The methodology grew organically out of everyday practice and is a synthesis of current guidance from Google, Microsoft and GitHub on verifying code that coding agents write. It is offered as a proposition: an attempt at what could work.</p>
+  <div class="note" style="margin-top:0"><b>A proposition.</b> The contract grew organically and draws on the published standards summarised on the <i>Why now</i> tab. Each element is tagged by its basis: <span class="ev e-s">Sourced</span> backed by a published source checked for this article, <span class="ev e-p">Practice</span> consistent with published practice, <span class="ev e-d">Proposed</span> introduced here, <span class="ev e-f">Field</span> observed in hands-on project work (see <i>Field lessons</i>).</div>
+  <div class="meta"><b>Version 1.0</b><span>7 October 2026</span><span>~18 min read</span><span>Interactive: autonomy ladder, contract builder</span></div>
+</div>
+
+<div class="tabs" role="tablist" aria-label="Sections">
+  <button role="tab" data-tab="overview" aria-selected="true">Overview</button>
+  <button role="tab" data-tab="why" aria-selected="false">Why now</button>
+  <button role="tab" data-tab="contract" aria-selected="false">The contract</button>
+  <button role="tab" data-tab="levels" aria-selected="false">By autonomy level</button>
+  <button role="tab" data-tab="builder" aria-selected="false">Build yours</button>
+  <button role="tab" data-tab="field" aria-selected="false">Field lessons</button>
+  <button role="tab" data-tab="sources" aria-selected="false">Sources and limits</button>
+</div>
+
+<!-- OVERVIEW -->
+<section class="panel active" id="p-overview">
+  <h2>What the contract is</h2>
+  <div class="prose">
+  <p>This is not about testing in general. It is about one thing: <b>making it explicit, in writing, what is actually guaranteed to be checked before a change merges, versus what merely could be checked if someone remembers to.</b></p>
+  <p>Most repositories have tests. Few have a <em>contract</em>: a short, named, discoverable statement of exactly which parts of the system are protected, by what, and how firmly. Without one, &ldquo;we have tests for that&rdquo; quietly becomes &ldquo;someone wrote a test for that once&rdquo;, and nobody can tell the difference until a bug gets through.</p>
+  </div>
+  <blockquote class="rule">No change to a guarded surface merges without its corresponding check passing. Where that check is not automated, the pull request must show the check&rsquo;s output, not just assert correctness.<small>That is the whole contract. The rest of this article is how to put it in place.</small></blockquote>
+
+  <div class="stats">
+    <div class="stat"><div class="v">3&ndash;6</div><div class="l">Guarded surfaces: the places where a bug would be silent or hard to reverse</div></div>
+    <div class="stat"><div class="v">1 each</div><div class="l">Check per surface, runnable on its own and named after the surface</div></div>
+    <div class="stat"><div class="v">2 labels</div><div class="l">How firmly each check is enforced (automated or manual) and how real it is (live down to mocked)</div></div>
+    <div class="stat"><div class="v">1 list</div><div class="l">Excluded zone: what is known not to be covered, and why</div></div>
+  </div>
+
+  <h3>Why it matters more with coding agents</h3>
+  <div class="prose">
+  <p>When a person writes and reviews every line, the contract can live in their head. As agents take over the writing, people stop reading every diff, and the published guidance from Google and Microsoft converges on the same conclusion: generating code is no longer the hard part, verifying it is. <span class="ev e-s">Sourced</span> A verification contract is a small, concrete way to make that verification explicit, so that it can be enforced by CI, by a reviewer, or by an orchestrator that runs many agents.</p>
+  </div>
+  <div class="note"><b>Reading guide.</b> <i>Why now</i> summarises the eight levels of AI-assisted coding and what Google, Microsoft and GitHub expect of verification, and maps each expectation to a part of the contract. <i>The contract</i> sets out the six steps. <i>By autonomy level</i> shows what the contract must provide at each of the eight levels. <i>Build yours</i> drafts a contract table and agent-guidance block you can paste into a repository. <i>Field lessons</i> collects what hands-on work with coding agents added to the pattern.</div>
+</section>
+
+<!-- WHY NOW -->
+<section class="panel" id="p-why">
+  <h2>Why now: verification is the bottleneck</h2>
+  <div class="prose">
+  <h3>The eight levels of AI-assisted coding</h3>
+  <p>Steve Yegge&rsquo;s informal eight-level model, described in early 2026, runs from no AI (level 1), through an agent in the editor with approvals on (2) and off (3), watching the agent instead of its diffs (4), working from the terminal and checking code later (5), running several agents in parallel (6), and managing ten or more by hand (7), to building an orchestrator that coordinates a fleet of agents (8). <span class="ev e-s">Sourced</span></p>
+  <p>Commentary on the model describes how review changes along the way. At level 7, reviewers face parallel streams of pull requests and review tends to become rubber-stamping. At level 8, the developer&rsquo;s work shifts to stating intent, decomposing work and designing where human judgment is required, verification moves into an automated pipeline, and verification replaces generation as the bottleneck. <span class="ev e-s">Sourced</span> The model is a practitioner&rsquo;s framing, not a standard; neither Google nor Microsoft uses it.</p>
+
+  <h3>What Google expects</h3>
+  <p>Google&rsquo;s whitepaper <i>The New SDLC With Vibe Coding</i> (Osmani, Saboo and Kartakis, May 2026) is the most direct statement. <span class="ev e-s">Sourced</span></p>
+  <ul class="plain">
+    <li><b>Verification is the dividing line.</b> &ldquo;The single biggest differentiator between the two ends is how outputs get verified.&rdquo; Without both tests and evaluations, the practice is still vibe coding.</li>
+    <li><b>Rigour scales with risk.</b> Disposable code may rely on little checking; structured AI-assisted work needs human judgment at key checkpoints; production systems need &ldquo;systematic verification at every stage&rdquo;.</li>
+    <li><b>Check how, not only what.</b> Output evaluation checks the final result and trajectory evaluation checks the sequence of tool calls and reasoning. &ldquo;A fluent output that skipped its verification steps is a more dangerous failure than one with a visible error.&rdquo;</li>
+    <li><b>People stay accountable.</b> &ldquo;AI-generated code requires the same or greater scrutiny than human-written code,&rdquo; and &ldquo;Review every line the agent produces that is going to ship.&rdquo; AI review supplements human review.</li>
+    <li><b>The agent&rsquo;s configuration is production code.</b> Rules files, prompts and evaluation suites are version-controlled, changed by pull request and owned. &ldquo;Hooks are the place for things the agent should never forget but often does.&rdquo;</li>
+  </ul>
+  <p>Google&rsquo;s DORA research adds the delivery picture. The 2025 <i>State of AI-assisted Software Development</i> report finds that AI adoption now improves throughput but still increases delivery instability, and its foreword mentions failures including &ldquo;silently deleted tests&rdquo;. <span class="ev e-s">Sourced</span> Two of the seven capabilities in DORA&rsquo;s AI Capabilities Model bear directly on verification: strong version control (&ldquo;your critical safety net&rdquo;) and working in small batches, because large AI-generated blocks &ldquo;are hard to review and test&rdquo;. <span class="ev e-s">Sourced</span></p>
+
+  <h3>What Microsoft and GitHub expect</h3>
+  <p>GitHub&rsquo;s responsible-use documentation for the Copilot cloud agent puts the burden on the user (&ldquo;You should review all outputs generated by the agent thoroughly prior to merging&rdquo;) and builds controls into the platform: the agent cannot push to the default branch, workflows triggered by its pull requests need approval from someone with write access, commits are co-attributed to the person who started the session and link to session logs, and automated security checks do not replace human review. <span class="ev e-s">Sourced</span></p>
+  <p>Microsoft&rsquo;s February 2026 update to its Security Development Lifecycle extends it to AI with threat modelling for AI workflows, agent identity and access control, and observability, and concedes that &ldquo;evolving agent behaviors outpace traditional review processes&rdquo;. <span class="ev e-s">Sourced</span> Microsoft&rsquo;s 2025 <i>Agentic DevOps</i> post describes agents working &ldquo;with your guidance and approval&rdquo;, though one example has an operations agent deploying a fix before people were told, a looser bar than Google&rsquo;s. <span class="ev e-s">Sourced</span></p>
+  </div>
+
+  <h3>Where the contract fits</h3>
+  <p class="prose">None of these sources describes a verification contract by name. The mapping below is this article&rsquo;s. <span class="ev e-d">Proposed</span></p>
+  <div class="tw"><table>
+    <thead><tr><th>Published expectation</th><th>Source</th><th>Contract element</th></tr></thead>
+    <tbody>
+      <tr><td>Systematic verification at every stage for production code; less for prototypes</td><td>Google whitepaper</td><td>Steps 1&ndash;2: a short list of guarded surfaces, each with one check. Everything else takes the normal path.</td></tr>
+      <tr><td>A fluent result that skipped its verification is the more dangerous failure; evaluate the trajectory too</td><td>Google whitepaper</td><td>Step 4: reviewers ask for the check&rsquo;s output, not a claim that it passed.</td></tr>
+      <tr><td>Rules files and evaluation suites are version-controlled, reviewed and owned</td><td>Google whitepaper</td><td>Step 6: the contract lives in the agent guidance file, and changing it is a reviewed change.</td></tr>
+      <tr><td>Hooks for what the agent should never forget</td><td>Google whitepaper</td><td>Step 3: move checks from the manual column to the automated one wherever possible.</td></tr>
+      <tr><td>&ldquo;Tests and evals become the primary mechanism for communicating intent to AI agents&rdquo;</td><td>Google whitepaper</td><td>Step 2: data-driven case tables serve as both the check and the specification an agent works to.</td></tr>
+      <tr><td>Silently deleted tests; version control as the safety net; small batches</td><td>DORA 2025</td><td>Step 3: disabling an automated check is a visible, reviewable act. Step 6: any move between columns is a recorded contract change.</td></tr>
+      <tr><td>Agent cannot push to the default branch; its workflows need approval; scans don&rsquo;t replace review</td><td>GitHub (Microsoft)</td><td>The enforcement column: branch protection and required status checks carry the automated half.</td></tr>
+      <tr><td>Co-attributed commits linked to session logs</td><td>GitHub (Microsoft)</td><td>Step 4: evidence of a manual check should be traceable to a commit and a session, not only pasted.</td></tr>
+      <tr><td>Agent behaviour outpaces traditional review</td><td>Microsoft SDL</td><td>Steps 4&ndash;5: state the limits of the review process and the excluded zone out loud.</td></tr>
+      <tr><td>Verify continuously where the agent acts, not only at a final gate</td><td>LeadDev panel</td><td>Level 8: the orchestrator triggers a surface&rsquo;s check whenever an agent touches it.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- THE CONTRACT -->
+<section class="panel" id="p-contract">
+  <h2>The contract in six steps</h2>
+
+  <div class="step"><div class="num">1</div><div>
+    <h3>Identify your guarded surfaces <span class="ev e-p">Practice</span></h3>
+    <p>A guarded surface is any part of the system where a bug would be:</p>
+    <ul>
+      <li><b>silent</b>: wrong output, no error, no obvious symptom; and/or</li>
+      <li><b>expensive or hard to reverse</b> once it ships: reprocessing a full dataset, a wrong value spreading into every downstream join, a corrupted identifier that cannot be told apart from a correct one by inspection.</li>
+    </ul>
+    <p>Not everything qualifies. Keep it to a short, named list; if everything is &ldquo;guarded&rdquo;, the word means nothing. Typical examples are an identifier-minting or hashing rule, a pricing calculation, a schema migration, an authorisation check, or a serialisation format that two services both depend on.</p>
+    <p>Scaling scrutiny to stakes is the same idea as the risk tiers in <a href="responsible_agent_framework.html#tiers">Responsible agent deployment and evaluation</a>, applied to code instead of agent behaviour.</p>
+    <p><b>Include the checking apparatus and the boundaries.</b> The graders, scorers, CI test discovery and evidence files that report on everything else belong on the list too; in practice they are where many silent failures live. So do the boundaries between components, which no per-component check covers. <span class="ev e-f">Field</span> (see <a href="#field" data-go="field">Field lessons</a>)</p>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div>
+    <h3>Write one check per surface <span class="ev e-p">Practice</span></h3>
+    <p>Each guarded surface gets exactly one thing that can answer &ldquo;does this still hold?&rdquo;: a script, an assertion harness, a property test or a golden-file diff. It need not be elaborate. It needs to be:</p>
+    <ul>
+      <li><b>Runnable on demand</b>, independently of the full test suite.</li>
+      <li><b>Named after the surface it guards</b>, not after whatever produced it, so the next person, or agent, finds it by thinking about the surface rather than the history.</li>
+      <li><b>Able to fail loudly</b> on the exact corruption it exists to catch. A check that cannot be made to fail by deliberately breaking the thing it guards is not a check.</li>
+      <li><b>Real where it matters.</b> A guarded check must not mock the surface it guards. Stand-ins for things around it are fine; a stand-in for the thing itself turns the check into a test of the stand-in. <span class="ev e-d">Proposed</span></li>
+      <li><b>Controlled in both directions.</b> Give the check a known-bad input it must flag and a known-good input it must pass. When proving it can fail, break the code path it guards, not a constant or helper the check also reads, or both sides move together and the check stays green. <span class="ev e-f">Field</span></li>
+    </ul>
+    <p>For the highest-stakes surfaces, one check may not be enough: an error that shows in one place but not another needs a second, independent check that observes through a different channel. <span class="ev e-f">Field</span> (see <a href="#field" data-go="field">Field lessons</a>)</p>
+    <p><b>Prefer data-driven checks.</b> Where possible, keep the cases in data rather than in code: a table or file of inputs and expected outputs that the check iterates over, drawn from samples of real records, the specification and known past failures. <span class="ev e-p">Practice</span> Data-driven cases are easy to extend without touching the check&rsquo;s logic, easy for a reviewer to read, and make it obvious when a case was removed. They also double as the specification an agent works to. Two conditions keep them honest:</p>
+    <ul>
+      <li><b>Expected values need an independent source</b>: the specification, a hand calculation, a reference implementation or a previously verified release. Values copied from the current output of the code under test only prove the code agrees with itself.</li>
+      <li><b>The data should change.</b> Refresh samples from real data on a schedule, and add every escaped bug as a new row. Property-based tests, which generate inputs, are the natural complement for pure logic.</li>
+    </ul>
+    <h3 style="margin-top:22px">Watch for baked-in responses</h3>
+    <p>A baked-in response is an answer hard-coded somewhere, in the code, a mock, a fixture or an expected-value file, that lets a check pass without the real logic running. Agents produce them readily when asked to make a failing test pass, and they are easy to miss in a large diff. Treat them as a standing review question, not a one-off. <span class="ev e-d">Proposed</span> Signs to look for:</p>
+    <ul>
+      <li>Code that special-cases test inputs (<code>if customer_id == "TEST-001"</code>) or returns a constant on the path the tests exercise.</li>
+      <li>A mock or stub set up to return exactly the value the assertion checks, so the test is true by construction.</li>
+      <li>Expected values or snapshots regenerated from current output and accepted without review.</li>
+      <li>Recorded responses with no date or refresh, so the real dependency has moved on and the recording has not.</li>
+      <li>Error handling that swallows a failure and returns a default that happens to satisfy the test.</li>
+      <li>A summary quoting test output that no recorded run produced.</li>
+    </ul>
+    <p>Defences: break the real surface on purpose and confirm the check fails; vary the data so a hard-coded answer stops matching; and treat any change to a guarded check&rsquo;s mocks, fixtures, recordings or expected values as a change to the guarded surface itself, with the same evidence required.</p>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div>
+    <h3>Classify each check, how firm and how real, and say so out loud <span class="ev e-p">Practice</span></h3>
+    <p>This is the step most projects skip, and the one that matters most.</p>
+    <ul>
+      <li><b>Automated (CI-enforced):</b> runs on every pull request without anyone deciding to run it. It cannot be forgotten, only disabled, and disabling it is a visible, reviewable act. With branch protection and required status checks, it also binds agents that never read the guidance.</li>
+      <li><b>Manual (convention-enforced):</b> needs real data, a VPN, an expensive fixture or another precondition that keeps it out of CI. It is real verification, but only as strong as the discipline of whoever is supposed to run it.</li>
+    </ul>
+    <p>Both are legitimate. The failure is not having a manual half; it is <b>not labelling it as manual</b>, so it is treated with the confidence of the automated half. Write both lists side by side in the same document.</p>
+    <p>Two refinements from practice. <span class="ev e-f">Field</span> First, a check has three outcomes, not two: a check that errored, was skipped or inspected nothing is <b>inconclusive</b>, and must never be counted as a pass or averaged in. Discovering zero tests, or reading zero files, should fail the job. Second, &ldquo;automated&rdquo; should say where and when the check runs; CI that triggers only on a branch nobody works on is not enforcement.</p>
+    <p>Firmness is one label. The second is <b>fidelity</b>: how close the check runs to the real thing. <span class="ev e-d">Proposed</span></p>
+    <ul class="fidl">
+      <li><b>Direct</b><span>Pure logic with nothing external to stand in for: the real code on real or generated inputs. Property tests and golden files live here, and they are fast enough for CI.</span></li>
+      <li><b>Live</b><span>Runs against the real dependency or environment. Highest fidelity; often manual, because it needs access, data or cost that CI does not have.</span></li>
+      <li><b>Snapshot or container</b><span>A copy of the real thing: a production-schema snapshot, a containerised service, a sampled dataset. Usually the best route for moving a live check into CI without losing much fidelity.</span></li>
+      <li><b>Recorded</b><span>Replays responses captured from the real dependency. Acceptable with a capture date and a refresh schedule; stale recordings are a common source of baked-in responses.</span></li>
+      <li><b>Mocked</b><span>A hand-written stand-in. Fine for what surrounds the surface, never for the surface itself.</span></li>
+    </ul>
+    <p>The two labels explain each other. High-fidelity checks tend to be manual because they need real data or access; the usual way to automate them is to move from live to snapshot or container, not from live to mocked. Many of the silent, irreversible bugs the contract targets sit at boundaries such as schemas, data shapes and formats another service reads, which is why guarded checks often look more like integration tests than unit tests. For a format shared between services, consumer-driven contract testing (Pact and similar tools, unrelated to this article&rsquo;s use of &ldquo;contract&rdquo;) is one well-established way to check it.</p>
+    <p>An illustrative example, for a made-up order-processing service:</p>
+    <div class="tw"><table>
+      <thead><tr><th>Guarded surface</th><th>Check</th><th>Fidelity</th><th>Enforcement</th></tr></thead>
+      <tbody>
+        <tr><td>Customer ID minting</td><td><code>check_customer_id_minting</code>: data-driven golden file of sampled records</td><td><span class="tag fid">Direct</span></td><td><span class="tag auto">Automated</span> required CI status</td></tr>
+        <tr><td>Price calculation</td><td><code>check_pricing_invariants</code>: case table plus property test</td><td><span class="tag fid">Direct</span></td><td><span class="tag auto">Automated</span> required CI status</td></tr>
+        <tr><td>Authorisation boundary</td><td><code>check_authz_matrix</code>: role-by-resource table against a containerised service</td><td><span class="tag fid">Container</span></td><td><span class="tag auto">Automated</span> required CI status</td></tr>
+        <tr><td>Schema migrations</td><td><code>check_migration_roundtrip</code> on a production-schema snapshot</td><td><span class="tag fid">Snapshot</span></td><td><span class="tag man">Manual</span> needs snapshot; output in PR</td></tr>
+        <tr><td>Partner export format</td><td><code>check_partner_export</code> against the partner validator</td><td><span class="tag fid">Live</span></td><td><span class="tag man">Manual</span> needs partner VPN; output in PR</td></tr>
+      </tbody>
+    </table></div>
+    <p>For where the automated column runs in a platform, see <a href="mlops_architecture.html#envs">Environments</a> and <a href="mlops_architecture.html#built">Built as code</a> in the MLOps reference architecture.</p>
+  </div></div>
+
+  <div class="step"><div class="num">4</div><div>
+    <h3>Enforce the manual half at review, not just when writing <span class="ev e-p">Practice</span></h3>
+    <p>A manual check that only the author is trusted to run is weaker than it looks. Code review closes the gap: <b>a reviewer who approves a change to a guarded surface asks for the check&rsquo;s output, and does not accept a claim of correctness in the description.</b></p>
+    <p>A common way this fails: an automated review pipeline (static lint, structural grounding, documentation drift, pattern search) approves a rewrite of guarded logic without any phase running the script written to test that logic, because none of the phases execute code. The script already exists; what is missing is a rule that reviewers, human or automated, treat &ldquo;guarded logic changed and a matching check exists&rdquo; as a trigger to run it, not to read about it.</p>
+    <p>If your review process, human, bot or both, only reads diffs and text, it cannot verify that a manual check happened. Say that limitation out loud too.</p>
+    <p><b>Evidence, strongest first.</b> With agents in the loop, pasted output is weaker than it used to be: an agent can produce text that looks like a passing run. Prefer evidence the reviewer can trace or reproduce. <span class="ev e-d">Proposed</span></p>
+    <ul class="evl">
+      <li><b>CI result</b><span>The check ran in CI on the head commit and is a required status. Nothing to argue about.</span></li>
+      <li><b>Reproduced</b><span>The reviewer, or a reviewing agent with the needed access, ran the check on the head commit and got the same result.</span></li>
+      <li><b>Traceable</b><span>Output attached with the exact command, commit SHA and time, linked to the session log or run record that produced it.</span></li>
+      <li><b>Pasted</b><span>Output pasted into the description with no trace. Acceptable for low-stakes surfaces only.</span></li>
+      <li><b>Claim</b><span>&ldquo;Verified locally&rdquo;, &ldquo;tests pass&rdquo;. Not accepted for a guarded surface.</span></li>
+    </ul>
+    <p>The same logic applies to agents themselves: regression suites that should stay near 100% are the agent-side equivalent of a check that must pass. See <a href="responsible_agent_framework.html#tests">Testing</a> in the responsible agent framework.</p>
+  </div></div>
+
+  <div class="step"><div class="num">5</div><div>
+    <h3>Name your excluded zone <span class="ev e-p">Practice</span></h3>
+    <p>Every contract has a boundary, and the boundary should be a stated fact, not a gap discovered by surprise. If a check is known to be broken, not yet written, or structurally blocked from running (for example, CI cannot give every test its own isolated data root), write it next to the contract: &ldquo;X is not currently covered, here is why, here is what would need to change.&rdquo; An undocumented gap looks identical to a covered surface until it fails. A documented one is a known risk someone can prioritise.</p>
+  </div></div>
+
+  <div class="step"><div class="num">6</div><div>
+    <h3>Put the contract where the work happens <span class="ev e-p">Practice</span></h3>
+    <p>A contract that lives only in a conversation, a wiki page nobody opens during a pull request, or someone&rsquo;s memory is not a contract; it is a story about one. Put it:</p>
+    <ul>
+      <li><b>Inline in the repository&rsquo;s agent and contributor guidance</b> (<code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>CONTRIBUTING.md</code>) as a short, named block: one sentence stating the rule and a pointer to the full table. This is where coding agents read their instructions, so it is where they learn which surfaces are guarded.</li>
+      <li><b>Next to the tests</b> (a <code>testing/README.md</code> or equivalent), with the automated and manual split as an actual table, not prose buried in a longer document.</li>
+      <li><b>In the pull request template or review checklist</b>, so &ldquo;did you run the check for the surface you touched?&rdquo; is a question that gets asked, not assumed.</li>
+    </ul>
+    <p>Treat the contract like the rest of the agent&rsquo;s configuration: version-controlled, changed by pull request, with a named owner. <span class="ev e-s">Sourced</span></p>
+    <p><b>Back every rule with a test or guard.</b> A rule in the guidance file states intent; it does not enforce it. A rule written down, even with the incident behind it named, can leave the code it prohibits in place. <span class="ev e-f">Field</span> (see <a href="#field" data-go="field">Field lessons</a>)</p>
+  </div></div>
+
+  <h3>Applying it to a new project</h3>
+  <ol class="prose">
+    <li>List the three to six places where a silent or irreversible bug would hurt most. Resist listing more; a long list pulls attention away from the surfaces that matter.</li>
+    <li>For each, confirm a check exists or write one. Make it fail on purpose once, to prove it can.</li>
+    <li>Sort each check into automated or manual. Wire every automated one into CI as a required status now, not eventually.</li>
+    <li>Write the one-sentence contract and the table (surface, check, enforcement) into a document the team, and its agents, will actually open.</li>
+    <li>Add the excluded-zone list, even if it is short, even if it is embarrassing.</li>
+    <li>Revisit the table whenever a check moves between columns. A manual check graduating into CI, or a CI check quietly skipping, are both contract changes worth a one-line note.</li>
+  </ol>
+  <p class="prose">The point is narrow: &ldquo;we test for that&rdquo; becomes a claim anyone on the team can verify by reading one table, instead of a claim only the person who wrote the test can vouch for.</p>
+</section>
+
+<!-- LEVELS -->
+<section class="panel" id="p-levels">
+  <h2>The contract at each level of autonomy</h2>
+  <p class="prose">Select a level. The level descriptions follow Yegge&rsquo;s model and commentary on it <span class="ev e-s">Sourced</span>; what the contract must provide at each level is this article&rsquo;s proposal <span class="ev e-d">Proposed</span>. The bar under each level shows roughly how much of the verification burden has to sit in the automated column.</p>
+  <div class="ladder" id="ladder" role="group" aria-label="Autonomy level"></div>
+  <div class="lvbox" id="lvbox" aria-live="polite"></div>
+</section>
+
+<!-- BUILDER -->
+<section class="panel" id="p-builder">
+  <h2>Build your contract</h2>
+  <p class="prose">Describe each candidate surface and answer the questions. The builder tells you whether it qualifies as guarded and which column its check belongs in, then drafts the table and an agent-guidance block to paste into your repository. Nothing you enter leaves the page or is saved.</p>
+  <div class="builder">
+    <div class="card">
+      <h3>Add a surface</h3>
+      <div class="field"><label for="bSurf">Surface</label><input type="text" id="bSurf" placeholder="e.g. Pricing calculation"></div>
+      <div class="field"><label for="bCheck">Check</label><input type="text" id="bCheck" placeholder="e.g. check_pricing_invariants"><div class="hint">Name it after the surface, not after what produced it.</div></div>
+      <label class="q"><input type="checkbox" id="bSilent"><span>A bug here would be silent<small>Wrong output, no error, no obvious symptom.</small></span></label>
+      <label class="q"><input type="checkbox" id="bCostly"><span>A bug here would be expensive or hard to reverse<small>Reprocessing, corrupted keys, values spread downstream.</small></span></label>
+      <label class="q"><input type="checkbox" id="bFails"><span>The check has been made to fail on purpose<small>Break the surface deliberately; the check must catch it.</small></span></label>
+      <label class="q"><input type="checkbox" id="bCI" checked><span>The check can run in CI<small>No real data, VPN or expensive fixture needed.</small></span></label>
+      <div class="field" id="bWhyWrap" hidden><label for="bWhy">Why it can&rsquo;t run in CI</label><input type="text" id="bWhy" placeholder="e.g. needs production schema snapshot"></div>
+      <div class="field" style="margin-top:12px"><label for="bFid">Fidelity</label><select id="bFid">
+        <option value="direct">Direct: pure logic, nothing to stand in for</option>
+        <option value="live">Live: the real dependency</option>
+        <option value="snapshot">Snapshot or container</option>
+        <option value="recorded">Recorded responses</option>
+        <option value="mocked">Mocked: the surface itself is a stand-in</option>
+      </select></div>
+      <label class="q"><input type="checkbox" id="bData"><span>Cases are data-driven<small>Inputs and expected values in a table or file, with an independent source for the expected values.</small></span></label>
+      <div class="verdict" id="bVerdict" aria-live="polite"></div>
+      <div class="row"><button class="btn p" id="bAdd" type="button">Add to contract</button><button class="btn" id="bExcl" type="button">Add as excluded zone</button></div>
+      <div class="warn" id="bWarn" hidden></div>
+      <h3 style="margin-top:22px">Surfaces</h3>
+      <div class="tw" style="margin:8px 0 0"><table><thead><tr><th>Surface</th><th>Check</th><th>Fidelity</th><th>Enforcement</th><th></th></tr></thead><tbody id="bRows"></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button class="btn s" id="bExample" type="button">Load the example</button><button class="btn s" id="bClear" type="button">Clear</button></div>
+    </div>
+    <div class="card">
+      <h3>Generated text</h3>
+      <div class="seg" id="outSeg" role="group" aria-label="Output">
+        <button type="button" data-o="table" aria-pressed="true">Contract table</button>
+        <button type="button" data-o="agents" aria-pressed="false">AGENTS.md block</button>
+        <button type="button" data-o="pr" aria-pressed="false">PR checklist</button>
+      </div>
+      <pre class="out" id="out"></pre>
+      <div class="row" style="margin-top:10px"><button class="btn" id="copy" type="button">Copy</button><span class="small" id="copied" aria-live="polite"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FIELD LESSONS -->
+<section class="panel" id="p-field">
+  <h2>Field lessons</h2>
+  <div class="note"><b>Where these come from.</b> These lessons come from the site owner&rsquo;s hands-on work on a software project built largely by coding agents. The project&rsquo;s purpose and details are confidential and are not described here. Every lesson has been generalised, and the examples are invented to show the mechanism; they are not accounts of what happened. Lessons on this tab are tagged <span class="ev e-f">Field</span>.</div>
+  <div class="prose">
+  <p><b>Two patterns ran through nearly all of it.</b> First, the most costly defects were not in the product logic but in the checks: the graders, scorers, test doubles and CI configuration that reported success they had not earned. Second, almost every error in those checks made results look better than they were. Errors that make results look worse get investigated because they get in someone&rsquo;s way; errors that flatter tend to be believed. Good news deserves extra scrutiny.</p>
+  </div>
+
+  <h3>The checks are surfaces too</h3>
+  <details class="fl"><summary><span>Every checker needs controls in both directions</span><span class="ev e-f">Field</span><span class="stp">Steps 1&ndash;2</span></summary>
+    <p><b>Lesson.</b> A check that grades other code needs a known-bad input it must flag and a known-good input it must pass, run before any of its results are trusted.</p>
+    <p><b>What went wrong.</b> Checkers were built that could not fire at all: one ignored the observations it had just collected when deciding its verdict; another looked for a pattern the real inputs never use. Their clean results looked like real passes. A later checker failed in both directions across two versions, first raising false alarms, then missing a real defect.</p>
+    <p><b>What worked.</b> A self-check mode that runs the checker over deliberately broken copies and requires it to flag each one; paired &ldquo;everything present&rdquo; and &ldquo;nothing present&rdquo; synthetic inputs; a deliberately wrong reference implementation as a source of guaranteed failures. Controls can be wrong too. A control that lacks the property it claims, or fires for the wrong reason (matching an unrelated substring, say), proves nothing, so the controls need checking as well.</p>
+  </details>
+  <details class="fl"><summary><span>&ldquo;Could not check&rdquo; is an outcome, never a pass</span><span class="ev e-f">Field</span><span class="stp">Steps 2&ndash;3</span></summary>
+    <p><b>Lesson.</b> A check that errored, was skipped or inspected nothing must report itself as inconclusive or failed. It must never fold into a pass, a zero or an average.</p>
+    <p><b>What went wrong.</b> Broad exception handlers turned outages into empty results that read as clean. A policy gate passed after reading none of the files it was meant to inspect. Test discovery silently skipped whole directories. Integration tests that could not find their fixtures returned early and counted as passes. A script run from the wrong directory reported success on zero files. A missing number defaulted to zero and quietly satisfied a rule.</p>
+    <p><b>What worked.</b> Failing closed: discovering zero items, or running zero suites, fails the job. Parsers raise on input they cannot read instead of skipping it. Missing values are stored as null, never zero. Every skip names its cause, and the skip count is reported beside the pass count.</p>
+  </details>
+  <details class="fl"><summary><span>Prove a check can fail by breaking the wiring, not a shared value</span><span class="ev e-f">Field</span><span class="stp">Step 2</span></summary>
+    <p><b>Lesson.</b> To prove a test can fail, corrupt the code path it guards. Do not change a constant or helper that both the test and the code read: both sides move together and the test stays green.</p>
+    <p><b>What went wrong.</b> Converting hard-coded expectations into ones derived from shared configuration created tautologies, and a &ldquo;proof of failure&rdquo; that edited the shared value left the test passing. Elsewhere, an &ldquo;independent&rdquo; checker shared a defect with the code under test, so both agreed on the wrong answer, and one expected value had been computed from the implementation&rsquo;s own output.</p>
+    <p><b>What worked.</b> Recorded fail-then-revert proofs: the deliberate corruption, the exact failing assertion, evidence the corruption was reverted, and which cases still passed in both states, labelled as controls. A third, independent implementation to settle disagreements between code and checker. The rule: inputs may be pinned, but expectations must come from something the code under test does not control.</p>
+  </details>
+  <details class="fl"><summary><span>Each assertion must tell the two states apart</span><span class="ev e-f">Field</span><span class="stp">Step 2</span></summary>
+    <p><b>Lesson.</b> For every assertion, name the broken state it rules out, and confirm it gives a different result in the working and the broken state.</p>
+    <p><b>What went wrong.</b> Suites passed against code that did nothing. A UI test asserted a label shown in every state. A mock returned the same response for every argument. A fixture&rsquo;s values made a transformation a no-op, so code that never applied it still passed. Success flags were set unconditionally. A status assertion accepted every plausible code. An error-path test checked only that the call returned.</p>
+    <p><b>What worked.</b> Mutation by deletion: copy the module aside, delete the behaviour under test, and confirm the suite goes red. Fixtures chosen so the operation under test actually changes the values. Assertions on structure rather than strings. A standing review question: does anything in the code express the intent this test checks?</p>
+  </details>
+
+  <h3>Stand-ins and fidelity</h3>
+  <details class="fl"><summary><span>No mock path in shipped code; a guidance rule alone does not remove one</span><span class="ev e-f">Field</span><span class="stp">Steps 3, 6</span></summary>
+    <p><b>Lesson.</b> If production code can return canned answers when a dependency is missing or a mode flag is unset, some check will eventually pass on the canned answer. Remove the path or make it fail loudly, and guard the removal with a test.</p>
+    <p><b>What went wrong.</b> The original brief to the agents asked for a switch between mock and real modes. The agents built a deterministic mock tier and made it the default. A validator approved every input; a client returned a hard-coded object without making a network call; a verifier treated any successful HTTP response as success; a fixture value was later quoted as if it were a measurement; and CI was configured to pass against the mock tier. A rule against mock modes was then added to the agent guidance, and a later audit still found the violating default in code.</p>
+    <p><b>What worked.</b> Deleting mock modes outright, so a missing dependency returns an explicit &ldquo;unavailable&rdquo; error; feeding known-bad inputs to validators; running checks against a real service or container.</p>
+  </details>
+  <details class="fl"><summary><span>For the highest-stakes surface, one check is not enough</span><span class="ev e-f">Field</span><span class="stp">Step 2</span></summary>
+    <p><b>Lesson.</b> Where an error can show up in one place but not another (a stored value, an API response, what is displayed), use at least two checks that share no code and observe through different channels, and run them on real inputs as well as fixtures.</p>
+    <p><b>What went wrong.</b> A component reached a perfect score on hand-built fixtures and was reported fixed. Running the same check on a sample of real inputs found many failures from ordinary variations no fixture contained. Another class of failure was invisible to that check at any sample size; only a second check observing a different channel could see it.</p>
+    <p><b>Invented illustration.</b> A price is correct in the API response but rendered wrongly on screen. A check that reads the API cannot see the rendering bug, however many records it reads. Sample width and observation channel are separate axes; widening one does not cover the other.</p>
+    <p><b>What worked.</b> Two independent checks on different channels, plus a sweep over real inputs. Each check reports the cases it cannot judge separately rather than scoring them. The real-input sweep stayed manual because the inputs could not be stored in CI, so each defect it found was reduced to a synthetic regression case that could run there.</p>
+  </details>
+  <details class="fl"><summary><span>Verify the artifact that ships, where it runs</span><span class="ev e-f">Field</span><span class="stp">Step 3</span></summary>
+    <p><b>Lesson.</b> Build each deployable unit in isolation, confirm the artifact under test is the one just built, and run browser code in a real browser.</p>
+    <p><b>What went wrong.</b> Building each service from only its own directory revealed packaging defects in most of them, including an image that could never have started. A shared workspace had hidden undeclared dependencies. Code compiled and then failed when loaded. Tests passed in a simulated browser and threw in a real one. A measurement run silently used a stale build. Configuration repeated across files drifted until a cross-file consistency check was added, which immediately found more. A build recorded as fixed was broken by a test added later, and nobody rebuilt.</p>
+    <p><b>What worked.</b> An isolated-build gate per component; artifact hashes recorded with results; tooling that rejects stale or incomplete run records; real-browser runs with an independent check of what was displayed; automated cross-file consistency checks; a rule to re-run a check whenever its subject changes.</p>
+  </details>
+  <details class="fl"><summary><span>Test against the real neighbour</span><span class="ev e-f">Field</span><span class="stp">Step 1</span></summary>
+    <p><b>Lesson.</b> Per-component checks do not cover the contracts between components. Run at least one consumer against a live instance of each provider.</p>
+    <p><b>What went wrong.</b> Every component passed its own gates. Defects appeared only when one agent&rsquo;s component ran against another&rsquo;s live service: mismatched paths and request shapes, required parameters accepted but never read, options dropped in transit, a container missing data its own evidence file said it had, and a reader ignoring part of the provider&rsquo;s output. Client-side test doubles had encoded an endpoint shape the real server never used.</p>
+    <p><b>What worked.</b> Consumer-driven runs against real containers as part of each consumer&rsquo;s admission gate.</p>
+  </details>
+
+  <h3>Evidence and review</h3>
+  <details class="fl"><summary><span>Keep the evidence, and make it reproducible</span><span class="ev e-f">Field</span><span class="stp">Step 4</span></summary>
+    <p><b>Lesson.</b> Every reported number needs its raw output stored beside the tool that produced it, and a command that reproduces it. Summaries should be recomputed from the raw rows.</p>
+    <p><b>What went wrong.</b> Raw outputs lived in an ignored working directory and survived only as numbers typed into prose; some cited files did not exist. An evidence folder kept at a relative path was lost, and the figures that depended on it could no longer be reproduced. A summary statistic reported a change between two byte-identical runs. A derived reliability figure inverted its own formula. A test &ldquo;guarded&rdquo; a key figure by checking that the number appeared in a note.</p>
+    <p><b>What worked.</b> Committing raw outputs; a &ldquo;Reproducing&rdquo; section with commands in every findings document; recomputing statistics from saved rows; property assertions on derived formulas (a value that must rise when its input rises); running twice and requiring a match before reporting any difference.</p>
+  </details>
+  <details class="fl"><summary><span>Label every figure with how it was obtained</span><span class="ev e-f">Field</span><span class="stp">Steps 3&ndash;4</span></summary>
+    <p><b>Lesson.</b> Tag each recorded value as measured, human-scored, asserted, inferred or unrecorded, and default the tag to &ldquo;asserted&rdquo; so an untagged value cannot pass as measured.</p>
+    <p><b>What went wrong.</b> Hand-typed coverage figures, agent-invented effort estimates, hard-coded verdict tables in scoring code and counts padded with items that did not qualify all looked measured. A scorer labelled its evidence &ldquo;real&rdquo; while running nothing. A figure flagged as unreliable kept being reused until it was removed: disclosure is not correction. The same status fact, maintained by hand in several places, drifted apart.</p>
+    <p><b>What worked.</b> A per-record source field defaulting to &ldquo;asserted&rdquo;; re-deriving every row of a scored table against code and tests; deriving verdicts from runtime behaviour instead of tables; one evidence file per component instead of central status files; marking anything unmeasured as inferred or unrecorded rather than estimating it.</p>
+  </details>
+  <details class="fl"><summary><span>A component&rsquo;s report about itself is not evidence</span><span class="ev e-f">Field</span><span class="stp">Step 2</span></summary>
+    <p><b>Lesson.</b> Self-reported confidence, success flags and supplier metadata must be checked against independent ground truth, never asserted on as stand-ins for correctness.</p>
+    <p><b>What went wrong.</b> A model-based component reported uniformly high confidence on output with obvious errors, and a test asserted on that confidence. Success flags reported work that had not happened. A &ldquo;verified&rdquo; field came from a component grading its own output. Supplier metadata about test inputs was wrong. A mean error rate hid one extreme outlier.</p>
+    <p><b>What worked.</b> Error rates measured against ground truth known when the test input was generated, with a deliberately wrong &ldquo;truth&rdquo; as a control that must fail; reporting the range as well as the mean.</p>
+  </details>
+  <details class="fl"><summary><span>Review the whole change, and prefer reproduction to reading</span><span class="ev e-f">Field</span><span class="stp">Step 4</span></summary>
+    <p><b>Lesson.</b> Per-task review misses defects that span tasks, and a review that reads code without running it is one reader&rsquo;s opinion. Add a whole-change review that runs edge-case and malformed inputs, and grade each finding by whether it was reproduced.</p>
+    <p><b>What went wrong.</b> Whole-change reviews repeatedly found serious defects that no per-task review could see, such as a cleanup step that deleted real content, an environment incompatibility and a race condition. An early multi-agent review that read code and ran unit tests certified figures that were later overturned, one of them a mock value. A later large read-only audit found real issues quickly, but by its own account most findings were code reading, and some of its premises were wrong. A plain question from the human, &ldquo;does this actually work?&rdquo;, surfaced several defects in a component with an extensive passing suite.</p>
+    <p><b>What worked.</b> A mandatory final whole-change review, one bounded round of fixes, and an independent re-review that reproduces each fix; mutation proofs attached to audit findings.</p>
+  </details>
+
+  <h3>What this changes in the contract</h3>
+  <p class="prose">The adjustments below are proposed from the lessons above. <span class="ev e-d">Proposed</span></p>
+  <div class="tw"><table>
+    <thead><tr><th>Step</th><th>Adjustment</th></tr></thead>
+    <tbody>
+      <tr><td>1. Guarded surfaces</td><td>List the verification apparatus itself (graders, scorers, CI test discovery, evidence files) among the guarded surfaces. Add the boundaries between components as surfaces, checked by running a consumer against a live provider.</td></tr>
+      <tr><td>2. One check per surface</td><td>One primary check per surface, but the highest-stakes surfaces get at least two independent checks that observe through different channels, plus a run over real inputs. Every checker gets a must-fire and a must-not-fire control. Prove failure by breaking the wiring; take expectations from something the code does not control; make every assertion tell the working and broken states apart.</td></tr>
+      <tr><td>3. Firmness and fidelity</td><td>Add a third outcome, inconclusive, that is never counted as a pass or averaged in. Record where and when a check runs, not only whether it is automated: CI that runs only on a branch nobody works on is not enforcement. Treat a shared, unisolated environment as a loss of fidelity.</td></tr>
+      <tr><td>4. Evidence at review</td><td>Evidence must persist: raw output stored, a command to reproduce it, a date, and a trigger for re-running it. Tag figures by how they were obtained, defaulting to &ldquo;asserted&rdquo;. Recompute summaries from raw rows. Review the whole change, and grade review findings by whether they were reproduced. Give good news extra scrutiny.</td></tr>
+      <tr><td>5. Excluded zone</td><td>Pin the list with a test that names every entry; agent edits can silently drop entries, and a count-only test shows that something went but not what. Declining to build a check that cannot be shown to fire, and naming the gap, is a legitimate outcome. Treat claims such as &ldquo;not supported&rdquo; or &ldquo;large effort&rdquo; as checks to run, not answers. State the sample size behind any reliability claim; zero failures in a small sample supports only a modest bound (see <a href="responsible_agent_framework.html#calib">Calibration</a> in the responsible agent framework).</td></tr>
+      <tr><td>6. Where the contract lives</td><td>Back every guidance rule with a test or guard; a rule written down, even with its originating incident named, did not remove the code it prohibited. Word briefs carefully: asking agents for a mock switch produced a mock default.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Working with agents</h3>
+  <ul class="plain prose">
+    <li><b>Ask for a stand-in and it becomes the default.</b> A brief that asked for a mock/real switch produced a mock tier as the default path, with CI tuned to pass on it.</li>
+    <li><b>Claims ran ahead of evidence.</b> Commit messages and summaries described fixes and behaviours the code did not yet have.</li>
+    <li><b>Agents&rsquo; own checking scripts were wrong at a steady rate</b>: sweeps that skipped branches, counters that dropped items, scripts that passed on zero files. This happened even shortly after the same agent had diagnosed the same class of flaw elsewhere. Knowing the failure mode did not prevent it when the check and the expectation came from the same place.</li>
+    <li><b>Agents fitted the product to a broken fixture.</b> When a control fixture was wrong, the first agent fix changed the product logic to match it.</li>
+    <li><b>Agents trusted their briefs.</b> Wrong premises in a brief were caught only once agents were told to verify premises before acting.</li>
+    <li><b>Bulk edits silently dropped content</b> from structured lists, and code was classified by the folder it sat in rather than by what referenced it.</li>
+    <li><b>Agents sharing one environment corrupted each other&rsquo;s results.</b> Contradictory test counts from parallel runs were nearly recorded as product defects.</li>
+    <li><b>Self-checks stayed inside the agent&rsquo;s current frame.</b> Most corrections came from the human declining that frame, or from evidence outside the agent&rsquo;s context: the original requirements, the actual dates, a plain question.</li>
+    <li><b>Read the test, not the summary of it.</b> Confirming a regression test meant reading the test itself, not accepting an agent&rsquo;s description of it.</li>
+    <li><b>What worked: a four-gate admission sequence per component</b>, written into the agent guidance with the incident behind each rule. The component is self-contained; it builds in isolation; its own tests pass, with skips counted; and its output is checked by an independent tool. The evidence lives in a file beside the component.</li>
+  </ul>
+
+  <h3>Typical excluded zones</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Gap</th><th>Why</th><th>What stood in</th></tr></thead>
+    <tbody>
+      <tr><td>Real inputs</td><td>Could not be stored or redistributed in CI</td><td>Synthetic reductions of each real-input defect, run in CI</td></tr>
+      <tr><td>Paid or credentialed external services</td><td>No access in CI</td><td>The dependent figure stays unmeasured, and says so</td></tr>
+      <tr><td>Dependency trees the policy tooling could not parse</td><td>Tool limitation</td><td>A one-off manual audit, not rechecked</td></tr>
+      <tr><td>UI not run in a real browser</td><td>Only simulated environments available</td><td>Browser behaviour labelled inferred</td></tr>
+      <tr><td>Concurrency and load</td><td>Not exercised</td><td>Named as a gap</td></tr>
+      <tr><td>Reliability beyond the sample</td><td>Sample too small for the target failure rate</td><td>A stated bound instead of a claim</td></tr>
+      <tr><td>Per-task cost and time</td><td>Telemetry only at project level</td><td>Marked unrecorded, not estimated</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- SOURCES -->
+<section class="panel" id="p-sources">
+  <h2>Sources and limits</h2>
+  <div class="prose">
+  <h3>Notes on the sources</h3>
+  <ul class="plain">
+    <li><b>The eight levels are informal.</b> They come from talks and blog posts by Steve Yegge and from commentary on them, not from a standard. Neither Google nor Microsoft uses them.</li>
+    <li><b>The Google whitepaper was read from a third-party copy.</b> Kaggle&rsquo;s page did not render the body text, so quotations were taken from a PDF hosted by a third party that carries the same title, authors and date. Page-level wording should be checked against Google&rsquo;s own copy.</li>
+    <li><b>DORA findings are survey-based and correlational.</b> They describe associations between AI adoption and delivery outcomes, not causes.</li>
+    <li><b>Field lessons are generalised.</b> They come from hands-on project work whose details are confidential. Examples on that tab are invented to show the mechanism, and the adjustments to the contract are proposals.</li>
+    <li><b>The synthesis is this article&rsquo;s.</b> The table linking published expectations to contract elements, the evidence ladder and the per-level guidance are proposals. The worked example is made up.</li>
+  </ul>
+  <h3>Related on this site</h3>
+  <ul class="plain">
+    <li><a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a>: where CI, promotion gates, orchestration and agent evaluation sit in a platform.</li>
+    <li><a href="responsible_agent_framework.html">Responsible agent deployment and evaluation</a>: risk tiers, rubrics and regression testing for the agents themselves.</li>
+  </ul>
+  <h3>Sources checked for this article</h3>
+  <ul class="plain">
+    <li>Eight levels: <a href="https://newsletter.pragmaticengineer.com/p/steve-yegge-on-ai-agents-and-the" target="_blank" rel="noopener">Steve Yegge on AI agents</a> (The Pragmatic Engineer, 10 February 2026); <a href="https://www.augmentcode.com/guides/steve-yegge-8-levels-ai-assisted-development" target="_blank" rel="noopener">Steve Yegge&rsquo;s 8 levels of AI-assisted development</a> (Augment Code, commentary); <a href="https://maggieappleton.com/gastown" target="_blank" rel="noopener">Gas Town</a> (Maggie Appleton, commentary).</li>
+    <li>Google: <a href="https://www.kaggle.com/whitepaper-the-new-SDLC-with-vibe-coding" target="_blank" rel="noopener">The New SDLC With Vibe Coding</a> (Osmani, Saboo and Kartakis, May 2026).</li>
+    <li>Google DORA: <a href="https://services.google.com/fh/files/misc/2025_state_of_ai_assisted_software_development.pdf" target="_blank" rel="noopener">2025 State of AI-assisted Software Development</a> (PDF); <a href="https://cloud.google.com/blog/products/ai-machine-learning/from-adoption-to-impact-putting-the-dora-ai-capabilities-model-to-work/" target="_blank" rel="noopener">Putting the DORA AI Capabilities Model to work</a> (Harvey and Park, 10 December 2025).</li>
+    <li>GitHub (Microsoft): <a href="https://docs.github.com/en/copilot/responsible-use/copilot-cloud-agent" target="_blank" rel="noopener">Responsible use of GitHub Copilot cloud agent</a>.</li>
+    <li>Microsoft: <a href="https://www.microsoft.com/en-us/security/blog/2026/02/03/microsoft-sdl-evolving-security-practices-for-an-ai-powered-world/" target="_blank" rel="noopener">Microsoft SDL: evolving security practices for an AI-powered world</a> (Zunger, 3 February 2026); <a href="https://developer.microsoft.com/blog/reimagining-every-phase-of-the-developer-lifecycle/" target="_blank" rel="noopener">Agentic DevOps in action</a> (Silver, Rodriguez and Delimarsky, 29 May 2025).</li>
+    <li>Continuous verification: <a href="https://leaddev.com/technical-direction/effective-verification-for-humans-and-agents" target="_blank" rel="noopener">Effective verification for humans and agents</a> (LeadDev panel, 11 August 2026).</li>
+  </ul>
+  </div>
+</section>
+
+<footer>
+  <div style="margin-bottom:8px">Researched, analysed and drafted with Claude (Anthropic) under the direction of the site owner, who reviewed it for accuracy and consistency. Sources are listed on the page. Errors are still possible.</div>
+  <div style="margin-bottom:8px">The methodology is a proposition synthesised from current published guidance; names, systems and the worked example are made up.</div>
+  <div>Related: <a href="mlops_architecture.html">MLOps reference architecture with an LLM interface</a> &middot; <a href="responsible_agent_framework.html">Responsible agent deployment and evaluation</a>.</div>
+</footer>
+</main>
+
+<script>
+/* tabs */
+const tabs=[...document.querySelectorAll('.tabs button')];
+function showTab(id){
+  if(!document.getElementById('p-'+id))id='overview';
+  tabs.forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===id)));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='p-'+id));
+  try{history.replaceState(null,'','#'+id)}catch(e){}
+}
+tabs.forEach(b=>{b.onclick=()=>showTab(b.dataset.tab);
+  b.onkeydown=e=>{const i=tabs.indexOf(b);let j=-1;
+    if(e.key==='ArrowRight')j=(i+1)%tabs.length;if(e.key==='ArrowLeft')j=(i+tabs.length-1)%tabs.length;
+    if(j>=0){tabs[j].focus();showTab(tabs[j].dataset.tab);e.preventDefault()}}});
+if(location.hash)showTab(location.hash.slice(1));
+document.addEventListener('click',e=>{const a=e.target.closest('a[data-go]');if(!a)return;e.preventDefault();showTab(a.dataset.go);window.scrollTo({top:document.querySelector('.tabs').offsetTop-8,behavior:'smooth'});});
+
+/* levels */
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LEVELS=[
+ {n:1,t:"No AI",s:"Writes",auto:20,human:"Writes and reviews every line.",who:"The author, then a reviewer reading the diff.",fail:"&ldquo;We have tests for that&rdquo; drifts into &ldquo;someone wrote a test once&rdquo;. The gap exists before AI; agents widen it.",c:"The same contract applies. Name the surfaces, write one check each, label the manual ones. It is cheapest to set up now."},
+ {n:2,t:"Agent, approvals on",s:"Approves",auto:25,human:"Approves each agent action and reviews each step.",who:"The developer, step by step.",fail:"Approval fatigue: each step looks fine, and nobody asks whether the guarded surface still holds as a whole.",c:"Put the contract block in the agent guidance file so the agent knows which surfaces are guarded and which check to run when it touches one."},
+ {n:3,t:"Agent, YOLO mode",s:"Trusts",auto:40,human:"Turns approval prompts off; reviews the result.",who:"The developer at the end, plus whatever CI runs.",fail:"The agent edits guarded code without the developer noticing, because nothing asked.",c:"Make every automatable check a required CI status. CI now does the job the approval prompts used to do."},
+ {n:4,t:"Watching, not diffs",s:"Converses",auto:55,human:"Follows the agent&rsquo;s conversation instead of reading diffs.",who:"Whatever the agent says it did, plus CI.",fail:"A fluent summary that skipped its verification steps. The developer hears &ldquo;tests pass&rdquo; and never sees them run, or they pass because the agent edited a mock.",c:"The evidence rule starts to matter: for a guarded surface, a claim is not accepted. The check&rsquo;s output, tied to a commit, is."},
+ {n:5,t:"CLI first",s:"Checks later",auto:65,human:"Works from the terminal and checks code afterwards.",who:"Review of agent output after the fact.",fail:"Many small commits, reviewed in bulk, with guarded changes mixed in among routine ones.",c:"Checks named after surfaces let a reviewer find the right one fast. Keep batches small so a guarded change is visible, not buried."},
+ {n:6,t:"Several agents",s:"Juggles",auto:75,human:"Runs two to five agents on separate tasks and switches between them.",who:"Per-agent review by one person with divided attention.",fail:"Context switching: the reviewer loses track of which agent touched which surface.",c:"Most surfaces should now be in the automated column, moved there through snapshots or containers rather than mocks. Manual checks get an explicit owner and a slot in the review checklist."},
+ {n:7,t:"10+ by hand",s:"Coordinates",auto:85,human:"Manages ten or more agents by hand.",who:"Overwhelmed reviewers facing parallel pull request streams.",fail:"Review collapse: approval becomes rubber-stamping. Plans drift apart and merges conflict.",c:"Enforcement must come from the platform: branch protection, required statuses, and a manual check that blocks merge until its evidence is attached."},
+ {n:8,t:"Orchestrator",s:"Designs",auto:95,human:"Builds or adopts an orchestrator; states intent, decomposes work and designs where people must judge.",who:"An automated pipeline with human checkpoints built into the platform.",fail:"Verification becomes the bottleneck. Without a written contract, the orchestrator has nothing to enforce.",c:"The contract table becomes configuration. When an agent touches a guarded surface, the orchestrator runs its check; a manual surface routes to a named person. The excluded zone is published, and any change to the contract itself needs human approval. See <a href=\"mlops_architecture.html#orch\">Orchestration</a> and <a href=\"mlops_architecture.html#eval\">Agent evaluation</a> in the MLOps reference architecture."}
+];
+const ladder=document.getElementById('ladder'),lvbox=document.getElementById('lvbox');
+let lv=8;
+function renderLadder(){
+  ladder.innerHTML=LEVELS.map(l=>`<button type="button" aria-pressed="${l.n===lv}" data-l="${l.n}">L${l.n}<span>${l.s}</span><span class="bar"><i style="width:${l.auto}%"></i></span></button>`).join('');
+  const l=LEVELS[lv-1];
+  lvbox.innerHTML=`<h3>Level ${l.n}: ${l.t}</h3><div class="sub">Yegge&rsquo;s level ${l.n}</div>
+   <div class="lvgrid">
+     <div><b>The developer</b>${l.human}</div>
+     <div><b>Who verifies</b>${l.who}</div>
+     <div><b>Typical failure</b>${l.fail}</div>
+     <div class="contract"><b>What the contract must provide</b>${l.c}</div>
+   </div>
+   <div class="meter"><span>Share of verification that must be automated (illustrative)</span><span class="track"><i style="width:${l.auto}%"></i></span><b>~${l.auto}%</b></div>`;
+}
+ladder.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;lv=+b.dataset.l;renderLadder();});
+renderLadder();
+
+/* builder */
+const $=id=>document.getElementById(id);
+let rows=[];
+const FID={direct:'Direct',live:'Live',snapshot:'Snapshot',recorded:'Recorded',mocked:'Mocked'};
+function verdict(){
+  const s=$('bSilent').checked,c=$('bCostly').checked,ci=$('bCI').checked,f=$('bFails').checked,fid=$('bFid').value,d=$('bData').checked;
+  $('bWhyWrap').hidden=ci;
+  let v;
+  if(!s&&!c){v='<b>Probably not a guarded surface.</b> Neither silent nor hard to reverse; ordinary tests cover it. Keep the list short.';$('bVerdict').className='verdict';}
+  else{
+    v=`<b>Guarded surface.</b> Its check goes in the <b>${ci?'automated':'manual'}</b> column${ci?', wired into CI as a required status.':'. The PR must show the check&rsquo;s output.'}`;
+    if(fid==='mocked')v+=' <b>The check mocks the surface it guards</b>, so it tests the stand-in. Move it to a snapshot, container or direct check.';
+    else if(fid==='recorded')v+=' Give the recordings a capture date and a refresh schedule.';
+    else if(fid==='live'&&!ci)v+=' To automate it, consider a snapshot or container rather than a mock.';
+    if(!d)v+=' Consider moving the cases into a data table.';
+    if(!f)v+=' Make the check fail on purpose once before relying on it.';
+    $('bVerdict').className='verdict g';
+  }
+  $('bVerdict').innerHTML=v;
+}
+['bSilent','bCostly','bCI','bFails','bFid','bData'].forEach(id=>$(id).addEventListener('change',verdict));
+function add(kind){
+  const surf=$('bSurf').value.trim(),chk=$('bCheck').value.trim();
+  if(!surf){$('bSurf').focus();return;}
+  const ci=$('bCI').checked;
+  rows.push({surf,chk:chk||'(not written yet)',kind:kind==='excl'?'excl':(ci?'auto':'man'),why:$('bWhy').value.trim(),fails:$('bFails').checked,fid:$('bFid').value,data:$('bData').checked});
+  $('bSurf').value='';$('bCheck').value='';$('bWhy').value='';
+  ['bSilent','bCostly','bFails','bData'].forEach(id=>$(id).checked=false);$('bCI').checked=true;$('bFid').value='direct';verdict();
+  render();
+}
+$('bAdd').onclick=()=>add('row');
+$('bExcl').onclick=()=>add('excl');
+$('bClear').onclick=()=>{rows=[];render();};
+$('bExample').onclick=()=>{rows=[
+  {surf:'Customer ID minting',chk:'check_customer_id_minting',kind:'auto',why:'',fails:true,fid:'direct',data:true},
+  {surf:'Price calculation',chk:'check_pricing_invariants',kind:'auto',why:'',fails:true,fid:'direct',data:true},
+  {surf:'Authorisation boundary',chk:'check_authz_matrix',kind:'auto',why:'',fails:true,fid:'snapshot',data:true},
+  {surf:'Schema migrations',chk:'check_migration_roundtrip',kind:'man',why:'needs a production-schema snapshot',fails:true,fid:'snapshot',data:false},
+  {surf:'Partner export format',chk:'check_partner_export',kind:'man',why:'needs the partner VPN',fails:false,fid:'live',data:true},
+  {surf:'Backfill jobs',chk:'(not written yet)',kind:'excl',why:'CI cannot give each test its own isolated data root',fails:false,fid:'direct',data:false}
+];render();};
+const LBL={auto:'Automated',man:'Manual',excl:'Excluded'};
+function enf(r){return r.kind==='auto'?'Automated: required CI status':r.kind==='man'?`Manual: ${r.why||'not runnable in CI'}; output in PR`:`Not covered: ${r.why||'reason not stated'}`;}
+function render(){
+  $('bRows').innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${esc(r.surf)}</td><td><code>${esc(r.chk)}</code></td><td>${r.kind==='excl'?'':`<span class="tag fid${r.fid==='mocked'?' bad':''}">${FID[r.fid]}</span>`}</td><td><span class="tag ${r.kind}">${LBL[r.kind]}</span></td><td><button class="btn s" type="button" data-del="${i}" aria-label="Remove ${esc(r.surf)}">&times;</button></td></tr>`).join(''):'<tr><td colspan="5" class="small">No surfaces yet. Add one, or load the example.</td></tr>';
+  const n=rows.filter(r=>r.kind!=='excl').length,w=$('bWarn');
+  w.hidden=n<=6;w.textContent=n>6?`${n} guarded surfaces. Consider trimming to the three to six that matter most; a long list dilutes attention.`:'';
+  renderOut();
+}
+$('bRows').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;rows.splice(+b.dataset.del,1);render();});
+let outMode='table';
+document.getElementById('outSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;outMode=b.dataset.o;
+  [...document.querySelectorAll('#outSeg button')].forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderOut();});
+function renderOut(){
+  const g=rows.filter(r=>r.kind!=='excl'),x=rows.filter(r=>r.kind==='excl');
+  const tbl=g.length?['| Guarded surface | Check | Fidelity | Enforcement |','| --- | --- | --- | --- |',...g.map(r=>`| ${r.surf} | \`${r.chk}\`${r.data?' (data-driven)':''} | ${FID[r.fid]} | ${enf(r)} |`)].join('\n'):'| Guarded surface | Check | Fidelity | Enforcement |\n| --- | --- | --- | --- |\n| _add a surface_ | | | |';
+  const ex=x.length?x.map(r=>`- **${r.surf}**: not currently covered. Why: ${r.why||'_state the reason_'}. What would need to change: _describe_.`).join('\n'):'- _None listed. If that is true, say so explicitly._';
+  const open=[
+    ...g.filter(r=>r.fid==='mocked').map(r=>`- \`${r.chk}\` mocks the surface it guards; replace with a snapshot, container or direct check.`),
+    ...g.filter(r=>r.fid==='recorded').map(r=>`- \`${r.chk}\` uses recorded responses; record the capture date and a refresh schedule.`),
+    ...g.filter(r=>!r.data).map(r=>`- \`${r.chk}\` has hand-written cases; consider a data table with an independent source for expected values.`),
+    ...g.filter(r=>!r.fails).map(r=>`- \`${r.chk}\` has not yet been made to fail on purpose.`)
+  ].join('\n');
+  let t;
+  if(outMode==='table'){
+    t=`# Verification contract\n\nNo change to a guarded surface merges without its corresponding check passing. Where that check is not automated, the pull request must show the check's output, not just assert correctness.\n\n## Guarded surfaces\n\n${tbl}\n\nFidelity: Direct (pure logic) · Live · Snapshot/container · Recorded · Mocked. A guarded check never mocks the surface it guards.\n\n## Excluded zone\n\n${ex}\n`+(open?`\n## Open items\n\n${open}\n`:'')+`\n_Changes to this table, including a check moving between automated and manual or changing fidelity, are contract changes and need a one-line note in the PR. Changes to a guarded check's mocks, fixtures, recordings or expected values count as changes to the guarded surface._\n`;
+  }else if(outMode==='agents'){
+    const list=g.length?g.map(r=>`- ${r.surf} → run \`${r.chk}\`${r.kind==='man'?' (manual: '+(r.why||'not in CI')+')':''}`).join('\n'):'- _add surfaces_';
+    t=`## VERIFICATION CONTRACT\n\nNo change to a guarded surface merges without its check passing. If the check is manual, run it and attach the output (exact command, commit SHA, result) to the PR. Never write "verified" or "tests pass" without the output.\n\nGuarded surfaces:\n${list}\n\nRules for agents:\n- If your change touches a guarded surface, run its check before proposing the change, and report the result even if it fails.\n- Do not disable, skip, weaken or delete a check, and do not move it between automated and manual, without saying so explicitly in the PR description.\n- Do not add or change mocks, stubs, fixtures, recordings or expected values in a guarded check to make it pass. If you think one is wrong, flag it and explain why.\n- No baked-in responses: never special-case test inputs, return constants on tested paths, or regenerate expected values from current output.\n- Prefer data-driven cases: add rows to the case table rather than new hand-written assertions, and take expected values from the specification or a verified source.\n- If you cannot run a manual check (no access), say so; do not substitute reasoning for execution.\n- A check that errors, is skipped or inspects nothing is inconclusive, not a pass. Report skip counts beside pass counts.\n\nFull table and excluded zone: testing/README.md\n`;
+  }else{
+    t=`### Verification contract\n\n- [ ] This PR touches these guarded surfaces: _list, or "none"_\n- [ ] For each automated check: the required CI status passed on the head commit\n- [ ] For each manual check: output attached with command, commit SHA and time\n- [ ] No check was disabled, skipped or moved between columns (or: explained below)\n- [ ] No mocks, stubs, fixtures, recordings or expected values in a guarded check changed (or: each change explained and evidenced)\n- [ ] No baked-in responses: no special-cased test inputs, no constants on tested paths, no expected values copied from current output\n- [ ] New cases added as data rows, with the source of expected values stated\n- [ ] Skip counts reported; no check inspected zero items or counted an error as a pass\n- [ ] Excluded zone unchanged (or: updated in testing/README.md)\n\nReviewer: if a guarded surface changed and a matching check exists, run it or confirm its output. A description that says "verified" is not evidence.\n`;
+  }
+  $('out').textContent=t;
+}
+$('copy').onclick=async()=>{
+  try{await navigator.clipboard.writeText($('out').textContent);$('copied').textContent='Copied.';}
+  catch(e){const r=document.createRange();r.selectNodeContents($('out'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('copied').textContent='Selected; press Ctrl/Cmd+C to copy.';}
+  setTimeout(()=>$('copied').textContent='',2500);
+};
+verdict();render();
+
+</script>
+</body>
+</html>
