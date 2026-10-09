@@ -173,6 +173,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
     </div>
     <ul class="list" id="list">
       <!-- Fallback when JavaScript is off -->
+      <li class="item"><time>Oct 8, 2026</time><div><h3><a href="agent_orchestrator_reference.html">A well-built agent orchestrator</a></h3></div><div class="side">v1.0</div></li>
       <li class="item"><time>Oct 7, 2026</time><div><h3><a href="verification_contract.html">The verification contract</a></h3></div><div class="side">v1.0</div></li>
       <li class="item"><time>Oct 6, 2026</time><div><h3><a href="responsible_agent_framework.html">Responsible agent deployment and evaluation (draft)</a></h3></div><div class="side">v0.4</div></li>
       <li class="item"><time>Oct 6, 2026</time><div><h3><a href="belief_engineering_provenance.html">Belief engineering and code provenance (preliminary)</a></h3></div><div class="side">v0.1</div></li>
@@ -210,6 +211,18 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
    featured: true puts an article in the lead slot (else the newest).
    --------------------------------------------------------------- */
 const ARTICLES = [
+  {
+    href: "agent_orchestrator_reference.html",
+    title: "A well-built agent orchestrator",
+    dek: "A reference design for a local or self-hosted orchestrator that coordinates many AI agents on real work, with Octet, coming soon, as the worked example. Eight design principles, a role model where exactly one role writes, one merges and one leaves the machine, isolation and audit controls, the interoperability standards (MCP, ACP, A2A, AGENTS.md, OpenTelemetry GenAI) and a tickable conformance checklist. Each claim is tagged by evidence strength.",
+    date: "2026-10-08",
+    version: "1.0",
+    type: "Reference design",
+    topics: ["Agents", "Governance", "Developer tools"],
+    minutes: 15,
+    featured: false,
+    sections: ["Overview","Principles","Architecture","Work and isolation","Security and audit","Observability and standards","Identity and failures","Checklist","Sources"]
+  },
   {
     href: "verification_contract.html",
     title: "The verification contract",
